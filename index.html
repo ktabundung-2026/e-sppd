@@ -709,12 +709,6 @@
                                         <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                     </table>
-                                    <!-- Tanda Tangan / Nama Kepala Desa di Tiba Desa (Tengah) -->
-                                    <div class="mt-8 text-center">
-                                        <p class="font-bold">Kepala Desa <span class="data-fillable" id="bktNamaDesa1">-</span>,</p>
-                                        <div class="h-12"></div>
-                                        <p class="font-bold underline uppercase" id="bktKadesNama1">-</p>
-                                    </div>
                                 </td>
                                 <td class="p-2 align-top">
                                     <table class="w-full">
@@ -722,9 +716,8 @@
                                         <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                     </table>
-                                    <!-- Tanda Tangan / Nama Kepala Desa di Berangkat Desa (Tengah) -->
+                                    <!-- Nama Kepala Desa dijajarkan di Kolom 2 (Kanan) tanpa tulisan Kepala Desa Desa ... -->
                                     <div class="mt-8 text-center">
-                                        <p class="font-bold">Kepala Desa <span class="data-fillable" id="bktNamaDesa2">-</span>,</p>
                                         <div class="h-12"></div>
                                         <p class="font-bold underline uppercase" id="bktKadesNama2">-</p>
                                     </div>
@@ -1324,10 +1317,7 @@
             document.getElementById('bktCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('bktCamatNip').innerText = record.nipCamat;
 
-            // Update Kepala Desa di SPPD Belakang
-            document.getElementById('bktNamaDesa1').innerText = record.tempatTujuan;
-            document.getElementById('bktNamaDesa2').innerText = record.tempatTujuan;
-            document.getElementById('bktKadesNama1').innerText = record.namaKades || '....................';
+            // Update Kepala Desa di SPPD Belakang (Hanya Nama di Kolom 2)
             document.getElementById('bktKadesNama2').innerText = record.namaKades || '....................';
 
             // Laporan
