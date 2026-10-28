@@ -270,8 +270,10 @@
                             <span class="px-2.5 py-1 text-xs font-bold bg-gov-100 text-gov-800 rounded">Pelaksana Utama</span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
                                 <div>
-                                    <label class="block text-[11px] text-slate-600 mb-0.5">Nama Lengkap (Ketik/Pilih)</label>
-                                    <input type="text" id="namaPelaksana" list="listAsnNama" oninput="onNamaInputChanged('Pelaksana', this.value)" required value="Naema Ana Hutar, ST" placeholder="Ketik nama..." class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none font-semibold">
+                                    <label class="block text-[11px] text-slate-600 mb-0.5">Nama Lengkap (Pilih)</label>
+                                    <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" required class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none font-semibold">
+                                        <option value="">-- Pilih ASN --</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-[11px] text-slate-600 mb-0.5">NIP</label>
@@ -900,9 +902,9 @@
                                 <th rowspan="2" class="p-1 align-middle w-[110px]">Tanda Tangan</th>
                             </tr>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th class="border-r border-black p-0.5 w-[20px] text-[12px] whitespace-nowrap">Vol</th>
-                                <th class="border-r border-black p-0.5 w-[20px] text-[12px] whitespace-nowrap">Sat</th>
-                                <th class="border-r border-black p-0.5 w-[40px] text-[12px] leading-tight">Harga<br>Satuan</th>
+                                <th class="border-r border-black p-0.5 w-14 text-[12px] whitespace-nowrap">Vol</th>
+                                <th class="border-r border-black p-0.5 w-14 text-[12px] whitespace-nowrap">Sat</th>
+                                <th class="border-r border-black p-0.5 w-20 text-[12px] leading-tight">Harga<br>Satuan</th>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
                                 <td class="border-r border-black p-0.5">1</td>
@@ -1034,25 +1036,42 @@
         };
 
         function populateSelectOptions() {
-            const datalistAsn = document.getElementById('listAsnNama');
-            datalistAsn.innerHTML = '';
-            DATA_ASN_TABUNDUNG.forEach(asn => {
-                const opt = document.createElement('option');
-                opt.value = asn.nama;
-                opt.innerText = `${asn.jabatan} - NIP. ${asn.nip}`;
-                datalistAsn.appendChild(opt);
-            });
+    // Populate Dropdown Pelaksana Utama
+    const selectPelaksana = document.getElementById('namaPelaksana');
+    if (selectPelaksana) {
+        selectPelaksana.innerHTML = '<option value="">-- Pilih ASN --</option>';
+        DATA_ASN_TABUNDUNG.forEach(asn => {
+            const opt = document.createElement('option');
+            opt.value = asn.nama;
+            opt.innerText = `${asn.nama} - ${asn.jabatan}`;
+            selectPelaksana.appendChild(opt);
+        });
+    }
 
-            const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
-            if(selectDesa) {
-                DAFTAR_DESA_TABUNDUNG.forEach(desa => {
-                    const opt = document.createElement('option');
-                    opt.value = desa;
-                    opt.innerText = desa;
-                    selectDesa.appendChild(opt);
-                });
-            }
-        }
+    // Populate Datalist ASN (untuk elemen lainnya jika ada)
+    const datalistAsn = document.getElementById('listAsnNama');
+    if (datalistAsn) {
+        datalistAsn.innerHTML = '';
+        DATA_ASN_TABUNDUNG.forEach(asn => {
+            const opt = document.createElement('option');
+            opt.value = asn.nama;
+            opt.innerText = `${asn.jabatan} - NIP. ${asn.nip}`;
+            datalistAsn.appendChild(opt);
+        });
+    }
+
+    // Populate Dropdown Desa Tujuan
+    const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
+    if (selectDesa) {
+        selectDesa.innerHTML = '<option value="">-- Pilih Desa --</option>';
+        DAFTAR_DESA_TABUNDUNG.forEach(desa => {
+            const opt = document.createElement('option');
+            opt.value = desa;
+            opt.innerText = desa;
+            selectDesa.appendChild(opt);
+        });
+    }
+}
 
         function onNamaInputChanged(role, namaVal) {
             if (!namaVal) return;
