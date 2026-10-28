@@ -87,7 +87,6 @@
             table-layout: fixed;
         }
 
-        /* [POIN 1] Lebar baris/row SPPD Depan menyesuaikan dengan isi keterangan (height: auto) */
         .sppd-front-table {
             width: 190mm !important;
             height: auto !important;
@@ -587,7 +586,6 @@
                         SURAT PERINTAH PERJALANAN DINAS<br>(SPPD)
                     </div>
 
-                    <!-- [POIN 1] Lebar baris/row fleksibel menyesuaikan isi keterangan -->
                     <table class="sppd-front-table border-collapse border border-black font-official text-xs">
                         <tbody>
                             <tr class="border-b border-black">
@@ -811,9 +809,20 @@
                                     <td class="font-semibold">3. Lama Perjalanan</td><td>:</td>
                                     <td>
                                         <span id="lapLama">1 (Satu) Hari</span>
-                                        <div class="pl-6 pt-1">
-                                            <p>Dari Tanggal : <span id="lapTglMulai">-</span></p>
-                                            <p>Sampai Tanggal : <span id="lapTglSelesai">-</span></p>
+                                        <!-- Titik dua Dari Tanggal & Sampai Tanggal dibuat sejajar atas-bawah -->
+                                        <div class="pt-1">
+                                            <table class="text-sm">
+                                                <tr>
+                                                    <td class="w-28">Dari Tanggal</td>
+                                                    <td class="w-4 text-center">:</td>
+                                                    <td><span id="lapTglMulai">-</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Sampai Tanggal</td>
+                                                    <td class="text-center">:</td>
+                                                    <td><span id="lapTglSelesai">-</span></td>
+                                                </tr>
+                                            </table>
                                         </div>
                                     </td>
                                 </tr>
@@ -823,7 +832,6 @@
                             </table>
                         </div>
 
-                        <!-- [POIN 2] Keterangan Yang Melakukan Perjalanan Dinas diletakkan 1 spasi tepat di bawah Kesimpulan dan Saran -->
                         <div id="lapSignatureSection" class="mt-4 font-official text-sm sppd-table-fixed">
                             <p class="font-bold mb-3">Yang Melakukan Perjalanan Dinas:</p>
                             <div id="lapTandaTanganPelaksana" class="space-y-3"></div>
@@ -842,13 +850,27 @@
                         </div>
                     </div>
 
-                    <!-- [POIN 3] No. BKU, T.A, dan Tanggal diletakkan di Pojok Kanan Atas Rata Kiri -->
+                    <!-- Titik 2 pada No. BKU, T.A, dan Tanggal dibuat Sejajar -->
                     <div class="flex justify-between items-start text-xs font-official mb-2 sppd-table-fixed">
                         <div></div>
-                        <div class="w-56 text-left">
-                            <p>No. BKU :</p>
-                            <p>T.A. : 2026</p>
-                            <p>Tanggal : <span id="kwiTglKwitansi">-</span></p>
+                        <div class="w-56">
+                            <table class="w-full">
+                                <tr>
+                                    <td class="w-16">No. BKU</td>
+                                    <td class="w-3 text-center">:</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>T.A.</td>
+                                    <td class="text-center">:</td>
+                                    <td>2026</td>
+                                </tr>
+                                <tr>
+                                    <td>Tanggal</td>
+                                    <td class="text-center">:</td>
+                                    <td><span id="kwiTglKwitansi">-</span></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
 
@@ -874,23 +896,23 @@
                         </tr>
                     </table>
 
-                    <!-- [POIN 3] Tambahkan kalimat keterangan di atas tabel bahagian kiri -->
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
+                    <!-- Tabel Kwitansi: Kode Rekening Dikelompokkan per Kolom pada Baris ke-3, Header (1) Dimerger -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
-                            <!-- [POIN 3] Merger Kolom Kode Rekening & Kolom Rincian Perhitungan Disesuaikan Lebarnya -->
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th class="border-r border-black p-1 w-32">Kode Rekening</th>
+                                <th colspan="5" class="border-r border-black p-1">Kode Rekening</th>
                                 <th class="border-r border-black p-1 whitespace-nowrap">Uraian</th>
-                                <th class="border-r border-black p-1 w-10">Vol</th>
-                                <th class="border-r border-black p-1 w-12">Sat</th>
-                                <th class="border-r border-black p-1 w-24">Harga Satuan</th>
+                                <th class="border-r border-black p-1 w-8">Vol</th>
+                                <th class="border-r border-black p-1 w-10">Sat</th>
+                                <!-- Header Harga Satuan Di-wrap -->
+                                <th class="border-r border-black p-1 w-16 whitespace-normal leading-tight">Harga Satuan</th>
                                 <th class="border-r border-black p-1 w-24">Jumlah (Rp)</th>
-                                <th class="p-1 w-28">Tanda Tangan</th>
+                                <th class="p-1 w-24">Tanda Tangan</th>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
-                                <td class="border-r border-black p-0.5">1</td>
+                                <td colspan="5" class="border-r border-black p-0.5">1</td>
                                 <td class="border-r border-black p-0.5">2</td>
                                 <td class="border-r border-black p-0.5">3</td>
                                 <td class="border-r border-black p-0.5">4</td>
@@ -900,55 +922,83 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center font-bold" id="kwiFullRek1">5.1.02</td>
-                                <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA LANGSUNG</td>
-                                <td class="border-r border-black p-1 font-bold text-right" id="kwiBelanjaLangsungVal">-</td>
+                            <!-- Baris 1: Level Kelompok (2 Segmen) -->
+                            <tr class="border-b border-black text-center font-bold">
+                                <td class="border-r border-black p-1 w-7" id="kwiSeg1_a">5.1</td>
+                                <td class="border-r border-black p-1 w-7" id="kwiSeg2_a">02</td>
+                                <td class="border-r border-black p-1 w-7"></td>
+                                <td class="border-r border-black p-1 w-7"></td>
+                                <td class="border-r border-black p-1 w-10"></td>
+                                <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
+                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center font-bold" id="kwiFullRek2">5.1.02.04</td>
-                                <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA PEGAWAI</td>
-                                <td class="border-r border-black p-1 font-bold text-right" id="kwiBelanjaPegawaiVal">-</td>
+                            <!-- Baris 2: Level Jenis (3 Segmen) -->
+                            <tr class="border-b border-black text-center font-bold">
+                                <td class="border-r border-black p-1" id="kwiSeg1_b">5.1</td>
+                                <td class="border-r border-black p-1" id="kwiSeg2_b">02</td>
+                                <td class="border-r border-black p-1" id="kwiSeg3_b">04</td>
+                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
+                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center font-bold" id="kwiFullRek3">5.1.02.04.01</td>
-                                <td class="border-r border-black p-1 font-bold" colspan="4">Belanja Perjalanan Dinas</td>
-                                <td class="border-r border-black p-1 font-bold text-right" id="kwiBelanjaPerjalananVal">-</td>
+                            <!-- Baris 3: Level Objek (4 Segmen) -->
+                            <tr class="border-b border-black text-center font-bold">
+                                <td class="border-r border-black p-1" id="kwiSeg1_c">5.1</td>
+                                <td class="border-r border-black p-1" id="kwiSeg2_c">02</td>
+                                <td class="border-r border-black p-1" id="kwiSeg3_c">04</td>
+                                <td class="border-r border-black p-1" id="kwiSeg4_c">01</td>
+                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
+                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <tr class="border-b border-black align-top">
-                                <td class="border-r border-black p-1 text-center font-bold" id="kwiFullRek4">5.1.02.04.01.00001</td>
-                                <td class="border-r border-black p-1" colspan="6">
+                            <!-- Baris 4: Level Rincian Objek (5 Segmen) -->
+                            <tr class="border-b border-black align-top text-center font-bold">
+                                <td class="border-r border-black p-1" id="kwiSeg1_d">5.1</td>
+                                <td class="border-r border-black p-1" id="kwiSeg2_d">02</td>
+                                <td class="border-r border-black p-1" id="kwiSeg3_d">04</td>
+                                <td class="border-r border-black p-1" id="kwiSeg4_d">01</td>
+                                <td class="border-r border-black p-1" id="kwiSeg5_d">00001</td>
+                                <td class="border-r border-black p-1 text-left" colspan="5">
                                     <p class="font-bold">Belanja Perjalanan Dinas Dalam Daerah</p>
-                                    <p>Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud"> Dalam rangka Monitoring Realisasi Pembayaran PBB-P2</span></p>
+                                    <p class="font-normal">Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud"> Dalam rangka Monitoring Realisasi Pembayaran PBB-P2</span></p>
                                 </td>
+                                <td class="p-1"></td>
                             </tr>
-                            <!-- Dynamic Row Personil Kwitansi (Tanpa wrap pada nama uraian) -->
+                            <!-- Dynamic Row Personil Kwitansi (5 Kolom Rekening Kosong) -->
                             <tbody id="kwiDynamicRows"></tbody>
                             <tr class="font-bold bg-slate-50">
-                                <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
+                                <td colspan="9" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
                                 <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
                                 <td class="p-1.5"></td>
                             </tr>
                         </tbody>
                     </table>
 
+                    <!-- Tanda Tangan: Pengguna Anggaran & Bendahara Pengeluaran Sejajar -->
                     <div class="grid grid-cols-2 gap-6 text-center text-xs font-official sppd-table-fixed mt-6">
-                        <div>
-                            <p>Mengetahui</p>
-                            <p class="font-bold">Pengguna Anggaran,</p>
-                            <div class="h-16"></div>
-                            <p class="font-bold underline" id="kwiCamatNama">-</p>
-                            <p>NIP. <span id="kwiCamatNip">-</span></p>
+                        <div class="flex flex-col justify-between h-32">
+                            <div>
+                                <p>Mengetahui</p>
+                                <p class="font-bold">Pengguna Anggaran,</p>
+                            </div>
+                            <div>
+                                <p class="font-bold underline" id="kwiCamatNama">-</p>
+                                <p>NIP. <span id="kwiCamatNip">-</span></p>
+                            </div>
                         </div>
-                        <div>
-                            <p></p>
-                            <p class="font-bold">Bendahara Pengeluaran,</p>
-                            <div class="h-16"></div>
-                            <p class="font-bold underline" id="kwiBendaharaNama">-</p>
-                            <p>NIP. <span id="kwiBendaharaNip">-</span></p>
+                        <div class="flex flex-col justify-between h-32">
+                            <div>
+                                <p>&nbsp;</p>
+                                <p class="font-bold">Bendahara Pengeluaran,</p>
+                            </div>
+                            <div>
+                                <p class="font-bold underline" id="kwiBendaharaNama">-</p>
+                                <p>NIP. <span id="kwiBendaharaNip">-</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1303,17 +1353,34 @@
             }
             lapTTD.innerHTML = ttdHTML;
 
-            // [POIN 3] Format Kode Rekening Gabungan pada Kwitansi
+            // Pengisian Rumpun Kode Rekening per Kolom Kwitansi
             const seg1 = record.rekSeg1 || '5.1';
             const seg2 = record.rekSeg2 || '02';
             const seg3 = record.rekSeg3 || '04';
             const seg4 = record.rekSeg4 || '01';
             const seg5 = record.rekSeg5 || '00001';
 
-            document.getElementById('kwiFullRek1').innerText = `${seg1}.${seg2}`;
-            document.getElementById('kwiFullRek2').innerText = `${seg1}.${seg2}.${seg3}`;
-            document.getElementById('kwiFullRek3').innerText = `${seg1}.${seg2}.${seg3}.${seg4}`;
-            document.getElementById('kwiFullRek4').innerText = `${seg1}.${seg2}.${seg3}.${seg4}.${seg5}`;
+            // Baris 1
+            document.getElementById('kwiSeg1_a').innerText = seg1;
+            document.getElementById('kwiSeg2_a').innerText = seg2;
+
+            // Baris 2
+            document.getElementById('kwiSeg1_b').innerText = seg1;
+            document.getElementById('kwiSeg2_b').innerText = seg2;
+            document.getElementById('kwiSeg3_b').innerText = seg3;
+
+            // Baris 3
+            document.getElementById('kwiSeg1_c').innerText = seg1;
+            document.getElementById('kwiSeg2_c').innerText = seg2;
+            document.getElementById('kwiSeg3_c').innerText = seg3;
+            document.getElementById('kwiSeg4_c').innerText = seg4;
+
+            // Baris 4
+            document.getElementById('kwiSeg1_d').innerText = seg1;
+            document.getElementById('kwiSeg2_d').innerText = seg2;
+            document.getElementById('kwiSeg3_d').innerText = seg3;
+            document.getElementById('kwiSeg4_d').innerText = seg4;
+            document.getElementById('kwiSeg5_d').innerText = seg5;
 
             // Kwitansi Data
             document.getElementById('kwiTerbilang').innerText = numberToWords(record.totalBiaya) + ' Rupiah';
@@ -1328,16 +1395,20 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // [POIN 3] Kwitansi Dynamic Rows (Nama Uraian Tidak Di-wrap)
+            // Dynamic Rows Personil Kwitansi dengan 5 Kolom Rekening Terpisah
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
                     <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1"></td>
                     <td class="border-r border-black p-1 whitespace-nowrap">1. ${record.namaPelaksana}</td>
                     <td class="border-r border-black p-1 text-center">1</td>
                     <td class="border-r border-black p-1 text-center">OH</td>
-                    <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-1 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-1 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                     <td class="p-1">1. ..........</td>
                 </tr>
             `;
@@ -1347,11 +1418,15 @@
                     rowsHTML += `
                         <tr class="border-b border-black align-top">
                             <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1"></td>
                             <td class="border-r border-black p-1 whitespace-nowrap">${no}. ${p.nama}</td>
                             <td class="border-r border-black p-1 text-center">1</td>
                             <td class="border-r border-black p-1 text-center">OH</td>
-                            <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-1 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-1 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                             <td class="p-1">${no}. ..........</td>
                         </tr>
                     `;
@@ -1597,7 +1672,6 @@
                 if (n < 12) return words[n];
                 if (n < 20) return convert(n - 10) + " Belas";
                 if (n < 100) return convert(Math.floor(n / 10)) + " Puluh " + convert(n % 10);
-                if (n < 200) return "Seratus " + convert(n - 100);
                 if (n < 1000) return convert(Math.floor(n / 100)) + " Ratus " + convert(n % 100);
                 if (n < 2000) return "Seribu " + convert(n - 1000);
                 if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
