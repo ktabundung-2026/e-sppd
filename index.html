@@ -975,7 +975,7 @@ function doPost(e) {
 
         // Fallback: Load data dari localStorage
         function loadRecordsFromLocalStorage() {
-            const savedData = localStorage.getItem('sppd_records');
+            const savedData = localStorage.getItem('sppd_catat');
             if (savedData) {
                 try {
                     travelRecords = JSON.parse(savedData);
@@ -990,7 +990,7 @@ function doPost(e) {
         async function fetchRecordsFromSupabase() {
             try {
                 const { data, error } = await supabaseClient
-                    .from('sppd_records')
+                    .from('sppd_catat')
                     .select('*')
                     .order('created_at', { ascending: false });
 
@@ -1192,7 +1192,7 @@ function doPost(e) {
                 };
 
                 const { data, error } = await supabaseClient
-                    .from('sppd_records')
+                    .from('sppd_catat')
                     .insert([payload])
                     .select();
 
@@ -1205,7 +1205,7 @@ function doPost(e) {
                 await fetchRecordsFromSupabase();
             } else {
                 travelRecords.unshift(record);
-                localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+                localStorage.setItem('sppd_catat', JSON.stringify(travelRecords));
                 renderHistoryTable();
             }
 
@@ -1414,18 +1414,18 @@ function doPost(e) {
             if(confirm("Apakah Anda yakin ingin menghapus data perjalanan dinas ini?")) {
                 if (supabaseClient) {
                     const { error } = await supabaseClient
-                        .from('sppd_records')
+                        .from('sppd_catat')
                         .delete()
                         .eq('id', id);
 
                     if (error) {
-                        alert('Gagal menghapus data dari Supabase: ' + error.message);
+                        alert('Gagal menghapus data dari Tabel: ' + error.message);
                         return;
                     }
                     await fetchRecordsFromSupabase();
                 } else {
                     travelRecords = travelRecords.filter(r => r.id !== id);
-                    localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+                    localStorage.setItem('sppd_catat', JSON.stringify(travelRecords));
                     renderHistoryTable();
                 }
             }
