@@ -360,7 +360,7 @@
                             </div>
                         </div>
 
-                        <!-- Rumpun 5 Kode Rekening -->
+                        <!-- Rumpun Kode Rekening (5 Bagian Input) -->
                         <div class="bg-white p-3.5 rounded-lg border border-slate-200 pt-3">
                             <label class="block text-xs font-bold text-slate-800 mb-2">Input Rumpun Kode Rekening (5 Bagian):</label>
                             <div class="grid grid-cols-5 gap-2">
@@ -830,7 +830,7 @@
                     </div>
                 </div>
 
-                <!-- 5. DOKUMEN KWITANSI (KOLOM URAIAN DIPERBESAR SECARA MAKSIMAL) -->
+                <!-- 5. DOKUMEN KWITANSI (KODE REKENING 1 KOLOM TUNGGAL RATA KIRI & URAIAN MAKSIMAL) -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -889,11 +889,11 @@
 
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
-                    <!-- TABEL KWITANSI: KOLOM URAIAN DIPERBESAR MAKSIMAL, KOLOM PERHITUNGAN & TOTAL DIPERKERAT -->
+                    <!-- TABEL KWITANSI: KODE REKENING 1 KOLOM RATA KIRI -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th colspan="5" rowspan="2" class="border-r border-black p-0.5 align-middle">Kode Rekening</th>
+                                <th rowspan="2" class="border-r border-black p-1 align-middle text-left w-36">Kode Rekening</th>
                                 <th rowspan="2" class="border-r border-black p-1 align-middle text-left">Uraian</th>
                                 <th colspan="3" class="border-r border-black p-0.5">Rincian Perhitungan</th>
                                 <th rowspan="2" class="border-r border-black p-1 align-middle w-20">Jumlah (Rp)</th>
@@ -905,7 +905,7 @@
                                 <th class="border-r border-black p-0.5 w-16 leading-tight">Harga Satuan</th>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
-                                <td colspan="5" class="border-r border-black p-0.5">1</td>
+                                <td class="border-r border-black p-0.5 text-left">1</td>
                                 <td class="border-r border-black p-0.5">2</td>
                                 <td class="border-r border-black p-0.5">3</td>
                                 <td class="border-r border-black p-0.5">4</td>
@@ -915,46 +915,30 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Baris 1: Level Kelompok (5.1 | 02) -->
-                            <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0 w-[1.3rem]" id="kwiSeg1_a">5.1</td>
-                                <td class="border-r border-black p-0 w-[1.1rem]" id="kwiSeg2_a">02</td>
-                                <td class="border-r border-black p-0 w-[1.1rem]"></td>
-                                <td class="border-r border-black p-0 w-[1.1rem]"></td>
-                                <td class="border-r border-black p-0 w-[2.2rem]"></td>
+                            <!-- Baris 1: Level Kelompok (5.1.02) -->
+                            <tr class="border-b border-black font-bold">
+                                <td class="border-r border-black p-1 text-left font-mono" id="kwiSeg_a">5.1.02</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 2: Level Jenis (5.1 | 02 | 04) -->
-                            <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0" id="kwiSeg1_b">5.1</td>
-                                <td class="border-r border-black p-0" id="kwiSeg2_b">02</td>
-                                <td class="border-r border-black p-0" id="kwiSeg3_b">04</td>
-                                <td class="border-r border-black p-0"></td>
-                                <td class="border-r border-black p-0"></td>
+                            <!-- Baris 2: Level Jenis (5.1.02.04) -->
+                            <tr class="border-b border-black font-bold">
+                                <td class="border-r border-black p-1 text-left font-mono" id="kwiSeg_b">5.1.02.04</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 3: Level Objek (5.1 | 02 | 04 | 01) -->
-                            <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0" id="kwiSeg1_c">5.1</td>
-                                <td class="border-r border-black p-0" id="kwiSeg2_c">02</td>
-                                <td class="border-r border-black p-0" id="kwiSeg3_c">04</td>
-                                <td class="border-r border-black p-0" id="kwiSeg4_c">01</td>
-                                <td class="border-r border-black p-0"></td>
+                            <!-- Baris 3: Level Objek (5.1.02.04.01) -->
+                            <tr class="border-b border-black font-bold">
+                                <td class="border-r border-black p-1 text-left font-mono" id="kwiSeg_c">5.1.02.04.01</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 4 & 5: Level Rincian Objek -->
-                            <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg1_d">5.1</td>
-                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg2_d">02</td>
-                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg3_d">04</td>
-                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg4_d">01</td>
-                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg5_d">00001</td>
+                            <!-- Baris 4 & 5: Level Rincian Objek (5.1.02.04.01.00001) -->
+                            <tr class="border-b border-black font-bold">
+                                <td class="border-r border-black p-1 text-left font-mono align-top" rowspan="2" id="kwiSeg_d">5.1.02.04.01.00001</td>
                                 <td class="border-r border-black p-1 text-left font-bold" colspan="5">Belanja Perjalanan Dinas Dalam Daerah</td>
                                 <td class="p-1" rowspan="2"></td>
                             </tr>
@@ -967,7 +951,7 @@
                             <tbody id="kwiDynamicRows"></tbody>
                             <!-- Jumlah Terima -->
                             <tr class="font-bold bg-slate-50 border-b border-black">
-                                <td colspan="9" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
+                                <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
                                 <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
                                 <td class="p-1.5"></td>
                             </tr>
@@ -1346,34 +1330,17 @@
             }
             lapTTD.innerHTML = ttdHTML;
 
-            // Pengisian Rumpun Kode Rekening per Kolom Kwitansi
+            // Format Gabungan Kode Rekening Tunggal
             const seg1 = record.rekSeg1 || '5.1';
             const seg2 = record.rekSeg2 || '02';
             const seg3 = record.rekSeg3 || '04';
             const seg4 = record.rekSeg4 || '01';
             const seg5 = record.rekSeg5 || '00001';
 
-            // Baris 1
-            document.getElementById('kwiSeg1_a').innerText = seg1;
-            document.getElementById('kwiSeg2_a').innerText = seg2;
-
-            // Baris 2
-            document.getElementById('kwiSeg1_b').innerText = seg1;
-            document.getElementById('kwiSeg2_b').innerText = seg2;
-            document.getElementById('kwiSeg3_b').innerText = seg3;
-
-            // Baris 3
-            document.getElementById('kwiSeg1_c').innerText = seg1;
-            document.getElementById('kwiSeg2_c').innerText = seg2;
-            document.getElementById('kwiSeg3_c').innerText = seg3;
-            document.getElementById('kwiSeg4_c').innerText = seg4;
-
-            // Baris 4 & 5
-            document.getElementById('kwiSeg1_d').innerText = seg1;
-            document.getElementById('kwiSeg2_d').innerText = seg2;
-            document.getElementById('kwiSeg3_d').innerText = seg3;
-            document.getElementById('kwiSeg4_d').innerText = seg4;
-            document.getElementById('kwiSeg5_d').innerText = seg5;
+            document.getElementById('kwiSeg_a').innerText = `${seg1}.${seg2}`;
+            document.getElementById('kwiSeg_b').innerText = `${seg1}.${seg2}.${seg3}`;
+            document.getElementById('kwiSeg_c').innerText = `${seg1}.${seg2}.${seg3}.${seg4}`;
+            document.getElementById('kwiSeg_d').innerText = `${seg1}.${seg2}.${seg3}.${seg4}.${seg5}`;
 
             // Kwitansi Data
             document.getElementById('kwiTerbilang').innerText = numberToWords(record.totalBiaya) + ' Rupiah';
@@ -1392,11 +1359,7 @@
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-0"></td>
-                    <td class="border-r border-black p-0"></td>
-                    <td class="border-r border-black p-0"></td>
-                    <td class="border-r border-black p-0"></td>
-                    <td class="border-r border-black p-0"></td>
+                    <td class="border-r border-black p-1"></td>
                     <td class="border-r border-black p-1">1. ${record.namaPelaksana}</td>
                     <td class="border-r border-black p-0.5 text-center">1</td>
                     <td class="border-r border-black p-0.5 text-center">OH</td>
@@ -1410,11 +1373,7 @@
                     const no = idx + 2;
                     rowsHTML += `
                         <tr class="border-b border-black align-top">
-                            <td class="border-r border-black p-0"></td>
-                            <td class="border-r border-black p-0"></td>
-                            <td class="border-r border-black p-0"></td>
-                            <td class="border-r border-black p-0"></td>
-                            <td class="border-r border-black p-0"></td>
+                            <td class="border-r border-black p-1"></td>
                             <td class="border-r border-black p-1">${no}. ${p.nama}</td>
                             <td class="border-r border-black p-0.5 text-center">1</td>
                             <td class="border-r border-black p-0.5 text-center">OH</td>
@@ -1658,21 +1617,3 @@
 
         function numberToWords(amount) {
             const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            let num = Math.floor(Math.abs(amount));
-            if (num === 0) return "Nol";
-
-            function convert(n) {
-                if (n < 12) return words[n];
-                if (n < 20) return convert(n - 10) + " Belas";
-                if (n < 100) return convert(Math.floor(n / 10)) + " Puluh " + convert(n % 10);
-                if (n < 1000) return convert(Math.floor(n / 100)) + " Ratus " + convert(n % 100);
-                if (n < 2000) return "Seribu " + convert(n - 1000);
-                if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
-                if (n < 1000000000) return convert(Math.floor(n / 1000000)) + " Juta " + convert(n % 1000000);
-                return n.toString();
-            }
-            return convert(num).replace(/\s+/g, ' ').trim();
-        }
-    </script>
-</body>
-</html>
