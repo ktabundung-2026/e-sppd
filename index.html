@@ -8,9 +8,6 @@
     <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SheetJS (XLSX) library untuk Ekspor Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -436,10 +433,6 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="exportToExcel()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-                            <i class="fa-solid fa-file-excel"></i> Ekspor Excel (.xlsx)
-                        </button>
-                        
                         <button onclick="printHistoryTable()" class="text-xs bg-gov-700 hover:bg-gov-800 text-white font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
                             <i class="fa-solid fa-print"></i> Cetak Rekap PDF
                         </button>
@@ -471,6 +464,7 @@
                             </tr>
                         </thead>
                         <tbody id="historyTableBody" class="divide-y divide-slate-200"></tbody>
+                        <tfoot id="historyTableFooter" class="bg-slate-100 font-bold border-t-2 border-slate-300"></tfoot>
                     </table>
                 </div>
             </div>
@@ -1036,42 +1030,42 @@
         };
 
         function populateSelectOptions() {
-    // Populate Dropdown Pelaksana Utama
-    const selectPelaksana = document.getElementById('namaPelaksana');
-    if (selectPelaksana) {
-        selectPelaksana.innerHTML = '<option value="">-- Pilih ASN --</option>';
-        DATA_ASN_TABUNDUNG.forEach(asn => {
-            const opt = document.createElement('option');
-            opt.value = asn.nama;
-            opt.innerText = `${asn.nama} - ${asn.jabatan}`;
-            selectPelaksana.appendChild(opt);
-        });
-    }
+            // Populate Dropdown Pelaksana Utama (Hanya Nama)
+            const selectPelaksana = document.getElementById('namaPelaksana');
+            if (selectPelaksana) {
+                selectPelaksana.innerHTML = '<option value="">-- Pilih ASN --</option>';
+                DATA_ASN_TABUNDUNG.forEach(asn => {
+                    const opt = document.createElement('option');
+                    opt.value = asn.nama;
+                    opt.innerText = asn.nama;
+                    selectPelaksana.appendChild(opt);
+                });
+            }
 
-    // Populate Datalist ASN (untuk elemen lainnya jika ada)
-    const datalistAsn = document.getElementById('listAsnNama');
-    if (datalistAsn) {
-        datalistAsn.innerHTML = '';
-        DATA_ASN_TABUNDUNG.forEach(asn => {
-            const opt = document.createElement('option');
-            opt.value = asn.nama;
-            opt.innerText = `${asn.jabatan} - NIP. ${asn.nip}`;
-            datalistAsn.appendChild(opt);
-        });
-    }
+            // Populate Datalist ASN
+            const datalistAsn = document.getElementById('listAsnNama');
+            if (datalistAsn) {
+                datalistAsn.innerHTML = '';
+                DATA_ASN_TABUNDUNG.forEach(asn => {
+                    const opt = document.createElement('option');
+                    opt.value = asn.nama;
+                    opt.innerText = `${asn.jabatan} - NIP. ${asn.nip}`;
+                    datalistAsn.appendChild(opt);
+                });
+            }
 
-    // Populate Dropdown Desa Tujuan
-    const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
-    if (selectDesa) {
-        selectDesa.innerHTML = '<option value="">-- Pilih Desa --</option>';
-        DAFTAR_DESA_TABUNDUNG.forEach(desa => {
-            const opt = document.createElement('option');
-            opt.value = desa;
-            opt.innerText = desa;
-            selectDesa.appendChild(opt);
-        });
-    }
-}
+            // Populate Dropdown Desa Tujuan
+            const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
+            if (selectDesa) {
+                selectDesa.innerHTML = '<option value="">-- Pilih Desa --</option>';
+                DAFTAR_DESA_TABUNDUNG.forEach(desa => {
+                    const opt = document.createElement('option');
+                    opt.value = desa;
+                    opt.innerText = desa;
+                    selectDesa.appendChild(opt);
+                });
+            }
+        }
 
         function onNamaInputChanged(role, namaVal) {
             if (!namaVal) return;
@@ -1244,7 +1238,6 @@
             document.getElementById('stNipCamat').innerText = record.nipCamat;
 
             // Personil Surat Tugas
-            // Personil Surat Tugas (Format Tanda Baca Rapih & Sejajar)
             const stDaftar = document.getElementById('stDaftarPersonil');
             let personilHTML = `
                 <div>
@@ -1381,6 +1374,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
+            // Dynamic Rows Personil Kwitansi
             // Dynamic Rows Personil Kwitansi (Uraian Luas & Nama 1 Baris)
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
@@ -1391,7 +1385,7 @@
                     <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
                     <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                     <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="p-0.5 text-center whitespace-nowrap">1. ..........</td>
+                    <td class="p-0.5 text-left whitespace-nowrap">1. ..........</td>
                 </tr>
             `;
             if (record.pengikut && record.pengikut.length > 0) {
@@ -1405,7 +1399,7 @@
                             <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
                             <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                             <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="p-0.5 text-center whitespace-nowrap">${no}. ..........</td>
+                            <td class="p-0.5 text-left whitespace-nowrap">${no}. ..........</td>
                         </tr>
                     `;
                 });
@@ -1478,12 +1472,20 @@
 
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
+            const tfoot = document.getElementById('historyTableFooter');
+
             if (travelRecords.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Belum ada riwayat perjalanan dinas.</td></tr>`;
+                tfoot.innerHTML = '';
                 return;
             }
 
+            let totalBiayaKeseluruhan = 0;
+
             tbody.innerHTML = travelRecords.map((item, index) => {
+                const itemTotal = item.totalBiaya || 0;
+                totalBiayaKeseluruhan += itemTotal;
+
                 let pengikutHTML = '';
                 if (item.pengikut && item.pengikut.length > 0) {
                     pengikutHTML = `<div class="mt-1 pt-1 border-t border-slate-200 text-[11px] text-slate-600">
@@ -1504,7 +1506,7 @@
                         </td>
                         <td class="p-3 align-top">${item.tempatTujuan}</td>
                         <td class="p-3 text-xs align-top">${item.tglMulai} s/d ${item.tglSelesai}</td>
-                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${itemTotal.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-center align-top">
                             <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1 mb-1">
                                 <i class="fa-solid fa-print"></i> Cetak Dokumen
@@ -1516,6 +1518,15 @@
                     </tr>
                 `;
             }).join('');
+
+            // Render rekap total biaya pada akhir kolom riwayat
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya Perjalanan Dinas:</td>
+                    <td class="p-3 text-emerald-800 text-sm font-extrabold whitespace-nowrap">Rp ${totalBiayaKeseluruhan.toLocaleString('id-ID')}</td>
+                    <td class="p-3"></td>
+                </tr>
+            `;
         }
 
         function filterHistory() {
@@ -1528,7 +1539,20 @@
             );
             
             const tbody = document.getElementById('historyTableBody');
+            const tfoot = document.getElementById('historyTableFooter');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Data tidak ditemukan.</td></tr>`;
+                tfoot.innerHTML = '';
+                return;
+            }
+
+            let totalBiayaKeseluruhan = 0;
+
             tbody.innerHTML = filtered.map((item) => {
+                const itemTotal = item.totalBiaya || 0;
+                totalBiayaKeseluruhan += itemTotal;
+
                 let pengikutHTML = '';
                 if (item.pengikut && item.pengikut.length > 0) {
                     pengikutHTML = `<div class="mt-1 pt-1 border-t border-slate-200 text-[11px] text-slate-600">
@@ -1548,50 +1572,21 @@
                         </td>
                         <td class="p-3 align-top">${item.tempatTujuan}</td>
                         <td class="p-3 text-xs align-top">${item.tglMulai}</td>
-                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${itemTotal.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-center align-top">
                             <button onclick="openPreviewModal(travelRecords.find(x => x.id === ${item.id}))" class="bg-gov-700 text-white px-2.5 py-1 rounded text-xs">Cetak</button>
                         </td>
                     </tr>
                 `;
             }).join('');
-        }
 
-        function exportToExcel() {
-            if (travelRecords.length === 0) return alert("Belum ada data riwayat SPPD untuk diekspor!");
-
-            const dataExcel = [];
-            travelRecords.forEach((item, index) => {
-                const pengikutStr = item.pengikut && item.pengikut.length > 0 
-                    ? item.pengikut.map(p => `${p.nama} (${p.jabatan})`).join('; ') 
-                    : '-';
-
-                dataExcel.push({
-                    "No": index + 1,
-                    "No. Surat Tugas": item.noSuratTugas,
-                    "No. SPPD": item.noSPPD,
-                    "Pelaksana Utama": item.namaPelaksana,
-                    "NIP Pelaksana": item.nipPelaksana,
-                    "Jabatan Pelaksana": item.jabatanPelaksana,
-                    "Pengikut": pengikutStr,
-                    "Tempat Tujuan": item.tempatTujuan,
-                    "Maksud Perjalanan": item.maksudTujuan,
-                    "Tanggal Mulai": item.tglMulai,
-                    "Tanggal Selesai": item.tglSelesai,
-                    "Lama (Hari)": item.lamaHari,
-                    "Biaya per Orang (Rp)": item.biayaPerOrang,
-                    "Total Biaya (Rp)": item.totalBiaya,
-                    "Kode Rekening": `${item.rekSeg1}.${item.rekSeg2}.${item.rekSeg3}.${item.rekSeg4}.${item.rekSeg5}`,
-                    "Penandatangan (Camat)": item.namaCamat,
-                    "Bendahara": item.namaBendahara
-                });
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(dataExcel);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap SPPD");
-
-            XLSX.writeFile(workbook, `Rekap_SPPD_Kec_Tabundung_${new Date().toISOString().slice(0,10)}.xlsx`);
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya (Hasil Cari):</td>
+                    <td class="p-3 text-emerald-800 text-sm font-extrabold whitespace-nowrap">Rp ${totalBiayaKeseluruhan.toLocaleString('id-ID')}</td>
+                    <td class="p-3"></td>
+                </tr>
+            `;
         }
 
         function printHistoryTable() {
