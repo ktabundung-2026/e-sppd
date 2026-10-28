@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Perjalanan Dinas Kecamatan (e-SPPD)</title>
+    <title>e-SPPD Kecamatan Tabundung</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font Inter -->
+    <!-- Google Font Inter & Tinos -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -33,59 +33,27 @@
         }
     </script>
     <style>
-        /* CSS for Screen vs Print styling */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .print-area, .print-area * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
             .print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 15px;
-                background: white !important;
-                color: black !important;
-                font-family: 'Tinos', Georgia, serif !important;
+                position: absolute; left: 0; top: 0; width: 100%;
+                margin: 0; padding: 15px; background: white !important;
+                color: black !important; font-family: 'Tinos', Georgia, serif !important;
             }
-            .no-print {
-                display: none !important;
-            }
-            .page-break {
-                page-break-before: always;
-            }
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
         }
         .document-paper {
             background-color: white;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm 15mm;
-            margin: auto;
-            color: #000;
-            font-family: 'Tinos', Georgia, serif;
-            font-size: 11pt;
-            line-height: 1.35;
+            width: 210mm; min-height: 297mm; padding: 20mm 15mm;
+            margin: auto; color: #000; font-family: 'Tinos', Georgia, serif;
+            font-size: 11pt; line-height: 1.35;
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
@@ -96,11 +64,11 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gov-700 rounded-lg flex items-center justify-center text-xl font-bold shadow-inner border border-gov-600">
-                        <i class="fa-solid me-0.5 fa-file-invoice"></i>
+                        <i class="fa-solid fa-file-invoice"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg leading-tight">e-SPPD Kecamatan</h1>
-                        <p class="text-xs text-gov-100">Sistem Informasi Perjalanan Dinas</p>
+                        <h1 class="font-bold text-lg leading-tight">e-SPPD Kec. Tabundung</h1>
+                        <p class="text-xs text-gov-100">Kabupaten Sumba Timur</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4">
@@ -111,10 +79,6 @@
                     <button onclick="switchTab('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Buat Baru</span>
-                    </button>
-                    <button onclick="openGasModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5" title="Integrasi Google Apps Script">
-                        <i class="fa-brands fa-google-drive"></i>
-                        <span class="hidden md:inline">Script GAS</span>
                     </button>
                 </div>
             </div>
@@ -133,14 +97,11 @@
                             <i class="fa-solid fa-pen-to-square text-gov-700"></i>
                             Form Rencana Perjalanan Dinas
                         </h2>
-                        <p class="text-sm text-slate-500 mt-0.5">Isi detail petugas, tujuan, jadwal, dan rincian anggaran biaya.</p>
+                        <p class="text-sm text-slate-500 mt-0.5">Pilih pegawai dan isi rincian kegiatan perjalanan dinas.</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="loadSampleData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded border border-slate-300 transition-colors">
-                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1"></i> Isi Contoh Data
-                        </button>
                         <button type="button" onclick="resetForm()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded border border-rose-200 transition-colors">
-                            <i class="fa-solid fa-rotate-right mr-1"></i> Reset
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Reset Form
                         </button>
                     </div>
                 </div>
@@ -156,33 +117,32 @@
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Surat Tugas & SPPD</label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <input type="text" id="noSuratTugas" required placeholder="Surat Tugas: 090 / 124 / Kec.01" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
-                                    <input type="text" id="noSPPD" required placeholder="SPPD: 094 / 088 / Kec.01" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                    <input type="text" id="noSuratTugas" required placeholder="Surat Tugas: 090 / ... / Kec. TBD" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                    <input type="text" id="noSPPD" required placeholder="SPPD: 094 / ... / Kec. TBD" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
                                 </div>
                             </div>
 
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Maksud & Tujuan Perjalanan Dinas</label>
-                                <textarea id="maksudTujuan" rows="2" required placeholder="Contoh: Menghadiri Rapat Koordinasi Penanggulangan Bencana Tingkat Kabupaten..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none"></textarea>
+                                <textarea id="maksudTujuan" rows="2" required placeholder="Contoh: Menghadiri Rapat Koordinasi Tingkat Kabupaten di Waingapu..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none"></textarea>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Berangkat</label>
-                                <input type="text" id="tempatBerangkat" required value="Kantor Kecamatan" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                <input type="text" id="tempatBerangkat" required value="Mavuko (Kec. Tabundung)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Tujuan</label>
-                                <input type="text" id="tempatTujuan" required placeholder="Contoh: Bappeda Kabupaten / Kantor Desa Sukamaju" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                <input type="text" id="tempatTujuan" required placeholder="Contoh: Waingapu / Kantor Desa Bira" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Alat Transportasi</label>
                                 <select id="alatAngkutan" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
-                                    <option value="Kendaraan Dinas (Roda 4)">Kendaraan Dinas (Roda 4)</option>
                                     <option value="Kendaraan Dinas (Roda 2)">Kendaraan Dinas (Roda 2)</option>
+                                    <option value="Kendaraan Dinas (Roda 4)">Kendaraan Dinas (Roda 4)</option>
                                     <option value="Kendaraan Umum / Travel">Kendaraan Umum / Travel</option>
-                                    <option value="Pesawat / Kereta Api">Pesawat / Kereta Api</option>
                                 </select>
                             </div>
 
@@ -226,23 +186,28 @@
 
                         <!-- Main Officer (Pelaksana Utama) -->
                         <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-3">
-                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-gov-100 text-gov-800 rounded">Pelaksana Utama (Pegawai Yang Diperintah)</span>
+                            <div class="flex items-center justify-between">
+                                <span class="inline-block px-2 py-0.5 text-xs font-bold bg-gov-100 text-gov-800 rounded">Pelaksana Utama (Pegawai Yang Diperintah)</span>
+                                <select onchange="autofillPelaksana(this.value)" class="text-xs border border-gov-600 bg-gov-50 text-gov-900 rounded px-2 py-1 font-semibold">
+                                    <option value="">-- Pilih dari Daftar ASN Kec. Tabundung --</option>
+                                </select>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                 <div>
                                     <label class="block text-xs text-slate-600 mb-1">Nama Lengkap</label>
-                                    <input type="text" id="namaPelaksana" required placeholder="H. Ahmad Subarkah, S.STP" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 focus:ring-1 focus:ring-gov-600">
+                                    <input type="text" id="namaPelaksana" required placeholder="Nama Pegawai" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-600 mb-1">NIP</label>
-                                    <input type="text" id="nipPelaksana" required placeholder="19820512 200604 1 002" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 focus:ring-1 focus:ring-gov-600">
+                                    <input type="text" id="nipPelaksana" required placeholder="NIP Pegawai" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-600 mb-1">Jabatan</label>
-                                    <input type="text" id="jabatanPelaksana" required placeholder="Kasi Pemerintahan" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 focus:ring-1 focus:ring-gov-600">
+                                    <input type="text" id="jabatanPelaksana" required placeholder="Jabatan" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-600 mb-1">Pangkat / Golongan</label>
-                                    <input type="text" id="pangkatPelaksana" required placeholder="Penata Tk. I / III/d" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 focus:ring-1 focus:ring-gov-600">
+                                    <input type="text" id="pangkatPelaksana" placeholder="misal: Penata / III/c" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
                                 </div>
                             </div>
                         </div>
@@ -257,18 +222,28 @@
                             <i class="fa-solid fa-signature"></i> 3. Pejabat Penandatangan & Bendahara
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Camat / Pejabat Pembuat Komitmen -->
-                            <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2">
-                                <h4 class="text-xs font-bold text-slate-700">Camat / Pejabat Berwenang</h4>
+                            <!-- Camat / Pejabat Berwenang -->
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-slate-700">Camat / Pejabat Berwenang</h4>
+                                    <select onchange="autofillCamat(this.value)" class="text-xs border border-slate-300 rounded px-2 py-0.5">
+                                        <option value="">-- Pilih Penandatangan --</option>
+                                    </select>
+                                </div>
                                 <div>
                                     <input type="text" id="namaCamat" required placeholder="Nama Camat" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 mb-2">
                                     <input type="text" id="nipCamat" required placeholder="NIP Camat" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 mb-2">
-                                    <input type="text" id="pangkatCamat" required placeholder="Pangkat Camat (misal: Pembina Utama Muda, IV/c)" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
+                                    <input type="text" id="pangkatCamat" placeholder="Pangkat Camat" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
                                 </div>
                             </div>
                             <!-- Bendahara Pengeluaran -->
-                            <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2">
-                                <h4 class="text-xs font-bold text-slate-700">Bendahara Pengeluaran (Untuk Kwitansi)</h4>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-slate-700">Bendahara / Pengelola Keuangan</h4>
+                                    <select onchange="autofillBendahara(this.value)" class="text-xs border border-slate-300 rounded px-2 py-0.5">
+                                        <option value="">-- Pilih Bendahara --</option>
+                                    </select>
+                                </div>
                                 <div>
                                     <input type="text" id="namaBendahara" required placeholder="Nama Bendahara" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300 mb-2">
                                     <input type="text" id="nipBendahara" required placeholder="NIP Bendahara" class="w-full px-2.5 py-1.5 text-sm rounded border border-slate-300">
@@ -297,7 +272,7 @@
                                 <input type="number" id="biayaTransport" min="0" value="0" oninput="calculateTotalBudget()" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Biaya Penginapan / Hotel (Rp)</label>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Biaya Penginapan (Rp)</label>
                                 <input type="number" id="biayaPenginapan" min="0" value="0" oninput="calculateTotalBudget()" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600">
                             </div>
                             <div class="sm:col-span-2">
@@ -315,7 +290,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 5: RINGKASAN LAPORAN HASIL (Untuk Laporan Perjalanan Dinas) -->
+                    <!-- SECTION 5: RINGKASAN LAPORAN HASIL -->
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
                         <h3 class="text-md font-semibold text-gov-800 flex items-center gap-2 border-b border-slate-200 pb-2">
                             <i class="fa-solid fa-file-lines"></i> 5. Draft Laporan Hasil Perjalanan Dinas
@@ -323,32 +298,32 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Hasil Utama / Temuan Kegiatan</label>
-                                <textarea id="laporanHasil" rows="3" placeholder="- Telah mengikuti serangkaian acara pembahasan rapat...&#10;- Hasil kesepakatan yaitu penambahan alokasi dana..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
+                                <textarea id="laporanHasil" rows="3" placeholder="- Telah melaksanakan koordinasi kegiatan di..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Saran / Tindak Lanjut</label>
-                                <textarea id="laporanSaran" rows="2" placeholder="Diharapkan Kasubag Keuangan segera menindaklanjuti berkas pendukung..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
+                                <textarea id="laporanSaran" rows="2" placeholder="Diharapkan tindak lanjut dari pihak terkait..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KOP SURAT CONFIGURATION -->
+                    <!-- KOP SURAT CONFIGURATION (DEFAULT TABUNDUNG) -->
                     <div class="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3">
                         <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-landmark"></i> Pengaturan Kop Surat Dokumen
                         </h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                                <label class="block text-xs text-slate-700 mb-1">Pemerintah Kabupaten / Kota</label>
-                                <input type="text" id="kopPemkab" value="PEMERINTAH KABUPATEN BANYUMAS" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
+                                <label class="block text-xs text-slate-700 mb-1">Pemerintah Kabupaten</label>
+                                <input type="text" id="kopPemkab" value="PEMERINTAH KABUPATEN SUMBA TIMUR" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-700 mb-1">Nama Kecamatan</label>
-                                <input type="text" id="kopKecamatan" value="KECAMATAN PURWOKERTO TIMUR" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
+                                <input type="text" id="kopKecamatan" value="KECAMATAN TABUNDUNG" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-700 mb-1">Alamat / Kontak Kop</label>
-                                <input type="text" id="kopAlamat" value="Jl. Prof. Dr. Suharso No. 102 Telp. (0281) 635123" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
+                                <input type="text" id="kopAlamat" value="Jln. Lahiru - Mavuko, Kecamatan Tabundung" class="w-full px-2.5 py-1.5 text-sm rounded border border-amber-300 bg-white">
                             </div>
                         </div>
                     </div>
@@ -377,7 +352,14 @@
                         </h2>
                         <p class="text-sm text-slate-500 mt-0.5">Daftar perjalanan dinas yang telah diinput dan siap cetak ulang.</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="exportDataJSON()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded border border-slate-300 transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-download text-gov-700"></i> Backup JSON
+                        </button>
+                        <label class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded border border-slate-300 transition-colors flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-upload text-emerald-700"></i> Restore JSON
+                            <input type="file" id="importFile" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                        </label>
                         <div class="relative">
                             <input type="text" id="searchHistory" oninput="filterHistory()" placeholder="Cari nama, tujuan..." class="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-gov-600">
                             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
@@ -398,7 +380,6 @@
                             </tr>
                         </thead>
                         <tbody id="historyTableBody" class="divide-y divide-slate-200">
-                            <!-- Populated dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -407,15 +388,15 @@
 
     </main>
 
-    <!-- DOCUMENT PREVIEW MODAL (FULLSCREEN RESPONSIVE) -->
+    <!-- DOCUMENT PREVIEW MODAL -->
     <div id="previewModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex flex-col justify-between overflow-hidden">
         <!-- Top Toolbar -->
         <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between no-print border-b border-slate-800">
             <div class="flex items-center space-x-3">
                 <span class="text-amber-400 text-lg"><i class="fa-solid fa-print"></i></span>
                 <div>
-                    <h3 class="font-bold text-sm" id="modalDocTitle">Pratinjau Dokumen Perjalanan Dinas</h3>
-                    <p class="text-xs text-slate-400">Pilih jenis surat di bawah dan klik tombol cetak / simpan PDF</p>
+                    <h3 class="font-bold text-sm" id="modalDocTitle">Pratinjau Dokumen SPPD</h3>
+                    <p class="text-xs text-slate-400">Pilih dokumen lalu klik Cetak / Simpan PDF</p>
                 </div>
             </div>
             <!-- Document Switcher Tabs in Modal -->
@@ -442,20 +423,19 @@
                 
                 <!-- DOCUMENT 1: SURAT TUGAS -->
                 <div id="doc-st" class="document-paper mb-8 hidden">
-                    <!-- Kop Surat -->
                     <div class="text-center border-b-4 border-double border-black pb-2 mb-6">
-                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="stKopPemkab">PEMERINTAH KABUPATEN BANYUMAS</h3>
-                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="stKopKecamatan">KECAMATAN PURWOKERTO TIMUR</h2>
-                        <p class="text-xs italic font-official" id="stKopAlamat">Jl. Prof. Dr. Suharso No. 102 Telp. (0281) 635123 Kode Pos 53111</p>
+                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="stKopPemkab">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="stKopKecamatan">KECAMATAN TABUNDUNG</h2>
+                        <p class="text-xs italic font-official" id="stKopAlamat">Jln. Lahiru - Mavuko, Kecamatan Tabundung</p>
                     </div>
 
                     <div class="text-center mb-6">
                         <h3 class="font-bold text-base underline uppercase tracking-widest">SURAT TUGAS</h3>
-                        <p class="text-sm">Nomor: <span id="stNoSurat">090 / 124 / Kec.01</span></p>
+                        <p class="text-sm">Nomor: <span id="stNoSurat">090 / ... / Kec. TBD</span></p>
                     </div>
 
                     <div class="space-y-4 text-justify font-official text-sm leading-relaxed">
-                        <p><span class="font-bold">Dasar:</span> DPA Kecamatan Tahun Anggaran berjalan dan kebutuhan pelaksanaan tugas dinas serta koordinasi teknis wilayah.</p>
+                        <p><span class="font-bold">Dasar:</span> DPA Kecamatan Tabundung Tahun Anggaran berjalan dan kebutuhan pelaksanaan tugas dinas serta koordinasi teknis wilayah.</p>
                         <p class="text-center font-bold my-2 uppercase">MEMERINTAHKAN:</p>
                         
                         <table class="w-full">
@@ -467,22 +447,22 @@
                                         <tr>
                                             <td class="w-28 font-semibold">Nama</td>
                                             <td class="w-3">:</td>
-                                            <td id="stNama" class="font-bold">H. Ahmad Subarkah, S.STP</td>
+                                            <td id="stNama" class="font-bold">-</td>
                                         </tr>
                                         <tr>
                                             <td>NIP</td>
                                             <td>:</td>
-                                            <td id="stNip">19820512 200604 1 002</td>
+                                            <td id="stNip">-</td>
                                         </tr>
                                         <tr>
                                             <td>Pangkat/Gol</td>
                                             <td>:</td>
-                                            <td id="stPangkat">Penata Tk. I / III/d</td>
+                                            <td id="stPangkat">-</td>
                                         </tr>
                                         <tr>
                                             <td>Jabatan</td>
                                             <td>:</td>
-                                            <td id="stJabatan">Kasi Pemerintahan</td>
+                                            <td id="stJabatan">-</td>
                                         </tr>
                                     </table>
                                 </td>
@@ -509,7 +489,7 @@
                                 <td class="w-4">:</td>
                                 <td>
                                     <ol class="list-decimal pl-4 space-y-1">
-                                        <li id="stMaksud">Menghadiri Rapat Koordinasi Penanggulangan Bencana...</li>
+                                        <li id="stMaksud">-</li>
                                         <li>Melaporkan hasil pelaksanaan tugas kepada atasan langsung.</li>
                                         <li>Melaksanakan tugas dengan penuh rasa tanggung jawab.</li>
                                     </ol>
@@ -520,26 +500,24 @@
                         <p class="mt-4">Demikian Surat Tugas ini diterbitkan untuk dipergunakan sebagaimana mestinya.</p>
                     </div>
 
-                    <!-- TTD Camat -->
                     <div class="mt-12 flex justify-end font-official text-sm">
                         <div class="w-64 text-center">
-                            <p><span id="stLokasiTgl">Purwokerto, 26 Oktober 2026</span></p>
-                            <p class="font-bold mt-1">CAMAT PURWOKERTO TIMUR</p>
+                            <p><span id="stLokasiTgl">Mavuko, -</span></p>
+                            <p class="font-bold mt-1">CAMAT TABUNDUNG</p>
                             <div class="h-20"></div>
-                            <p class="font-bold underline" id="stNamaCamat">NAMA CAMAT, S.Sos</p>
-                            <p id="stPangkatCamat">Pembina Utama Muda</p>
-                            <p>NIP. <span id="stNipCamat">19681201 199303 1 005</span></p>
+                            <p class="font-bold underline" id="stNamaCamat">-</p>
+                            <p id="stPangkatCamat">-</p>
+                            <p>NIP. <span id="stNipCamat">-</span></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- DOCUMENT 2: SPPD (SURAT PERINTH PERJALANAN DINAS) -->
+                <!-- DOCUMENT 2: SPPD -->
                 <div id="doc-sppd" class="document-paper mb-8 hidden">
-                    <!-- Kop Surat -->
                     <div class="text-center border-b-4 border-double border-black pb-2 mb-4">
-                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="sppdKopPemkab">PEMERINTAH KABUPATEN BANYUMAS</h3>
-                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="sppdKopKecamatan">KECAMATAN PURWOKERTO TIMUR</h2>
-                        <p class="text-xs italic font-official" id="sppdKopAlamat">Jl. Prof. Dr. Suharso No. 102 Telp. (0281) 635123 Kode Pos 53111</p>
+                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="sppdKopPemkab">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="sppdKopKecamatan">KECAMATAN TABUNDUNG</h2>
+                        <p class="text-xs italic font-official" id="sppdKopAlamat">Jln. Lahiru - Mavuko, Kecamatan Tabundung</p>
                     </div>
 
                     <div class="flex justify-between text-xs font-official mb-4">
@@ -548,13 +526,13 @@
                             <table class="w-full">
                                 <tr><td class="w-20">Lembar Ke</td><td>: 1 (Satu)</td></tr>
                                 <tr><td>Kode No</td><td>: 094</td></tr>
-                                <tr><td>Nomor</td><td>: <span id="sppdNoSurat">094/088/Kec.01</span></td></tr>
+                                <tr><td>Nomor</td><td>: <span id="sppdNoSurat">-</span></td></tr>
                             </table>
                         </div>
                     </div>
 
                     <div class="text-center font-bold text-base underline uppercase mb-4">
-                        SURAT PERINTH PERJALANAN DINAS (SPPD)
+                        SURAT PERINTAH PERJALANAN DINAS (SPPD)
                     </div>
 
                     <table class="w-full border-collapse border border-black font-official text-xs">
@@ -562,12 +540,12 @@
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 w-8 text-center">1.</td>
                                 <td class="border-r border-black p-2 w-1/2">Pejabat Pembuat Komitmen / Berwenang</td>
-                                <td class="p-2" id="sppdPejabat">Camat Purwokerto Timur</td>
+                                <td class="p-2" id="sppdPejabat">Camat Tabundung</td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">2.</td>
                                 <td class="border-r border-black p-2">Nama / NIP Pegawai yang diperintah</td>
-                                <td class="p-2 font-bold" id="sppdNamaNip">H. Ahmad Subarkah, S.STP / 19820512 200604 1 002</td>
+                                <td class="p-2 font-bold" id="sppdNamaNip">-</td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">3.</td>
@@ -577,20 +555,20 @@
                                     c. Tingkat Biaya Perjalanan Dinas
                                 </td>
                                 <td class="p-2">
-                                    a. <span id="sppdPangkat">Penata Tk. I / III/d</span><br>
-                                    b. <span id="sppdJabatan">Kasi Pemerintahan</span><br>
+                                    a. <span id="sppdPangkat">-</span><br>
+                                    b. <span id="sppdJabatan">-</span><br>
                                     c. Tingkat C
                                 </td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">4.</td>
                                 <td class="border-r border-black p-2">Maksud Perjalanan Dinas</td>
-                                <td class="p-2" id="sppdMaksud">Menghadiri Rapat Koordinasi Penanggulangan Bencana...</td>
+                                <td class="p-2" id="sppdMaksud">-</td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">5.</td>
                                 <td class="border-r border-black p-2">Alat Angkutan yang dipergunakan</td>
-                                <td class="p-2" id="sppdTransport">Kendaraan Dinas (Roda 4)</td>
+                                <td class="p-2" id="sppdTransport">Kendaraan Dinas (Roda 2)</td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">6.</td>
@@ -599,8 +577,8 @@
                                     b. Tempat Tujuan
                                 </td>
                                 <td class="p-2">
-                                    a. <span id="sppdBerangkat">Kantor Kecamatan</span><br>
-                                    b. <span id="sppdTujuan">Bappeda Kabupaten</span>
+                                    a. <span id="sppdBerangkat">Mavuko (Kec. Tabundung)</span><br>
+                                    b. <span id="sppdTujuan">-</span>
                                 </td>
                             </tr>
                             <tr class="border-b border-black">
@@ -611,9 +589,9 @@
                                     c. Tanggal Harus Kembali
                                 </td>
                                 <td class="p-2">
-                                    a. <span id="sppdLama">1 (Satu)</span> Hari<br>
-                                    b. <span id="sppdTglMulai">26 Oktober 2026</span><br>
-                                    c. <span id="sppdTglSelesai">26 Oktober 2026</span>
+                                    a. <span id="sppdLama">1</span> Hari<br>
+                                    b. <span id="sppdTglMulai">-</span><br>
+                                    c. <span id="sppdTglSelesai">-</span>
                                 </td>
                             </tr>
                             <tr class="border-b border-black">
@@ -624,7 +602,7 @@
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-2 text-center">9.</td>
                                 <td class="border-r border-black p-2">Pembebanan Anggaran<br>a. Instansi<br>b. Mata Anggaran</td>
-                                <td class="p-2"><br>a. Kecamatan Purwokerto Timur<br>b. <span id="sppdMak">5.1.02.04.01.0001</span></td>
+                                <td class="p-2"><br>a. Kecamatan Tabundung<br>b. <span id="sppdMak">-</span></td>
                             </tr>
                             <tr>
                                 <td class="border-r border-black p-2 text-center">10.</td>
@@ -636,16 +614,15 @@
 
                     <div class="mt-8 flex justify-end font-official text-xs">
                         <div class="w-64 text-center">
-                            <p>Dikeluarkan di: Purwokerto</p>
-                            <p>Pada tanggal: <span id="sppdTglSurat">26 Oktober 2026</span></p>
-                            <p class="font-bold mt-2">CAMAT PURWOKERTO TIMUR</p>
+                            <p>Dikeluarkan di: Mavuko</p>
+                            <p>Pada tanggal: <span id="sppdTglSurat">-</span></p>
+                            <p class="font-bold mt-2">CAMAT TABUNDUNG</p>
                             <div class="h-16"></div>
-                            <p class="font-bold underline" id="sppdCamatNama">NAMA CAMAT, S.Sos</p>
-                            <p>NIP. <span id="sppdCamatNip">19681201 199303 1 005</span></p>
+                            <p class="font-bold underline" id="sppdCamatNama">-</p>
+                            <p>NIP. <span id="sppdCamatNip">-</span></p>
                         </div>
                     </div>
 
-                    <!-- PAGE BREAK FOR SPPD LEMBAR II (BACK PAGE STAMP AREA) -->
                     <div class="page-break my-8 border-t-2 border-dashed border-slate-300 pt-8 no-print-break"></div>
 
                     <!-- SPPD LEMBAR II -->
@@ -657,29 +634,29 @@
                         <tr class="border-b border-black">
                             <td class="p-2 w-1/2 border-r border-black"></td>
                             <td class="p-2 w-1/2">
-                                Berangkat dari : <span id="l2Berangkat1">Kantor Kecamatan</span><br>
-                                Ke : <span id="l2Tujuan1">Bappeda Kabupaten</span><br>
-                                Pada Tanggal : <span id="l2Tgl1">26 Oktober 2026</span><br>
+                                Berangkat dari : <span id="l2Berangkat1">Mavuko</span><br>
+                                Ke : <span id="l2Tujuan1">-</span><br>
+                                Pada Tanggal : <span id="l2Tgl1">-</span><br>
                                 <div class="text-center mt-3">
-                                    <p class="font-bold">Camat Purwokerto Timur</p>
+                                    <p class="font-bold">Camat Tabundung</p>
                                     <div class="h-12"></div>
-                                    <p class="font-bold underline" id="l2Camat2">NAMA CAMAT, S.Sos</p>
+                                    <p class="font-bold underline" id="l2Camat2">-</p>
                                 </div>
                             </td>
                         </tr>
                         <tr class="border-b border-black">
                             <td class="p-2 border-r border-black">
-                                Tiba di : <span id="l2Tiba2">Bappeda Kabupaten</span><br>
-                                Pada Tanggal : <span id="l2TglTiba2">26 Oktober 2026</span><br>
+                                Tiba di : <span id="l2Tiba2">-</span><br>
+                                Pada Tanggal : <span id="l2TglTiba2">-</span><br>
                                 <p class="mt-2 font-bold text-center">Kepala Instansi / Pejabat Tujuan:</p>
                                 <div class="h-14"></div>
                                 <p class="text-center">( ........................................................... )</p>
                                 <p class="text-center">NIP. ....................................................</p>
                             </td>
                             <td class="p-2">
-                                Berangkat dari : <span id="l2Berangkat2">Bappeda Kabupaten</span><br>
-                                Ke : <span id="l2Kembali2">Kantor Kecamatan</span><br>
-                                Pada Tanggal : <span id="l2TglBerangkat2">26 Oktober 2026</span><br>
+                                Berangkat dari : <span id="l2Berangkat2">-</span><br>
+                                Ke : <span id="l2Kembali2">Mavuko</span><br>
+                                Pada Tanggal : <span id="l2TglBerangkat2">-</span><br>
                                 <p class="mt-2 font-bold text-center">Kepala Instansi / Pejabat Tujuan:</p>
                                 <div class="h-14"></div>
                                 <p class="text-center">( ........................................................... )</p>
@@ -695,13 +672,12 @@
                     </table>
                 </div>
 
-                <!-- DOCUMENT 3: LAPORAN PERJALANAN DINAS -->
+                <!-- DOCUMENT 3: LAPORAN -->
                 <div id="doc-laporan" class="document-paper mb-8 hidden">
-                    <!-- Kop Surat -->
                     <div class="text-center border-b-4 border-double border-black pb-2 mb-6">
-                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="lapKopPemkab">PEMERINTAH KABUPATEN BANYUMAS</h3>
-                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="lapKopKecamatan">KECAMATAN PURWOKERTO TIMUR</h2>
-                        <p class="text-xs italic font-official" id="lapKopAlamat">Jl. Prof. Dr. Suharso No. 102 Telp. (0281) 635123 Kode Pos 53111</p>
+                        <h3 class="font-bold text-base tracking-wider uppercase font-official" id="lapKopPemkab">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                        <h2 class="font-bold text-lg tracking-widest uppercase font-official" id="lapKopKecamatan">KECAMATAN TABUNDUNG</h2>
+                        <p class="text-xs italic font-official" id="lapKopAlamat">Jln. Lahiru - Mavuko, Kecamatan Tabundung</p>
                     </div>
 
                     <div class="text-center mb-6">
@@ -710,55 +686,50 @@
 
                     <div class="space-y-4 font-official text-sm leading-relaxed">
                         <table class="w-full">
-                            <tr><td class="w-36 font-semibold">1. Dasar Pelaksanaan</td><td class="w-4">:</td><td id="lapDasar">Surat Tugas Nomor: 090 / 124 / Kec.01</td></tr>
-                            <tr><td class="font-semibold">2. Pelaksana Tugas</td><td>:</td><td id="lapPelaksana" class="font-bold">H. Ahmad Subarkah, S.STP</td></tr>
-                            <tr><td class="font-semibold">3. Maksud & Tujuan</td><td>:</td><td id="lapMaksud">Menghadiri Rapat Koordinasi Penanggulangan Bencana...</td></tr>
-                            <tr><td class="font-semibold">4. Tempat Tujuan</td><td>:</td><td id="lapTujuan">Bappeda Kabupaten</td></tr>
-                            <tr><td class="font-semibold">5. Waktu Pelaksanaan</td><td>:</td><td id="lapWaktu">26 Oktober 2026 (1 Hari)</td></tr>
+                            <tr><td class="w-36 font-semibold">1. Dasar Pelaksanaan</td><td class="w-4">:</td><td id="lapDasar">-</td></tr>
+                            <tr><td class="font-semibold">2. Pelaksana Tugas</td><td>:</td><td id="lapPelaksana" class="font-bold">-</td></tr>
+                            <tr><td class="font-semibold">3. Maksud & Tujuan</td><td>:</td><td id="lapMaksud">-</td></tr>
+                            <tr><td class="font-semibold">4. Tempat Tujuan</td><td>:</td><td id="lapTujuan">-</td></tr>
+                            <tr><td class="font-semibold">5. Waktu Pelaksanaan</td><td>:</td><td id="lapWaktu">-</td></tr>
                         </table>
 
                         <hr class="border-black my-2">
 
                         <div>
                             <h4 class="font-bold underline mb-1">6. HASIL KEGIATAN / TEMUAN:</h4>
-                            <div id="lapHasilContent" class="whitespace-pre-line pl-4">
-                                - Telah mengikuti koordinasi...
-                            </div>
+                            <div id="lapHasilContent" class="whitespace-pre-line pl-4">-</div>
                         </div>
 
                         <div class="mt-4">
                             <h4 class="font-bold underline mb-1">7. KESIMPULAN & SARAN TINDAK LANJUT:</h4>
-                            <div id="lapSaranContent" class="whitespace-pre-line pl-4">
-                                - Diharapkan segera melengkapi berkas teknis.
-                            </div>
+                            <div id="lapSaranContent" class="whitespace-pre-line pl-4">-</div>
                         </div>
                     </div>
 
                     <div class="mt-12 flex justify-between font-official text-sm">
                         <div></div>
                         <div class="w-64 text-center">
-                            <p>Purwokerto, <span id="lapTglSurat">26 Oktober 2026</span></p>
+                            <p>Mavuko, <span id="lapTglSurat">-</span></p>
                             <p class="font-bold mt-1">Pelaksana Perjalanan Dinas,</p>
                             <div class="h-20"></div>
-                            <p class="font-bold underline" id="lapPelaksanaNama">H. Ahmad Subarkah, S.STP</p>
-                            <p>NIP. <span id="lapPelaksanaNip">19820512 200604 1 002</span></p>
+                            <p class="font-bold underline" id="lapPelaksanaNama">-</p>
+                            <p>NIP. <span id="lapPelaksanaNip">-</span></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- DOCUMENT 4: KWITANSI PEMBAYARAN -->
+                <!-- DOCUMENT 4: KWITANSI -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                     <div class="border-2 border-black p-4">
-                        <!-- Header Kwitansi -->
                         <div class="flex justify-between items-start border-b-2 border-black pb-3 mb-4">
                             <div>
-                                <h4 class="font-bold text-xs uppercase" id="kwiKopPemkab">PEMERINTAH KABUPATEN BANYUMAS</h4>
-                                <h3 class="font-bold text-sm uppercase" id="kwiKopKecamatan">KECAMATAN PURWOKERTO TIMUR</h3>
+                                <h4 class="font-bold text-xs uppercase" id="kwiKopPemkab">PEMERINTAH KABUPATEN SUMBA TIMUR</h4>
+                                <h3 class="font-bold text-sm uppercase" id="kwiKopKecamatan">KECAMATAN TABUNDUNG</h3>
                             </div>
                             <div class="text-right text-xs">
                                 <p class="font-bold text-sm underline">KWITANSI / BUKTI PEMBAYARAN</p>
                                 <p>TA: 2026</p>
-                                <p>M.A.K: <span id="kwiMak">5.1.02.04.01.0001</span></p>
+                                <p>M.A.K: <span id="kwiMak">-</span></p>
                             </div>
                         </div>
 
@@ -766,25 +737,20 @@
                             <tr class="align-top">
                                 <td class="w-36 font-semibold py-1">Sudah Terima Dari</td>
                                 <td class="w-4 py-1">:</td>
-                                <td class="py-1">Bendahara Pengeluaran Kecamatan Purwokerto Timur</td>
+                                <td class="py-1">Bendahara Pengeluaran Kecamatan Tabundung</td>
                             </tr>
                             <tr class="align-top">
                                 <td class="font-semibold py-1">Uang Sejumlah</td>
                                 <td class="py-1">:</td>
-                                <td class="py-1 font-bold bg-slate-100 p-2 border border-black italic" id="kwiTerbilang">
-                                    Enam Ratus Ribu Rupiah
-                                </td>
+                                <td class="py-1 font-bold bg-slate-100 p-2 border border-black italic" id="kwiTerbilang">Nol Rupiah</td>
                             </tr>
                             <tr class="align-top">
                                 <td class="font-semibold py-1">Untuk Pembayaran</td>
                                 <td class="py-1">:</td>
-                                <td class="py-1" id="kwiUntuk">
-                                    Biaya Perjalanan Dinas rangka Menghadiri Rapat Koordinasi Penanggulangan Bencana... berdasarkan SPPD No: 094/088/Kec.01.
-                                </td>
+                                <td class="py-1" id="kwiUntuk">-</td>
                             </tr>
                         </table>
 
-                        <!-- Rincian Tabel Anggaran -->
                         <div class="mt-4">
                             <p class="font-bold text-xs mb-1">Rincian Biaya Perjalanan Dinas:</p>
                             <table class="w-full border-collapse border border-black text-xs font-official">
@@ -799,12 +765,12 @@
                                     <tr class="border-b border-black">
                                         <td class="border-r border-black p-1 text-center">1</td>
                                         <td class="border-r border-black p-1">Uang Harian / Saku</td>
-                                        <td class="p-1 text-right" id="kwiValHarian">Rp 200.000</td>
+                                        <td class="p-1 text-right" id="kwiValHarian">Rp 0</td>
                                     </tr>
                                     <tr class="border-b border-black">
                                         <td class="border-r border-black p-1 text-center">2</td>
                                         <td class="border-r border-black p-1">Biaya Transportasi</td>
-                                        <td class="p-1 text-right" id="kwiValTransport">Rp 400.000</td>
+                                        <td class="p-1 text-right" id="kwiValTransport">Rp 0</td>
                                     </tr>
                                     <tr class="border-b border-black">
                                         <td class="border-r border-black p-1 text-center">3</td>
@@ -818,34 +784,33 @@
                                     </tr>
                                     <tr class="font-bold bg-slate-50">
                                         <td colspan="2" class="border-r border-black p-1.5 text-right">JUMLAH TOTAL</td>
-                                        <td class="p-1.5 text-right text-sm" id="kwiValTotal">Rp 600.000</td>
+                                        <td class="p-1.5 text-right text-sm" id="kwiValTotal">Rp 0</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Signatures Layout -->
                         <div class="mt-8 grid grid-cols-3 gap-2 text-center text-xs font-official">
                             <div>
                                 <p>Mengetahui/Menyetujui,</p>
                                 <p class="font-bold">Camat / PPK</p>
                                 <div class="h-16"></div>
-                                <p class="font-bold underline" id="kwiCamatNama">NAMA CAMAT, S.Sos</p>
-                                <p>NIP. <span id="kwiCamatNip">19681201 199303 1 005</span></p>
+                                <p class="font-bold underline" id="kwiCamatNama">-</p>
+                                <p>NIP. <span id="kwiCamatNip">-</span></p>
                             </div>
                             <div>
                                 <p>Lunas Dibayar,</p>
                                 <p class="font-bold">Bendahara Pengeluaran</p>
                                 <div class="h-16"></div>
-                                <p class="font-bold underline" id="kwiBendaharaNama">NAMA BENDAHARA, S.E.</p>
-                                <p>NIP. <span id="kwiBendaharaNip">19850310 200902 2 003</span></p>
+                                <p class="font-bold underline" id="kwiBendaharaNama">-</p>
+                                <p>NIP. <span id="kwiBendaharaNip">-</span></p>
                             </div>
                             <div>
-                                <p>Purwokerto, <span id="kwiTglSurat">26 Oktober 2026</span></p>
+                                <p>Mavuko, <span id="kwiTglSurat">-</span></p>
                                 <p class="font-bold">Yang Menerima Uang,</p>
                                 <div class="h-16"></div>
-                                <p class="font-bold underline" id="kwiPenerimaNama">H. Ahmad Subarkah, S.STP</p>
-                                <p>NIP. <span id="kwiPenerimaNip">19820512 200604 1 002</span></p>
+                                <p class="font-bold underline" id="kwiPenerimaNama">-</p>
+                                <p>NIP. <span id="kwiPenerimaNip">-</span></p>
                             </div>
                         </div>
                     </div>
@@ -855,134 +820,114 @@
         </div>
     </div>
 
-    <!-- GAS INTEGRATION CODE MODAL -->
-    <div id="gasModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-gov-900 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg flex items-center gap-2">
-                    <i class="fa-brands fa-google-drive text-amber-400"></i> Integrasi Google Apps Script (GAS)
-                </h3>
-                <button onclick="closeGasModal()" class="text-slate-300 hover:text-white text-2xl font-bold">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto space-y-4 text-sm text-slate-700">
-                <p>Aplikasi ini dapat dihubungkan langsung ke <strong>Google Sheets</strong> dan **Google Drive** menggunakan Google Apps Script agar semua data tersimpan di Cloud dan PDF tergenerate otomatis di Drive.</p>
-                
-                <h4 class="font-bold text-gov-800">Langkah Pemasangan Script GAS:</h4>
-                <ol class="list-decimal pl-5 space-y-1 text-xs">
-                    <li>Buka Google Spreadsheet baru di Google Drive Anda.</li>
-                    <li>Buka menu <strong>Ekstensi &gt; Apps Script</strong>.</li>
-                    <li>Hapus kode bawaan, lalu **Salin / Paste** kode di bawah ini ke dalam `Code.gs`.</li>
-                    <li>Klik <strong>Terapkan (Deploy) &gt; Terapkan sebagai Aplikasi Web (Web App)</strong>.</li>
-                    <li>Akses set ke: <em>Anyone (Siapa Saja)</em>. Simpan URL Web App tersebut.</li>
-                </ol>
-
-                <div class="relative">
-                    <button onclick="copyGasCode()" class="absolute right-2 top-2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1 rounded hover:bg-slate-700">
-                        <i class="fa-regular fa-copy mr-1"></i> Salin Script
-                    </button>
-                    <pre id="gasCodeContainer" class="bg-slate-900 text-emerald-400 p-4 rounded-lg text-xs overflow-x-auto h-64 font-mono">
-// =============================================
-// GOOGLE APPS SCRIPT BACKEND (Code.gs)
-// Aplikasi Perjalanan Dinas Kecamatan
-// =============================================
-
-function doGet(e) {
-  return HtmlService.createHtmlOutput("API Perjalanan Dinas Aktif.");
-}
-
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
-    // Auto Create Header jika Sheet Masih Kosong
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Timestamp", "No Surat Tugas", "No SPPD", "Pelaksana", 
-        "NIP Pelaksana", "Tujuan", "Tgl Mulai", "Tgl Selesai", 
-        "Lama Hari", "Total Biaya", "Status"
-      ]);
-    }
-    
-    // Simpan Data
-    sheet.appendRow([
-      new Date(),
-      data.noSuratTugas,
-      data.noSPPD,
-      data.namaPelaksana,
-      data.nipPelaksana,
-      data.tempatTujuan,
-      data.tglMulai,
-      data.tglSelesai,
-      data.lamaHari,
-      data.totalBiaya,
-      "Tersimpan"
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      "result": "success",
-      "message": "Data Perjalanan Dinas Berhasil Disimpan ke Google Sheets!"
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({
-      "result": "error",
-      "message": error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-                    </pre>
-                </div>
-            </div>
-            <div class="bg-slate-100 px-6 py-3 border-t flex justify-end">
-                <button onclick="closeGasModal()" class="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium">Tutup</button>
-            </div>
-        </div>
-    </div>
-
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // State Storage
+        // DATA PEGAWAI KECAMATAN TABUNDUNG
+        const DATA_ASN_TABUNDUNG = [
+            { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
+            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" },
+            { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM, EVALUASI DAN PELAPORAN", nip: "197409121999031004", pangkat: "Penata" },
+            { nama: "NAOMI KAHUATU TAMARU, S.Akun", jabatan: "KASUBAG UMUM KEUANGAN DAN ASET", nip: "197101272000122002", pangkat: "Penata" },
+            { nama: "MELKIANUS RIHIAMAH", jabatan: "KEPALA SEKSI KETENTRAMAN DAN KETERTIBAN", nip: "197602242002121008", pangkat: "Penata" },
+            { nama: "ANDIRIAS KULAAWANG, SP", jabatan: "KEPALA SEKSI PEMBERDAYAAN MASYARAKAT DAN DESA", nip: "197908302010011011", pangkat: "Penata" },
+            { nama: "NAEMA ANA HUTAR, ST", jabatan: "KEPALA SEKSI KESEJAHTERAAN SOSIAL DAN PENDIDIKAN", nip: "198211082009032010", pangkat: "Penata" },
+            { nama: "IMANUEL ANDY META YIWA, A.Md", jabatan: "KEPALA SEKSI EKONOMI", nip: "197804152005011013", pangkat: "Penata Muda" },
+            { nama: "SEFRIANUS UMBU KAMBARU NGANDJA RATU, ST", jabatan: "KEPALA SEKSI PEMERINTAHAN", nip: "197809182009011007", pangkat: "Penata" },
+            { nama: "DANIEL KAMBARU WINDI", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197712312008011084", pangkat: "Penata Muda" },
+            { nama: "YULIANUS P. MILAHAMU", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "198107222007011004", pangkat: "Pengatur Tk. I" },
+            { nama: "THOMAS WAHI TAMU", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "198304082009011012", pangkat: "Pengatur" },
+            { nama: "OMRI NDJURUMANA", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "199105082025211041", pangkat: "Pengatur" },
+            { nama: "APRIS UMBU DJAKAATA", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "199008182025211044", pangkat: "Pengatur" },
+            { nama: "RATU HERDIAN BALE, S.TP", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197710272024211002", pangkat: "Penata Muda" },
+            { nama: "UMBU TEUL NAMUPRAING", jabatan: "OPERATOR LAYANAN OPERASIONAL", nip: "197612082025211028", pangkat: "Pengatur" },
+            { nama: "IGNASIUS ROY KALE", jabatan: "STAF KECAMATAN TABUNDUNG", nip: "197407112007011022", pangkat: "Pengatur" }
+        ];
+
         let travelRecords = [];
         let currentRecord = null;
         let pengikutCount = 0;
 
-        // On Page Load
         window.onload = function() {
-            // Load saved data from localStorage
-            const savedData = localStorage.getItem('sppd_records');
+            populateASNSelects();
+
+            const savedData = localStorage.getItem('sppd_records_tabundung');
             if (savedData) {
-                try {
-                    travelRecords = JSON.parse(savedData);
-                } catch(e) {
-                    travelRecords = [];
-                }
+                try { travelRecords = JSON.parse(savedData); } catch(e) { travelRecords = []; }
             }
             renderHistoryTable();
-            // Set default date to today
             document.getElementById('tglSurat').valueAsDate = new Date();
             document.getElementById('tglMulai').valueAsDate = new Date();
             document.getElementById('tglSelesai').valueAsDate = new Date();
             calculateDuration();
+            
+            // Default setup untuk Camat & Bendahara
+            autofillCamat("197205212006041008"); // Camat Rudolf
+            autofillBendahara("197101272000122002"); // Kasubag Umum/Keuangan Naomi
+        };
+
+        function populateASNSelects() {
+            const selects = document.querySelectorAll('select[onchange^="autofill"]');
+            selects.forEach(select => {
+                DATA_ASN_TABUNDUNG.forEach(asn => {
+                    const opt = document.createElement('option');
+                    opt.value = asn.nip;
+                    opt.innerText = `${asn.nama} - (${asn.jabatan})`;
+                    select.appendChild(opt);
+                });
+            });
         }
 
-        // Tab Navigation Switcher
+        function autofillPelaksana(nip) {
+            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
+            if(asn) {
+                document.getElementById('namaPelaksana').value = asn.nama;
+                document.getElementById('nipPelaksana').value = asn.nip;
+                document.getElementById('jabatanPelaksana').value = asn.jabatan;
+                document.getElementById('pangkatPelaksana').value = asn.pangkat || '-';
+            }
+        }
+
+        function autofillCamat(nip) {
+            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
+            if(asn) {
+                document.getElementById('namaCamat').value = asn.nama;
+                document.getElementById('nipCamat').value = asn.nip;
+                document.getElementById('pangkatCamat').value = asn.pangkat || '-';
+            }
+        }
+
+        function autofillBendahara(nip) {
+            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
+            if(asn) {
+                document.getElementById('namaBendahara').value = asn.nama;
+                document.getElementById('nipBendahara').value = asn.nip;
+            }
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabName).classList.remove('hidden');
         }
 
-        // Add Dynamic Pengikut Row
         function addOfficerRow() {
             pengikutCount++;
             const container = document.getElementById('pengikutContainer');
             const div = document.createElement('div');
             div.id = `pengikut-row-${pengikutCount}`;
             div.className = 'bg-white p-3 rounded-lg border border-slate-200 relative flex flex-col md:flex-row gap-2 items-center';
+            
+            let options = `<option value="">-- Pilih Pengikut ASN --</option>`;
+            DATA_ASN_TABUNDUNG.forEach(asn => {
+                options += `<option value="${asn.nip}">${asn.nama}</option>`;
+            });
+
             div.innerHTML = `
                 <span class="text-xs font-bold text-slate-500 w-20">Pengikut ${pengikutCount}:</span>
+                <select onchange="autofillPengikutRow(${pengikutCount}, this.value)" class="p-1.5 text-xs rounded border border-slate-300 w-full md:w-48">
+                    ${options}
+                </select>
                 <input type="text" placeholder="Nama Lengkap" class="p-1.5 text-xs rounded border border-slate-300 flex-1 w-full pengikut-nama">
-                <input type="text" placeholder="NIP / NRK" class="p-1.5 text-xs rounded border border-slate-300 w-full md:w-36 pengikut-nip">
+                <input type="text" placeholder="NIP" class="p-1.5 text-xs rounded border border-slate-300 w-full md:w-36 pengikut-nip">
                 <input type="text" placeholder="Jabatan" class="p-1.5 text-xs rounded border border-slate-300 w-full md:w-40 pengikut-jabatan">
                 <button type="button" onclick="removeOfficerRow(${pengikutCount})" class="text-rose-600 hover:text-rose-800 p-1 text-sm">
                     <i class="fa-solid fa-trash"></i>
@@ -991,24 +936,36 @@ function doPost(e) {
             container.appendChild(div);
         }
 
+        function autofillPengikutRow(id, nip) {
+            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
+            const row = document.getElementById(`pengikut-row-${id}`);
+            if(asn && row) {
+                row.querySelector('.pengikut-nama').value = asn.nama;
+                row.querySelector('.pengikut-nip').value = asn.nip;
+                row.querySelector('.pengikut-jabatan').value = asn.jabatan;
+            }
+        }
+
         function removeOfficerRow(id) {
             const row = document.getElementById(`pengikut-row-${id}`);
             if (row) row.remove();
         }
 
-        // Calculate Travel Duration (Days)
         function calculateDuration() {
-            const tglMulai = new Date(document.getElementById('tglMulai').value);
-            const tglSelesai = new Date(document.getElementById('tglSelesai').value);
-            
-            if (tglMulai && tglSelesai && !isNaN(tglMulai) && !isNaN(tglSelesai)) {
-                const diffTime = Math.abs(tglSelesai - tglMulai);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                document.getElementById('lamaHari').value = diffDays > 0 ? diffDays : 1;
+            const tglMulaiVal = document.getElementById('tglMulai').value;
+            const tglSelesaiVal = document.getElementById('tglSelesai').value;
+
+            if (tglMulaiVal && tglSelesaiVal) {
+                const tglMulai = new Date(tglMulaiVal);
+                const tglSelesai = new Date(tglSelesaiVal);
+                if (!isNaN(tglMulai) && !isNaN(tglSelesai)) {
+                    const diffTime = tglSelesai - tglMulai;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    document.getElementById('lamaHari').value = diffDays > 0 ? diffDays : 1;
+                }
             }
         }
 
-        // Calculate Budget & Terbilang
         function calculateTotalBudget() {
             const harian = parseFloat(document.getElementById('uangHarian').value) || 0;
             const transport = parseFloat(document.getElementById('biayaTransport').value) || 0;
@@ -1021,17 +978,15 @@ function doPost(e) {
             return total;
         }
 
-        // Form Submit Handler
         function handleFormSubmit(e) {
             e.preventDefault();
             
-            // Collect Pengikut Data
             const pengikutList = [];
             document.querySelectorAll('#pengikutContainer > div').forEach(row => {
                 const nama = row.querySelector('.pengikut-nama').value;
                 const nip = row.querySelector('.pengikut-nip').value;
                 const jabatan = row.querySelector('.pengikut-jabatan').value;
-                if (nama.trim()) {
+                if (nama && nama.trim()) {
                     pengikutList.push({ nama, nip, jabatan });
                 }
             });
@@ -1050,28 +1005,24 @@ function doPost(e) {
                 lamaHari: document.getElementById('lamaHari').value,
                 tglSurat: document.getElementById('tglSurat').value,
                 
-                // Officers
                 namaPelaksana: document.getElementById('namaPelaksana').value,
                 nipPelaksana: document.getElementById('nipPelaksana').value,
                 jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
                 pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
                 pengikut: pengikutList,
 
-                // Signatures
                 namaCamat: document.getElementById('namaCamat').value,
                 nipCamat: document.getElementById('nipCamat').value,
                 pangkatCamat: document.getElementById('pangkatCamat').value,
                 namaBendahara: document.getElementById('namaBendahara').value,
                 nipBendahara: document.getElementById('nipBendahara').value,
 
-                // Budget
                 uangHarian: parseFloat(document.getElementById('uangHarian').value) || 0,
                 biayaTransport: parseFloat(document.getElementById('biayaTransport').value) || 0,
                 biayaPenginapan: parseFloat(document.getElementById('biayaPenginapan').value) || 0,
                 biayaLain: parseFloat(document.getElementById('biayaLain').value) || 0,
                 totalBiaya: calculateTotalBudget(),
 
-                // Reports & Kop
                 laporanHasil: document.getElementById('laporanHasil').value,
                 laporanSaran: document.getElementById('laporanSaran').value,
                 kopPemkab: document.getElementById('kopPemkab').value,
@@ -1079,26 +1030,26 @@ function doPost(e) {
                 kopAlamat: document.getElementById('kopAlamat').value,
             };
 
-            // Save locally
             travelRecords.unshift(record);
-            localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+            localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
             
             renderHistoryTable();
             openPreviewModal(record);
         }
 
-        // Populate Preview Modal Documents
         function openPreviewModal(record) {
             currentRecord = record;
 
-            // Date Formatter Helper
             const formatDate = (str) => {
                 if(!str) return '-';
-                const d = new Date(str);
-                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                const parts = str.split('-');
+                if(parts.length === 3) {
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                }
+                return str;
             };
 
-            // Kop Surat Sync
             ['st', 'sppd', 'lap', 'kwi'].forEach(prefix => {
                 const elPem = document.getElementById(`${prefix}KopPemkab`);
                 const elKec = document.getElementById(`${prefix}KopKecamatan`);
@@ -1108,19 +1059,17 @@ function doPost(e) {
                 if(elAlm) elAlm.innerText = record.kopAlamat;
             });
 
-            // 1. SURAT TUGAS
             document.getElementById('stNoSurat').innerText = record.noSuratTugas;
             document.getElementById('stNama').innerText = record.namaPelaksana;
             document.getElementById('stNip').innerText = record.nipPelaksana;
             document.getElementById('stPangkat').innerText = record.pangkatPelaksana;
             document.getElementById('stJabatan').innerText = record.jabatanPelaksana;
             document.getElementById('stMaksud').innerText = record.maksudTujuan;
-            document.getElementById('stLokasiTgl').innerText = `Purwokerto, ${formatDate(record.tglSurat)}`;
+            document.getElementById('stLokasiTgl').innerText = `Mavuko, ${formatDate(record.tglSurat)}`;
             document.getElementById('stNamaCamat').innerText = record.namaCamat;
             document.getElementById('stPangkatCamat').innerText = record.pangkatCamat;
             document.getElementById('stNipCamat').innerText = record.nipCamat;
 
-            // Pengikut pada Surat Tugas
             const stPengikutSec = document.getElementById('stPengikutSection');
             const stPengikutList = document.getElementById('stPengikutList');
             if (record.pengikut && record.pengikut.length > 0) {
@@ -1136,7 +1085,6 @@ function doPost(e) {
                 stPengikutSec.classList.add('hidden');
             }
 
-            // 2. SPPD LEMBAR 1 & 2
             document.getElementById('sppdNoSurat').innerText = record.noSPPD;
             document.getElementById('sppdPejabat').innerText = record.pangkatCamat ? `Camat (${record.pangkatCamat})` : 'Camat';
             document.getElementById('sppdNamaNip').innerText = `${record.namaPelaksana} / NIP. ${record.nipPelaksana}`;
@@ -1154,14 +1102,12 @@ function doPost(e) {
             document.getElementById('sppdCamatNama').innerText = record.namaCamat;
             document.getElementById('sppdCamatNip').innerText = record.nipCamat;
 
-            // Pengikut SPPD
             if (record.pengikut && record.pengikut.length > 0) {
                 document.getElementById('sppdPengikutTable').innerHTML = record.pengikut.map((p, i) => `${i+1}. ${p.nama} (${p.jabatan})`).join('<br>');
             } else {
                 document.getElementById('sppdPengikutTable').innerText = '- Tidak Ada -';
             }
 
-            // Lembar II SPPD
             document.getElementById('l2Berangkat1').innerText = record.tempatBerangkat;
             document.getElementById('l2Tujuan1').innerText = record.tempatTujuan;
             document.getElementById('l2Tgl1').innerText = formatDate(record.tglMulai);
@@ -1172,7 +1118,6 @@ function doPost(e) {
             document.getElementById('l2Kembali2').innerText = record.tempatBerangkat;
             document.getElementById('l2TglBerangkat2').innerText = formatDate(record.tglSelesai);
 
-            // 3. LAPORAN PERJALANAN DINAS
             document.getElementById('lapDasar').innerText = `Surat Tugas Nomor: ${record.noSuratTugas}`;
             document.getElementById('lapPelaksana').innerText = `${record.namaPelaksana} (NIP. ${record.nipPelaksana})`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan;
@@ -1184,7 +1129,6 @@ function doPost(e) {
             document.getElementById('lapPelaksanaNama').innerText = record.namaPelaksana;
             document.getElementById('lapPelaksanaNip').innerText = record.nipPelaksana;
 
-            // 4. KWITANSI PEMBAYARAN
             document.getElementById('kwiMak').innerText = record.mataAnggaran || '-';
             document.getElementById('kwiTerbilang').innerText = numberToWords(record.totalBiaya) + ' Rupiah';
             document.getElementById('kwiUntuk').innerText = `Biaya Perjalanan Dinas Rangka ${record.maksudTujuan} Sesuai SPPD Nomor: ${record.noSPPD}`;
@@ -1202,19 +1146,16 @@ function doPost(e) {
             document.getElementById('kwiPenerimaNama').innerText = record.namaPelaksana;
             document.getElementById('kwiPenerimaNip').innerText = record.nipPelaksana;
 
-            // Show Modal and default view 'st'
             document.getElementById('previewModal').classList.remove('hidden');
             switchDocView('st');
         }
 
-        // Switch Document inside Preview Modal
         function switchDocView(docType) {
             ['st', 'sppd', 'laporan', 'kwitansi'].forEach(d => {
                 document.getElementById(`doc-${d}`).classList.add('hidden');
             });
             document.getElementById(`doc-${docType}`).classList.remove('hidden');
 
-            // Tab styling
             document.querySelectorAll('.doc-tab-btn').forEach(btn => {
                 btn.className = "doc-tab-btn text-xs px-3 py-1.5 rounded font-medium text-slate-300 hover:text-white";
             });
@@ -1228,7 +1169,6 @@ function doPost(e) {
             document.getElementById('previewModal').classList.add('hidden');
         }
 
-        // Render History Table
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
             if (travelRecords.length === 0) {
@@ -1245,12 +1185,12 @@ function doPost(e) {
                     </td>
                     <td class="p-3">${item.tempatTujuan}</td>
                     <td class="p-3 text-xs">${item.tglMulai} s/d ${item.tglSelesai}</td>
-                    <td class="p-3 font-semibold text-emerald-700">Rp ${item.totalBiaya.toLocaleString('id-ID')}</td>
+                    <td class="p-3 font-semibold text-emerald-700">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
                     <td class="p-3 text-center">
-                        <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1" title="Cetak Dokumen">
+                        <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1">
                             <i class="fa-solid fa-print mr-1"></i> Cetak
                         </button>
-                        <button onclick="deleteRecord(${item.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs" title="Hapus">
+                        <button onclick="deleteRecord(${item.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -1273,7 +1213,7 @@ function doPost(e) {
                     <td class="p-3">${item.namaPelaksana}</td>
                     <td class="p-3">${item.tempatTujuan}</td>
                     <td class="p-3 text-xs">${item.tglMulai}</td>
-                    <td class="p-3 font-semibold text-emerald-700">Rp ${item.totalBiaya.toLocaleString('id-ID')}</td>
+                    <td class="p-3 font-semibold text-emerald-700">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
                     <td class="p-3 text-center">
                         <button onclick="openPreviewModal(travelRecords.find(x => x.id === ${item.id}))" class="bg-gov-700 text-white px-2 py-1 rounded text-xs">Cetak</button>
                     </td>
@@ -1282,46 +1222,43 @@ function doPost(e) {
         }
 
         function deleteRecord(id) {
-            if(confirm("Apakah Anda yakin ingin menghapus data perjalanan dinas ini?")) {
+            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 travelRecords = travelRecords.filter(r => r.id !== id);
-                localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+                localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
                 renderHistoryTable();
             }
         }
 
-        // Fill Sample Data Demo Function
-        function loadSampleData() {
-            document.getElementById('noSuratTugas').value = '090 / 142 / Kec.01';
-            document.getElementById('noSPPD').value = '094 / 098 / Kec.01';
-            document.getElementById('maksudTujuan').value = 'Koordinasi dan Evaluasi Pelaksanaan Program Penanggulangan Kemiskinan Ekstrem Tahun 2026';
-            document.getElementById('tempatBerangkat').value = 'Kantor Kecamatan Purwokerto Timur';
-            document.getElementById('tempatTujuan').value = 'Bappeda Kab. Banyumas';
-            document.getElementById('alatAngkutan').value = 'Kendaraan Dinas (Roda 4)';
-            document.getElementById('mataAnggaran').value = '5.1.02.04.01.0001';
-            
-            document.getElementById('namaPelaksana').value = 'H. Ahmad Subarkah, S.STP';
-            document.getElementById('nipPelaksana').value = '19820512 200604 1 002';
-            document.getElementById('jabatanPelaksana').value = 'Kasi Pemberdayaan Masyarakat';
-            document.getElementById('pangkatPelaksana').value = 'Penata Tk. I / III/d';
+        function exportDataJSON() {
+            if (travelRecords.length === 0) {
+                alert("Belum ada riwayat data SPPD!");
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(travelRecords, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `backup_sppd_tabundung_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
 
-            document.getElementById('namaCamat').value = 'Drs. H. Bambang Wijaya, M.Si';
-            document.getElementById('nipCamat').value = '19681201 199303 1 005';
-            document.getElementById('pangkatCamat').value = 'Pembina Utama Muda, IV/c';
-
-            document.getElementById('namaBendahara').value = 'Siti Nurhaliza, S.E.';
-            document.getElementById('nipBendahara').value = '19850310 200902 2 003';
-
-            document.getElementById('uangHarian').value = 250000;
-            document.getElementById('biayaTransport').value = 350000;
-            document.getElementById('biayaPenginapan').value = 0;
-            document.getElementById('biayaLain').value = 0;
-
-            document.getElementById('laporanHasil').value = `1. Mengikuti Rapat Koordinasi Bersama Tim Bappeda Kabupaten Banyumas.
-2. Menyampaikan data verifikasi 120 RTS (Rumah Tangga Sasaran) di wilayah Kecamatan Purwokerto Timur.
-3. Disepakati jadwal pendampingan lapangan minggu depan.`;
-            document.getElementById('laporanSaran').value = `Diharapkan para Lurah segera mempersiapkan kelengkapan administrasi kelurahan pendukung.`;
-
-            calculateTotalBudget();
+        function importDataJSON(e) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`Masukkan ${importedData.length} data riwayat SPPD?`)) {
+                            travelRecords = [...importedData, ...travelRecords];
+                            localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
+                            renderHistoryTable();
+                            alert("Data dipulihkan!");
+                        }
+                    }
+                } catch (err) { alert("Gagal membaca file JSON."); }
+            };
+            if (e.target.files[0]) fileReader.readAsText(e.target.files[0]);
         }
 
         function resetForm() {
@@ -1331,12 +1268,11 @@ function doPost(e) {
             calculateTotalBudget();
         }
 
-        // Helper: Convert Number to Words (Terbilang Bahasa Indonesia)
         function numberToWords(amount) {
             const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            let num = Math.floor(amount);
+            let num = Math.floor(Math.abs(amount));
             if (num === 0) return "Nol";
-            
+
             function convert(n) {
                 if (n < 12) return words[n];
                 if (n < 20) return convert(n - 10) + " Belas";
@@ -1349,28 +1285,6 @@ function doPost(e) {
                 return n.toString();
             }
             return convert(num).replace(/\s+/g, ' ').trim();
-        }
-
-        // GAS Modal Controls
-        function openGasModal() {
-            document.getElementById('gasModal').classList.remove('hidden');
-        }
-        function closeGasModal() {
-            document.getElementById('gasModal').classList.add('hidden');
-        }
-        function copyGasCode() {
-            const codeText = document.getElementById('gasCodeContainer').innerText;
-            navigator.clipboard.writeText(codeText).then(() => {
-                alert('Kode Apps Script berhasil disalin!');
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = codeText;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert('Kode Apps Script berhasil disalin!');
-            });
         }
     </script>
 </body>
