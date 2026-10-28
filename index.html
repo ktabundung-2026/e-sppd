@@ -830,7 +830,7 @@
                     </div>
                 </div>
 
-                <!-- 5. DOKUMEN KWITANSI (KOLOM RINCIAN KODE REKENING DIGABUNG 1 KOLOM & RATA KIRI) -->
+                <!-- 5. DOKUMEN KWITANSI (KOLOM VOL-SAT-HARGA SATUAN DIPERKECIL & HEADER WRAP) -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -889,7 +889,7 @@
 
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
-                    <!-- TABEL KWITANSI: KODE REKENING 1 KOLOM (RATA KIRI) & KOLOM URAIAN LEBAR -->
+                    <!-- TABEL KWITANSI: KOLOM PERHITUNGAN COMPACT & HEADER WRAPPED -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -900,9 +900,9 @@
                                 <th rowspan="2" class="p-1 align-middle w-20">Tanda Tangan</th>
                             </tr>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th class="border-r border-black p-0.5 w-5">Vol</th>
-                                <th class="border-r border-black p-0.5 w-6">Sat</th>
-                                <th class="border-r border-black p-0.5 w-16 leading-tight">Harga Satuan</th>
+                                <th class="border-r border-black p-0.5 w-4">Vol</th>
+                                <th class="border-r border-black p-0.5 w-5">Sat</th>
+                                <th class="border-r border-black p-0.5 w-12 break-words leading-none">Harga Satuan</th>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
                                 <td class="border-r border-black p-0.5">1</td>
@@ -1355,7 +1355,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // Dynamic Rows Personil Kwitansi (1 Kolom Kode Rekening Rata Kiri)
+            // Dynamic Rows Personil Kwitansi
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
