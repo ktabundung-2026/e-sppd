@@ -704,22 +704,27 @@
                                 </td>
                             </tr>
                             <tr class="border-b border-black row-signature-5cm">
-                                <td class="p-2 border-r border-black align-top">
+                                <td class="p-2 border-r border-black align-top relative">
                                     <table class="w-full">
                                         <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                     </table>
+                                    <!-- Nama Kepala Desa di Kolom 1 (Diturunkan mendekati garis batas) -->
+                                    <div class="mt-16 text-center">
+                                        <div class="h-12"></div>
+                                        <p class="font-bold underline uppercase data-fillable" id="bktKadesNama1">-</p>
+                                    </div>
                                 </td>
-                                <td class="p-2 align-top">
+                                <td class="p-2 align-top relative">
                                     <table class="w-full">
                                         <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
                                         <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                     </table>
-                                    <!-- Nama Kepala Desa dijajarkan di Kolom 2 (Kanan) tanpa tulisan Kepala Desa Desa ... -->
-                                    <div class="mt-8 text-center">
+                                    <!-- Nama Kepala Desa di Kolom 2 (Diturunkan mendekati garis batas) -->
+                                    <div class="mt-16 text-center">
                                         <div class="h-12"></div>
-                                        <p class="font-bold underline uppercase" id="bktKadesNama2">-</p>
+                                        <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1317,8 +1322,10 @@
             document.getElementById('bktCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('bktCamatNip').innerText = record.nipCamat;
 
-            // Update Kepala Desa di SPPD Belakang (Hanya Nama di Kolom 2)
-            document.getElementById('bktKadesNama2').innerText = record.namaKades || '....................';
+            // Update Nama Kepala Desa pada Kolom 1 dan Kolom 2 SPPD Belakang
+            const kadesName = record.namaKades || '....................';
+            document.getElementById('bktKadesNama1').innerText = kadesName;
+            document.getElementById('bktKadesNama2').innerText = kadesName;
 
             // Laporan
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan;
