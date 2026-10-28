@@ -838,7 +838,7 @@
                     </div>
                 </div>
 
-                <!-- 5. DOKUMEN KWITANSI (KOLOM KODE REKENING LEBIH RAPAT, URAIAN LEBIH BESAR) -->
+                <!-- 5. DOKUMEN KWITANSI (5 KOLOM REKENING ULTRA RAPAT / LEBAR KOLOM URAIAN MAKSIMAL) -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -897,7 +897,7 @@
 
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
-                    <!-- TABEL KWITANSI DENGAN KOLOM REKENING SUPER PERKETAT & KOLOM URAIAN MAKSIMAL -->
+                    <!-- TABEL KWITANSI: LEBAR 5 KOLOM REKENING ULTRA PERKETAT (0.8rem - 1.1rem) DAN URAIAN LEBIH BESAR -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -925,44 +925,44 @@
                         <tbody>
                             <!-- Baris 1: Level Kelompok (5.1 | 02) -->
                             <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0.5 w-[1.4rem]" id="kwiSeg1_a">5.1</td>
-                                <td class="border-r border-black p-0.5 w-[1.2rem]" id="kwiSeg2_a">02</td>
-                                <td class="border-r border-black p-0.5 w-[1.2rem]"></td>
-                                <td class="border-r border-black p-0.5 w-[1.2rem]"></td>
-                                <td class="border-r border-black p-0.5 w-[1.6rem]"></td>
+                                <td class="border-r border-black p-0 w-[0.9rem]" id="kwiSeg1_a">5.1</td>
+                                <td class="border-r border-black p-0 w-[0.8rem]" id="kwiSeg2_a">02</td>
+                                <td class="border-r border-black p-0 w-[0.8rem]"></td>
+                                <td class="border-r border-black p-0 w-[0.8rem]"></td>
+                                <td class="border-r border-black p-0 w-[1.1rem]"></td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
                             <!-- Baris 2: Level Jenis (5.1 | 02 | 04) -->
                             <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0.5" id="kwiSeg1_b">5.1</td>
-                                <td class="border-r border-black p-0.5" id="kwiSeg2_b">02</td>
-                                <td class="border-r border-black p-0.5" id="kwiSeg3_b">04</td>
-                                <td class="border-r border-black p-0.5"></td>
-                                <td class="border-r border-black p-0.5"></td>
+                                <td class="border-r border-black p-0" id="kwiSeg1_b">5.1</td>
+                                <td class="border-r border-black p-0" id="kwiSeg2_b">02</td>
+                                <td class="border-r border-black p-0" id="kwiSeg3_b">04</td>
+                                <td class="border-r border-black p-0"></td>
+                                <td class="border-r border-black p-0"></td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
                             <!-- Baris 3: Level Objek (5.1 | 02 | 04 | 01) -->
                             <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0.5" id="kwiSeg1_c">5.1</td>
-                                <td class="border-r border-black p-0.5" id="kwiSeg2_c">02</td>
-                                <td class="border-r border-black p-0.5" id="kwiSeg3_c">04</td>
-                                <td class="border-r border-black p-0.5" id="kwiSeg4_c">01</td>
-                                <td class="border-r border-black p-0.5"></td>
+                                <td class="border-r border-black p-0" id="kwiSeg1_c">5.1</td>
+                                <td class="border-r border-black p-0" id="kwiSeg2_c">02</td>
+                                <td class="border-r border-black p-0" id="kwiSeg3_c">04</td>
+                                <td class="border-r border-black p-0" id="kwiSeg4_c">01</td>
+                                <td class="border-r border-black p-0"></td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
                             <!-- Baris 4 & 5: Level Rincian Objek -->
                             <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0.5 align-middle" rowspan="2" id="kwiSeg1_d">5.1</td>
-                                <td class="border-r border-black p-0.5 align-middle" rowspan="2" id="kwiSeg2_d">02</td>
-                                <td class="border-r border-black p-0.5 align-middle" rowspan="2" id="kwiSeg3_d">04</td>
-                                <td class="border-r border-black p-0.5 align-middle" rowspan="2" id="kwiSeg4_d">01</td>
-                                <td class="border-r border-black p-0.5 align-middle" rowspan="2" id="kwiSeg5_d">00001</td>
+                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg1_d">5.1</td>
+                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg2_d">02</td>
+                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg3_d">04</td>
+                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg4_d">01</td>
+                                <td class="border-r border-black p-0 align-middle" rowspan="2" id="kwiSeg5_d">00001</td>
                                 <td class="border-r border-black p-1 text-left font-bold" colspan="5">Belanja Perjalanan Dinas Dalam Daerah</td>
                                 <td class="p-1" rowspan="2"></td>
                             </tr>
@@ -1403,11 +1403,11 @@
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-0.5"></td>
-                    <td class="border-r border-black p-0.5"></td>
-                    <td class="border-r border-black p-0.5"></td>
-                    <td class="border-r border-black p-0.5"></td>
-                    <td class="border-r border-black p-0.5"></td>
+                    <td class="border-r border-black p-0"></td>
+                    <td class="border-r border-black p-0"></td>
+                    <td class="border-r border-black p-0"></td>
+                    <td class="border-r border-black p-0"></td>
+                    <td class="border-r border-black p-0"></td>
                     <td class="border-r border-black p-1 whitespace-nowrap">1. ${record.namaPelaksana}</td>
                     <td class="border-r border-black p-1 text-center">1</td>
                     <td class="border-r border-black p-1 text-center">OH</td>
@@ -1421,11 +1421,11 @@
                     const no = idx + 2;
                     rowsHTML += `
                         <tr class="border-b border-black align-top">
-                            <td class="border-r border-black p-0.5"></td>
-                            <td class="border-r border-black p-0.5"></td>
-                            <td class="border-r border-black p-0.5"></td>
-                            <td class="border-r border-black p-0.5"></td>
-                            <td class="border-r border-black p-0.5"></td>
+                            <td class="border-r border-black p-0"></td>
+                            <td class="border-r border-black p-0"></td>
+                            <td class="border-r border-black p-0"></td>
+                            <td class="border-r border-black p-0"></td>
+                            <td class="border-r border-black p-0"></td>
                             <td class="border-r border-black p-1 whitespace-nowrap">${no}. ${p.nama}</td>
                             <td class="border-r border-black p-1 text-center">1</td>
                             <td class="border-r border-black p-1 text-center">OH</td>
