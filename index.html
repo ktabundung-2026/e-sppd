@@ -60,9 +60,9 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             width: 217mm;
             height: 330mm;
-            padding-top: 10mm;
-            padding-left: 17mm;
-            padding-right: 10mm;
+            padding-top: 10mm;     /* Margin atas 1 cm */
+            padding-left: 17mm;    /* Margin kiri 1.7 cm */
+            padding-right: 10mm;   /* Sisa margin kanan agar total tabel 19 cm pas */
             padding-bottom: 10mm;
             margin: auto; 
             color: #000; 
@@ -85,8 +85,20 @@
             table-layout: fixed;
         }
 
+        /* [POIN 2] SPPD Depan mengikuti lebar dan tinggi presisi seperti SPPD Belakang */
+        .sppd-front-table {
+            width: 190mm !important;
+            height: 275mm !important;
+            table-layout: fixed;
+        }
+
         .row-signature-5cm {
             height: 50mm !important;
+        }
+
+        /* [POIN 4] Turunkan Judul Dokumen sebesar 1.5 cm */
+        .title-spacing {
+            margin-top: 15mm !important;
         }
 
         @media (max-width: 640px) {
@@ -96,7 +108,7 @@
                 padding: 10px;
                 font-size: 8.5pt;
             }
-            .sppd-table-fixed, .sppd-back-table {
+            .sppd-table-fixed, .sppd-back-table, .sppd-front-table {
                 width: 100% !important;
                 height: auto !important;
             }
@@ -281,13 +293,13 @@
                         <div id="pengikutContainer" class="space-y-3"></div>
                     </div>
 
-                    <!-- 3. PENANDATANGAN & BENDAHARA (ISIAN MANUAL DENGAN AUTO-FILL KETIK) -->
+                    <!-- 3. PENANDATANGAN & BENDAHARA -->
                     <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
                         <h3 class="text-base font-bold text-gov-800 flex items-center gap-2 border-b border-slate-200 pb-2">
                             <i class="fa-solid fa-signature"></i> 3. Penandatangan (Camat) & Bendahara Pengeluaran
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Camat (Nama, NIP, Pangkat) -->
+                            <!-- Camat -->
                             <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
                                 <h4 class="text-xs font-bold text-slate-700 border-b border-slate-100 pb-1">Camat Tabundung</h4>
                                 <div class="space-y-2 pt-1">
@@ -306,7 +318,7 @@
                                 </div>
                             </div>
 
-                            <!-- Bendahara Pengeluaran (Nama, NIP) -->
+                            <!-- Bendahara Pengeluaran -->
                             <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
                                 <h4 class="text-xs font-bold text-slate-700 border-b border-slate-100 pb-1">Bendahara Pengeluaran</h4>
                                 <div class="space-y-2 pt-1">
@@ -323,16 +335,17 @@
                         </div>
                     </div>
 
-                    <!-- 4. RINCIAN BIAYA PER ORANG -->
+                    <!-- 4. RINCIAN BIAYA & KODE REKENING -->
                     <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
                         <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                             <h3 class="text-base font-bold text-gov-800 flex items-center gap-2">
-                                <i class="fa-solid fa-calculator"></i> 4. Biaya / Kwitansi per Personil
+                                <i class="fa-solid fa-calculator"></i> 4. Biaya & Kode Rekening APBD
                             </h3>
                             <button type="button" onclick="calculateTotalBudget()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded transition-colors">
                                 Hitung Total
                             </button>
                         </div>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Satuan Biaya per Orang / OH (Rp)</label>
@@ -345,6 +358,33 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Terbilang (Otomatis)</label>
                                 <input type="text" id="terbilang" readonly class="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 bg-slate-100 italic text-slate-600">
+                            </div>
+                        </div>
+
+                        <!-- [POIN 1] Rumpun 5 Kode Rekening di Bagian Bawah Section 4 -->
+                        <div class="bg-white p-3.5 rounded-lg border border-slate-200 pt-3">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">Input Rumpun Kode Rekening (5 Bagian):</label>
+                            <div class="grid grid-cols-5 gap-2">
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 mb-1 font-semibold">Akun</span>
+                                    <input type="text" id="rekSeg1" value="5.1" placeholder="5.1" class="w-full text-center px-2 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded focus:ring-2 focus:ring-gov-600">
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 mb-1 font-semibold">Kelompok</span>
+                                    <input type="text" id="rekSeg2" value="02" placeholder="02" class="w-full text-center px-2 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded focus:ring-2 focus:ring-gov-600">
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 mb-1 font-semibold">Jenis</span>
+                                    <input type="text" id="rekSeg3" value="04" placeholder="04" class="w-full text-center px-2 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded focus:ring-2 focus:ring-gov-600">
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 mb-1 font-semibold">Objek</span>
+                                    <input type="text" id="rekSeg4" value="01" placeholder="01" class="w-full text-center px-2 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded focus:ring-2 focus:ring-gov-600">
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 mb-1 font-semibold">Rincian Objek</span>
+                                    <input type="text" id="rekSeg5" value="00001" placeholder="00001" class="w-full text-center px-2 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded focus:ring-2 focus:ring-gov-600">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -462,16 +502,18 @@
                 
                 <!-- 1. DOKUMEN SURAT PERINTAH TUGAS (ST.pdf) -->
                 <div id="doc-st" class="document-paper mb-8 hidden">
+                    <!-- [POIN 3] Kop Dibuat Lebih Besar & Menyesuaikan Lebar Kertas -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-4">
+                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
-                            <h3 class="font-bold text-base sm:text-lg uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                            <h2 class="font-bold text-lg sm:text-2xl uppercase font-official">KECAMATAN TABUNDUNG</h2>
-                            <h3 class="font-bold text-sm sm:text-base uppercase font-official tracking-widest">MALAHAR</h3>
+                            <h3 class="font-bold text-lg sm:text-xl uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                            <h2 class="font-bold text-xl sm:text-3xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                            <h3 class="font-bold text-base sm:text-lg uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
                         </div>
                     </div>
 
-                    <div class="text-center mb-6">
+                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
+                    <div class="text-center title-spacing mb-6">
                         <h3 class="font-bold text-base sm:text-lg underline uppercase tracking-widest">SURAT PERINTAH TUGAS</h3>
                         <p class="text-sm">NO. <span id="stNoSurat">003/SPT/TBD/VII/2026</span></p>
                     </div>
@@ -496,15 +538,12 @@
                         </tr>
                     </table>
 
-                    <div class="mt-12 flex justify-between font-official text-sm sppd-table-fixed">
-                        <div class="w-56">
-                            <table class="w-full">
-                                <tr><td class="w-24">Dikeluarkan di</td><td>: Malahar</td></tr>
-                                <tr><td>Pada Tanggal</td><td>: <span id="stTglSurat">-</span></td></tr>
-                            </table>
-                        </div>
+                    <!-- [POIN 8] Keterangan Dikeluarkan & Pada Tanggal Diletakkan di Atas Camat (Jarak 1 Spasi) -->
+                    <div class="mt-12 flex justify-end font-official text-sm sppd-table-fixed">
                         <div class="w-64 text-center">
-                            <p class="font-bold">Camat Tabundung,</p>
+                            <p class="text-left">Dikeluarkan di : Malahar</p>
+                            <p class="text-left">Pada Tanggal : <span id="stTglSurat">-</span></p>
+                            <p class="font-bold mt-2">Camat Tabundung,</p>
                             <div class="h-20"></div>
                             <p class="font-bold underline" id="stNamaCamat">-</p>
                             <p id="stPangkatCamat">-</p>
@@ -513,14 +552,15 @@
                     </div>
                 </div>
 
-                <!-- 2. DOKUMEN SPPD HALAMAN DEPAN (SPPD-Halaman Depan.pdf)[cite: 4] -->
+                <!-- 2. DOKUMEN SPPD HALAMAN DEPAN -->
                 <div id="doc-sppd-depan" class="document-paper mb-8 hidden">
+                    <!-- [POIN 3] Kop Dibuat Lebih Besar -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-4">
+                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
-                            <h3 class="font-bold text-base uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                            <h2 class="font-bold text-lg uppercase font-official">KECAMATAN TABUNDUNG</h2>
-                            <h3 class="font-bold text-sm uppercase font-official tracking-widest">MALAHAR</h3>
+                            <h3 class="font-bold text-lg uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                            <h2 class="font-bold text-2xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                            <h3 class="font-bold text-base uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
                         </div>
                     </div>
 
@@ -534,16 +574,18 @@
                         </div>
                     </div>
 
-                    <div class="text-center font-bold text-sm underline uppercase mb-2">
+                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
+                    <div class="text-center title-spacing font-bold text-sm underline uppercase mb-4">
                         SURAT PERINTAH PERJALANAN DINAS<br>(SPPD)
                     </div>
 
-                    <table class="sppd-table-fixed border-collapse border border-black font-official text-xs">
+                    <!-- [POIN 2] Tabel Presisi Seperti SPPD Belakang -->
+                    <table class="sppd-front-table border-collapse border border-black font-official text-xs">
                         <tbody>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-1.5 w-6 text-center">1.</td>
                                 <td class="border-r border-black p-1.5 w-1/2">Pejabat yang memberi perintah</td>
-                                <td class="p-1.5" id="sppdPejabat">☐ Camat</td>
+                                <td class="p-1.5" id="sppdPejabat">Camat Tabundung</td>
                             </tr>
                             <tr class="border-b border-black">
                                 <td class="border-r border-black p-1.5 text-center">2.</td>
@@ -580,7 +622,7 @@
                                 </td>
                                 <td class="p-1.5">
                                     : <span id="sppdBerangkat">Malahar</span><br>
-                                    : <span id="sppdTujuan">☐ Desa Billa</span>
+                                    : <span id="sppdTujuan">Desa Billa</span>
                                 </td>
                             </tr>
                             <tr class="border-b border-black">
@@ -632,12 +674,12 @@
                         </tbody>
                     </table>
 
-                    <div class="mt-6 flex justify-between font-official text-xs sppd-table-fixed">
+                    <div class="mt-4 flex justify-between font-official text-xs sppd-table-fixed">
                         <div></div>
                         <div class="w-64 text-center">
                             <p>Dikeluarkan di : Malahar</p>
                             <p>Pada Tanggal : <span id="sppdTglSurat">-</span></p>
-                            <p class="font-bold mt-2">Camat Tabundung,</p>
+                            <p class="font-bold mt-1">Camat Tabundung,</p>
                             <div class="h-16"></div>
                             <p class="font-bold underline" id="sppdCamatNama">-</p>
                             <p id="sppdCamatPangkat">-</p>
@@ -646,11 +688,11 @@
                     </div>
                 </div>
 
-                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG (SPPD-Halaman Belakang.pdf)[cite: 3] -->
+                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG -->
                 <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                     <table class="sppd-back-table border-collapse border border-black font-official text-xs">
                         <tbody>
-                            <!-- Baris 1: Keterangan SPPD Nomor dan Kedudukan Utama -->
+                            <!-- Baris 1 -->
                             <tr class="border-b border-black">
                                 <td class="p-2 w-1/2 border-r border-black align-top"></td>
                                 <td class="p-2 w-1/2 align-top">
@@ -664,7 +706,7 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 2 (Point I - Lebar/Tinggi Baris 5 cm) -->
+                            <!-- Baris 2 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -680,7 +722,7 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 3 (Point II - Lebar/Tinggi Baris 5 cm) -->
+                            <!-- Baris 3 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -696,7 +738,7 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 4 (Point III - Lebar/Tinggi Baris 5 cm) -->
+                            <!-- Baris 4 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -712,7 +754,7 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 5 (Pengesahan Kembali - Point IV) -->
+                            <!-- Baris 5 -->
                             <tr class="border-b border-black">
                                 <td class="p-2 border-r border-black align-top">
                                     <p class="font-bold">Catatan Lain-lain :</p>
@@ -732,7 +774,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <!-- Baris 6 (Box Perhatian Baku) -->
+                            <!-- Baris 6 -->
                             <tr>
                                 <td colspan="2" class="p-2 font-official text-[9pt]">
                                     <p class="font-bold uppercase underline">PERHATIAN:</p>
@@ -743,61 +785,72 @@
                     </table>
                 </div>
 
-                <!-- 4. DOKUMEN LAPORAN PERJALANAN DINAS (SPPD-Laporan.pdf)[cite: 6] -->
-                <div id="doc-laporan" class="document-paper mb-8 hidden">
-                    <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-4">
-                        <div class="text-center flex-1">
-                            <h3 class="font-bold text-base sm:text-lg uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                            <h2 class="font-bold text-lg sm:text-xl uppercase font-official">KECAMATAN TABUNDUNG</h2>
-                            <h3 class="font-bold text-sm uppercase font-official tracking-widest">MALAHAR</h3>
+                <!-- 4. DOKUMEN LAPORAN PERJALANAN DINAS -->
+                <div id="doc-laporan" class="document-paper mb-8 hidden flex flex-col justify-between">
+                    <div>
+                        <!-- [POIN 3] Kop Dibuat Lebih Besar -->
+                        <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
+                            <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
+                            <div class="text-center flex-1">
+                                <h3 class="font-bold text-lg sm:text-xl uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                                <h2 class="font-bold text-xl sm:text-3xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                                <h3 class="font-bold text-base sm:text-lg uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
+                            </div>
+                        </div>
+
+                        <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
+                        <div class="text-center title-spacing mb-6">
+                            <h3 class="font-bold text-base underline uppercase tracking-wider">LAPORAN PERJALANAN DINAS</h3>
+                        </div>
+
+                        <!-- [POIN 5 & 7] Spasi Berjarak Per Poin & Indentasi Tab Poin 3 -->
+                        <div id="lapContentContainer" class="space-y-4 font-official text-sm leading-relaxed sppd-table-fixed">
+                            <table class="w-full border-separate border-spacing-y-3">
+                                <tr class="align-top"><td class="w-48 font-semibold">1. Dasar</td><td class="w-4">:</td><td id="lapDasar">Atas Perintah Camat</td></tr>
+                                <tr class="align-top"><td class="font-semibold">2. Tujuan</td><td>:</td><td id="lapTujuan">-</td></tr>
+                                <tr class="align-top">
+                                    <td class="font-semibold">3. Lama Perjalanan</td><td>:</td>
+                                    <td>
+                                        <span id="lapLama">1 (Satu) Hari</span>
+                                        <!-- [POIN 7] Keterangan Dari & Sampai Tanggal Masuk 1 Tab -->
+                                        <div class="pl-6 pt-1">
+                                            <p>Dari Tanggal : <span id="lapTglMulai">-</span></p>
+                                            <p>Sampai Tanggal : <span id="lapTglSelesai">-</span></p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="align-top"><td class="font-semibold">4. Maksud Perjalanan Dinas</td><td>:</td><td id="lapMaksud">-</td></tr>
+                                <tr class="align-top"><td class="font-semibold">5. Hasil yang dicapai</td><td>:</td><td id="lapHasil" class="whitespace-pre-line">-</td></tr>
+                                <tr class="align-top"><td class="font-semibold">6. Kesimpulan dan Saran</td><td>:</td><td id="lapSaran" class="whitespace-pre-line">-</td></tr>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="text-center mb-4">
-                        <h3 class="font-bold text-base underline uppercase tracking-wider">LAPORAN PERJALANAN DINAS</h3>
-                    </div>
-
-                    <div class="space-y-3 font-official text-sm leading-relaxed sppd-table-fixed">
-                        <table class="w-full">
-                            <tr class="align-top"><td class="w-48 font-semibold">1. Dasar</td><td class="w-4">:</td><td id="lapDasar">Atas Perintah Camat</td></tr>
-                            <tr class="align-top"><td class="font-semibold">2. Tujuan</td><td>:</td><td id="lapTujuan">-</td></tr>
-                            <tr class="align-top">
-                                <td class="font-semibold">3. Lama Perjalanan</td><td>:</td>
-                                <td>
-                                    <span id="lapLama">1 (Satu) Hari</span><br>
-                                    Dari Tanggal : <span id="lapTglMulai">-</span><br>
-                                    Sampai Tanggal : <span id="lapTglSelesai">-</span>
-                                </td>
-                            </tr>
-                            <tr class="align-top"><td class="font-semibold">4. Maksud Perjalanan Dinas</td><td>:</td><td id="lapMaksud">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">5. Hasil yang dicapai</td><td>:</td><td id="lapHasil" class="whitespace-pre-line">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">6. Kesimpulan dan Saran</td><td>:</td><td id="lapSaran" class="whitespace-pre-line">-</td></tr>
-                        </table>
-                    </div>
-
-                    <div class="mt-10 font-official text-sm sppd-table-fixed">
+                    <!-- [POIN 5 & 6] Keterangan Yang Melakukan Perjalanan Berjarak & Responsif Terhadap Jumlah Personil -->
+                    <div id="lapSignatureSection" class="mt-8 font-official text-sm sppd-table-fixed pb-4">
                         <p class="font-bold mb-3">Yang Melakukan Perjalanan Dinas:</p>
-                        <div id="lapTandaTanganPelaksana" class="space-y-4"></div>
+                        <div id="lapTandaTanganPelaksana" class="space-y-3"></div>
                     </div>
                 </div>
 
-                <!-- 5. DOKUMEN KWITANSI (SPPD-Kwitansi.pdf)[cite: 5] -->
+                <!-- 5. DOKUMEN KWITANSI -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
+                    <!-- [POIN 3] Kop Dibuat Lebih Besar -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-4">
+                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
-                            <h3 class="font-bold text-base sm:text-lg uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                            <h2 class="font-bold text-lg sm:text-xl uppercase font-official">KECAMATAN TABUNDUNG</h2>
-                            <h3 class="font-bold text-sm uppercase font-official tracking-widest">MALAHAR</h3>
+                            <h3 class="font-bold text-lg sm:text-xl uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                            <h2 class="font-bold text-xl sm:text-3xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                            <h3 class="font-bold text-base sm:text-lg uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
                         </div>
                     </div>
 
-                    <div class="text-center font-bold text-base underline uppercase mb-3">
+                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
+                    <div class="text-center title-spacing font-bold text-base underline uppercase mb-4">
                         KWITANSI
                     </div>
 
-                    <table class="sppd-table-fixed text-xs font-official space-y-1 mb-4">
+                    <table class="sppd-table-fixed text-xs font-official space-y-1 mb-3">
                         <tr class="align-top">
                             <td class="w-36 font-semibold">Sudah Terima dari</td>
                             <td class="w-4">:</td>
@@ -817,60 +870,72 @@
 
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
-                            <tr class="bg-slate-100 border-b border-black text-center">
-                                <th colspan="4" class="border-r border-black p-1 w-28">Kode Rekening</th>
+                            <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                                <!-- [POIN 10] 4 Kolom Kode Rekening Menyesuaikan Isian Section 4 -->
+                                <th id="thKodeSeg1" class="border-r border-black p-1 w-10">5.1</th>
+                                <th id="thKodeSeg2" class="border-r border-black p-1 w-10">02</th>
+                                <th id="thKodeSeg3" class="border-r border-black p-1 w-10">04</th>
+                                <th id="thKodeSeg4" class="border-r border-black p-1 w-10">01</th>
                                 <th class="border-r border-black p-1">Uraian</th>
-                                <th class="border-r border-black p-1 w-10">Vol</th>
-                                <th class="border-r border-black p-1 w-24">Rincian Perhitungan Harga Satuan Sat</th>
+                                <!-- [POIN 9] Header Merger Rincian Perhitungan & Kolom Satuan (Sat) -->
+                                <th colspan="3" class="border-r border-black p-1">Rincian Perhitungan</th>
                                 <th class="border-r border-black p-1 w-24">Jumlah (Rp)</th>
                                 <th class="p-1 w-24">Tanda Tangan</th>
+                            </tr>
+                            <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                                <td colspan="4" class="border-r border-black p-1">Kode Rekening</td>
+                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1 w-8">Vol</td>
+                                <td class="border-r border-black p-1 w-12">Sat</td>
+                                <td class="border-r border-black p-1 w-20">Harga Satuan</td>
+                                <td class="border-r border-black p-1"></td>
+                                <td class="p-1"></td>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
                                 <td colspan="4" class="border-r border-black p-0.5">1</td>
                                 <td class="border-r border-black p-0.5">2</td>
                                 <td class="border-r border-black p-0.5">3</td>
-                                <td class="border-r border-black p-0.5">4 5</td>
+                                <td class="border-r border-black p-0.5">4</td>
+                                <td class="border-r border-black p-0.5">5</td>
                                 <td class="border-r border-black p-0.5">6=(3x5)</td>
                                 <td class="p-0.5">7</td>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center">5.1</td>
-                                <td class="border-r border-black p-1 text-center">02</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg1">5.1</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg2">02</td>
                                 <td class="border-r border-black p-1 text-center"></td>
                                 <td class="border-r border-black p-1 text-center"></td>
-                                <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA LANGSUNG</td>
+                                <td class="border-r border-black p-1 font-bold" colspan="5">BELANJA LANGSUNG</td>
                                 <td class="p-1"></td>
                             </tr>
                             <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center">5.1</td>
-                                <td class="border-r border-black p-1 text-center">02</td>
-                                <td class="border-r border-black p-1 text-center">04</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg1_b">5.1</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg2_b">02</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg3">04</td>
                                 <td class="border-r border-black p-1 text-center"></td>
                                 <td class="border-r border-black p-1 font-bold">BELANJA PEGAWAI</td>
-                                <td class="border-r border-black p-1"></td>
-                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1" colspan="3"></td>
                                 <td class="border-r border-black p-1 font-bold text-right" id="kwiBelanjaPegawaiVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
                             <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-center">5.1</td>
-                                <td class="border-r border-black p-1 text-center">04</td>
-                                <td class="border-r border-black p-1 text-center">02</td>
-                                <td class="border-r border-black p-1 text-center">01</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg1_c">5.1</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg2_c">02</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg3_b">04</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg4">01</td>
                                 <td class="border-r border-black p-1 font-bold">Belanja Perjalanan Dinas</td>
-                                <td class="border-r border-black p-1"></td>
-                                <td class="border-r border-black p-1"></td>
+                                <td class="border-r border-black p-1" colspan="3"></td>
                                 <td class="border-r border-black p-1 font-bold text-right" id="kwiBelanjaPerjalananVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
                             <tr class="border-b border-black align-top">
-                                <td class="border-r border-black p-1 text-center">5.1</td>
-                                <td class="border-r border-black p-1 text-center">01</td>
-                                <td class="border-r border-black p-1 text-center">02.04</td>
-                                <td class="border-r border-black p-1 text-center">0001</td>
-                                <td class="border-r border-black p-1" colspan="5">
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg1_d">5.1</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg2_d">02</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg3_c">04.01</td>
+                                <td class="border-r border-black p-1 text-center" id="kwiCellSeg5">00001</td>
+                                <td class="border-r border-black p-1" colspan="6">
                                     <p class="font-bold">Belanja Perjalanan Dinas Dalam Daerah</p>
                                     <p>Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud"> Dalam rangka Monitoring Realisasi Pembayaran PBB-P2</span></p>
                                 </td>
@@ -878,7 +943,7 @@
                             <!-- Dynamic Row Personil Kwitansi -->
                             <tbody id="kwiDynamicRows"></tbody>
                             <tr class="font-bold bg-slate-50">
-                                <td colspan="7" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
+                                <td colspan="8" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
                                 <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
                                 <td class="p-1.5"></td>
                             </tr>
@@ -899,14 +964,14 @@
                         <div>
                             <p>Mengetahui</p>
                             <p class="font-bold">Pengguna Anggaran,</p>
-                            <div class="h-20"></div>
+                            <div class="h-16"></div>
                             <p class="font-bold underline" id="kwiCamatNama">-</p>
                             <p>NIP. <span id="kwiCamatNip">-</span></p>
                         </div>
                         <div>
                             <p></p>
                             <p class="font-bold">Bendahara Pengeluaran,</p>
-                            <div class="h-20"></div>
+                            <div class="h-16"></div>
                             <p class="font-bold underline" id="kwiBendaharaNama">-</p>
                             <p>NIP. <span id="kwiBendaharaNip">-</span></p>
                         </div>
@@ -964,7 +1029,6 @@
         };
 
         function populateSelectOptions() {
-            // Populate Datalist ASN Nama
             const datalistAsn = document.getElementById('listAsnNama');
             datalistAsn.innerHTML = '';
             DATA_ASN_TABUNDUNG.forEach(asn => {
@@ -974,7 +1038,6 @@
                 datalistAsn.appendChild(opt);
             });
 
-            // Populate Dropdown Desa
             const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
             if(selectDesa) {
                 DAFTAR_DESA_TABUNDUNG.forEach(desa => {
@@ -986,7 +1049,6 @@
             }
         }
 
-        // Auto-fill NIP & Pangkat saat memasukkan Nama pada Pelaksana / Camat / Bendahara
         function onNamaInputChanged(role, namaVal) {
             if (!namaVal) return;
             const match = DATA_ASN_TABUNDUNG.find(a => a.nama.trim().toLowerCase() === namaVal.trim().toLowerCase());
@@ -1120,6 +1182,13 @@
                 biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
                 totalBiaya: calculateTotalBudget(),
 
+                // [POIN 1] Simpan Rumpun 5 Kode Rekening
+                rekSeg1: document.getElementById('rekSeg1').value || '5.1',
+                rekSeg2: document.getElementById('rekSeg2').value || '02',
+                rekSeg3: document.getElementById('rekSeg3').value || '04',
+                rekSeg4: document.getElementById('rekSeg4').value || '01',
+                rekSeg5: document.getElementById('rekSeg5').value || '00001',
+
                 laporanHasil: document.getElementById('laporanHasil').value,
                 laporanSaran: document.getElementById('laporanSaran').value,
             };
@@ -1151,7 +1220,7 @@
             document.getElementById('stPangkatCamat').innerText = record.pangkatCamat;
             document.getElementById('stNipCamat').innerText = record.nipCamat;
 
-            // Daftar Personil Surat Tugas
+            // Personil Surat Tugas
             const stDaftar = document.getElementById('stDaftarPersonil');
             let personilHTML = `
                 <div>
@@ -1207,7 +1276,7 @@
                 sppdPengikutBody.innerHTML = `<tr><td colspan="2" class="py-0.5 italic text-slate-500">- Tidak Ada -</td></tr>`;
             }
 
-            // SPPD Halaman Belakang (Lembar II Pengesahan)
+            // SPPD Halaman Belakang
             document.getElementById('bktNoSPPD').innerText = record.noSPPD;
             document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktTujuan1').innerText = record.tempatTujuan;
@@ -1234,7 +1303,17 @@
             document.getElementById('lapHasil').innerText = record.laporanHasil;
             document.getElementById('lapSaran').innerText = record.laporanSaran;
 
+            // [POIN 6] Pengaturan Spasi TTD Laporan Agar Muat 1 Halaman Lengkap
+            const totalPersonil = 1 + (record.pengikut ? record.pengikut.length : 0);
             const lapTTD = document.getElementById('lapTandaTanganPelaksana');
+            const lapContent = document.getElementById('lapContentContainer');
+            
+            if (totalPersonil > 3) {
+                lapContent.className = "space-y-1.5 font-official text-xs leading-tight sppd-table-fixed";
+            } else {
+                lapContent.className = "space-y-4 font-official text-sm leading-relaxed sppd-table-fixed";
+            }
+
             let ttdHTML = `
                 <div class="flex justify-between items-center w-full max-w-md">
                     <div>
@@ -1248,7 +1327,7 @@
                 record.pengikut.forEach((p, idx) => {
                     const no = idx + 2;
                     ttdHTML += `
-                        <div class="flex justify-between items-center w-full max-w-md pt-2">
+                        <div class="flex justify-between items-center w-full max-w-md pt-1">
                             <div>
                                 <p class="font-bold">${no}. ${p.nama}</p>
                                 <p class="text-xs text-slate-600">NIP. ${p.nip || '-'}</p>
@@ -1260,7 +1339,36 @@
             }
             lapTTD.innerHTML = ttdHTML;
 
-            // Kwitansi
+            // [POIN 10] Sinkronisasi Header & Cell Rumpun Kode Rekening Kwitansi
+            const seg1 = record.rekSeg1 || '5.1';
+            const seg2 = record.rekSeg2 || '02';
+            const seg3 = record.rekSeg3 || '04';
+            const seg4 = record.rekSeg4 || '01';
+            const seg5 = record.rekSeg5 || '00001';
+
+            document.getElementById('thKodeSeg1').innerText = seg1;
+            document.getElementById('thKodeSeg2').innerText = seg2;
+            document.getElementById('thKodeSeg3').innerText = seg3;
+            document.getElementById('thKodeSeg4').innerText = seg4;
+
+            document.getElementById('kwiCellSeg1').innerText = seg1;
+            document.getElementById('kwiCellSeg2').innerText = seg2;
+            
+            document.getElementById('kwiCellSeg1_b').innerText = seg1;
+            document.getElementById('kwiCellSeg2_b').innerText = seg2;
+            document.getElementById('kwiCellSeg3').innerText = seg3;
+
+            document.getElementById('kwiCellSeg1_c').innerText = seg1;
+            document.getElementById('kwiCellSeg2_c').innerText = seg2;
+            document.getElementById('kwiCellSeg3_b').innerText = seg3;
+            document.getElementById('kwiCellSeg4').innerText = seg4;
+
+            document.getElementById('kwiCellSeg1_d').innerText = seg1;
+            document.getElementById('kwiCellSeg2_d').innerText = seg2;
+            document.getElementById('kwiCellSeg3_c').innerText = `${seg3}.${seg4}`;
+            document.getElementById('kwiCellSeg5').innerText = seg5;
+
+            // Kwitansi Data
             document.getElementById('kwiTerbilang').innerText = numberToWords(record.totalBiaya) + ' Rupiah';
             document.getElementById('kwiMaksud').innerText = record.maksudTujuan;
             document.getElementById('kwiBelanjaPegawaiVal').innerText = record.totalBiaya.toLocaleString('id-ID');
@@ -1272,6 +1380,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
+            // [POIN 9] Kwitansi Dynamic Row (Vol, Sat, Harga Satuan)
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
@@ -1281,7 +1390,8 @@
                     <td class="border-r border-black p-1"></td>
                     <td class="border-r border-black p-1">1. ${record.namaPelaksana}</td>
                     <td class="border-r border-black p-1 text-center">1</td>
-                    <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')} OH</td>
+                    <td class="border-r border-black p-1 text-center">OH</td>
+                    <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                     <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                     <td class="p-1">1. ..........</td>
                 </tr>
@@ -1297,7 +1407,8 @@
                             <td class="border-r border-black p-1"></td>
                             <td class="border-r border-black p-1">${no}. ${p.nama}</td>
                             <td class="border-r border-black p-1 text-center">1</td>
-                            <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')} OH</td>
+                            <td class="border-r border-black p-1 text-center">OH</td>
+                            <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                             <td class="border-r border-black p-1 text-right">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
                             <td class="p-1">${no}. ..........</td>
                         </tr>
