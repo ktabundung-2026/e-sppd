@@ -561,7 +561,7 @@
                     </div>
                 </div>
 
-                <!-- 2. DOKUMEN SPPD HALAMAN DEPAN -->
+                <!-- 2. DOKUMEN SPPD HALAMAN DEPAN (BARIS 7 PENGIKUT MERGER DIGABUNG LANGSUNG DI BAWAH JUDUL PENGIKUT) -->
                 <div id="doc-sppd-depan" class="document-paper mb-8 hidden">
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -648,15 +648,7 @@
                                 <td class="border-r border-black p-2 text-center align-top">7.</td>
                                 <td class="border-r border-black p-2 align-top">Pengikut:</td>
                                 <td class="p-2 align-top">
-                                    <table class="w-full text-xs">
-                                        <thead>
-                                            <tr class="border-b border-slate-400 font-semibold">
-                                                <th class="text-left w-1/2">Nama</th>
-                                                <th class="text-left">Keterangan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="sppdPengikutTabel"></tbody>
-                                    </table>
+                                    <div id="sppdPengikutTabel" class="space-y-1"></div>
                                 </td>
                             </tr>
                             <tr class="border-b border-black">
@@ -838,7 +830,7 @@
                     </div>
                 </div>
 
-                <!-- 5. DOKUMEN KWITANSI (5 KOLOM REKENING ULTRA RAPAT / LEBAR KOLOM URAIAN MAKSIMAL) -->
+                <!-- 5. DOKUMEN KWITANSI (KOLOM RINCIAN KODE REKENING LEBAR 5 DIGIT ANGKA) -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -897,7 +889,7 @@
 
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
-                    <!-- TABEL KWITANSI: LEBAR 5 KOLOM REKENING ULTRA PERKETAT (0.8rem - 1.1rem) DAN URAIAN LEBIH BESAR -->
+                    <!-- TABEL KWITANSI: KOLOM KODE REKENING PAS HINGGA 5 DIGIT ANGKA & KOLOM URAIAN OPTIMAL -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -925,11 +917,11 @@
                         <tbody>
                             <!-- Baris 1: Level Kelompok (5.1 | 02) -->
                             <tr class="border-b border-black text-center font-bold">
-                                <td class="border-r border-black p-0 w-[0.9rem]" id="kwiSeg1_a">5.1</td>
-                                <td class="border-r border-black p-0 w-[0.8rem]" id="kwiSeg2_a">02</td>
-                                <td class="border-r border-black p-0 w-[0.8rem]"></td>
-                                <td class="border-r border-black p-0 w-[0.8rem]"></td>
+                                <td class="border-r border-black p-0 w-[1.3rem]" id="kwiSeg1_a">5.1</td>
+                                <td class="border-r border-black p-0 w-[1.1rem]" id="kwiSeg2_a">02</td>
                                 <td class="border-r border-black p-0 w-[1.1rem]"></td>
+                                <td class="border-r border-black p-0 w-[1.1rem]"></td>
+                                <td class="border-r border-black p-0 w-[2.2rem]"></td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
                                 <td class="p-1"></td>
@@ -1291,17 +1283,14 @@
             document.getElementById('sppdCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('sppdCamatNip').innerText = record.nipCamat;
 
-            // Pengikut Tabel SPPD Depan
-            const sppdPengikutBody = document.getElementById('sppdPengikutTabel');
+            // Pengikut SPPD Depan (Merger Kolom Nama & Keterangan Langsung Di Bawah Baris Pengikut)
+            const sppdPengikutContainer = document.getElementById('sppdPengikutTabel');
             if (record.pengikut && record.pengikut.length > 0) {
-                sppdPengikutBody.innerHTML = record.pengikut.map(p => `
-                    <tr>
-                        <td class="py-0.5">${p.nama}</td>
-                        <td class="py-0.5">${p.jabatan}</td>
-                    </tr>
+                sppdPengikutContainer.innerHTML = record.pengikut.map((p, idx) => `
+                    <div>${idx + 1}. ${p.nama} (${p.jabatan})</div>
                 `).join('');
             } else {
-                sppdPengikutBody.innerHTML = `<tr><td colspan="2" class="py-0.5 italic text-slate-500">- Tidak Ada -</td></tr>`;
+                sppdPengikutContainer.innerHTML = `<div class="italic text-slate-500">- Tidak Ada -</div>`;
             }
 
             // SPPD Halaman Belakang
