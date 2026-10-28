@@ -900,9 +900,9 @@
                                 <th rowspan="2" class="p-1 align-middle w-[110px]">Tanda Tangan</th>
                             </tr>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th class="border-r border-black p-0.5 w-2 text-[12px] whitespace-nowrap">Vol</th>
-                                <th class="border-r border-black p-0.5 w-2 text-[12px] whitespace-nowrap">Sat</th>
-                                <th class="border-r border-black p-0.5 w-4 text-[12px] leading-tight">Harga<br>Satuan</th>
+                                <th class="border-r border-black p-0.5 w-[20px] text-[12px] whitespace-nowrap">Vol</th>
+                                <th class="border-r border-black p-0.5 w-[20px] text-[12px] whitespace-nowrap">Sat</th>
+                                <th class="border-r border-black p-0.5 w-[40px] text-[12px] leading-tight">Harga<br>Satuan</th>
                             </tr>
                             <tr class="border-b border-black text-center bg-slate-50 italic">
                                 <td class="border-r border-black p-0.5">1</td>
@@ -1225,23 +1225,30 @@
             document.getElementById('stNipCamat').innerText = record.nipCamat;
 
             // Personil Surat Tugas
+            // Personil Surat Tugas (Format Tanda Baca Rapih & Sejajar)
             const stDaftar = document.getElementById('stDaftarPersonil');
             let personilHTML = `
                 <div>
-                    <p class="font-bold">1. Nama : ${record.namaPelaksana}</p>
-                    <p class="pl-4">NIP : ${record.nipPelaksana}</p>
-                    <p class="pl-4">Pangkat/Golongan : ${record.pangkatPelaksana}</p>
-                    <p class="pl-4">Jabatan : ${record.jabatanPelaksana}</p>
+                    <p class="font-bold">1. Pelaksana Utama</p>
+                    <table class="w-full text-sm font-official border-none ml-4 mt-0.5">
+                        <tr class="align-top"><td class="w-36">Nama</td><td class="w-3 text-center">:</td><td class="font-bold">${record.namaPelaksana}</td></tr>
+                        <tr class="align-top"><td>NIP</td><td class="text-center">:</td><td>${record.nipPelaksana}</td></tr>
+                        <tr class="align-top"><td>Pangkat / Golongan</td><td class="text-center">:</td><td>${record.pangkatPelaksana}</td></tr>
+                        <tr class="align-top"><td>Jabatan</td><td class="text-center">:</td><td>${record.jabatanPelaksana}</td></tr>
+                    </table>
                 </div>
             `;
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, idx) => {
                     personilHTML += `
                         <div class="pt-2">
-                            <p class="font-bold">${idx + 2}. Nama : ${p.nama}</p>
-                            <p class="pl-4">NIP : ${p.nip || '-'}</p>
-                            <p class="pl-4">Pangkat/Golongan : ${p.pangkat || '-'}</p>
-                            <p class="pl-4">Jabatan : ${p.jabatan}</p>
+                            <p class="font-bold">${idx + 2}. Pengikut</p>
+                            <table class="w-full text-sm font-official border-none ml-4 mt-0.5">
+                                <tr class="align-top"><td class="w-36">Nama</td><td class="w-3 text-center">:</td><td class="font-bold">${p.nama}</td></tr>
+                                <tr class="align-top"><td>NIP</td><td class="text-center">:</td><td>${p.nip || '-'}</td></tr>
+                                <tr class="align-top"><td>Pangkat / Golongan</td><td class="text-center">:</td><td>${p.pangkat || '-'}</td></tr>
+                                <tr class="align-top"><td>Jabatan</td><td class="text-center">:</td><td>${p.jabatan}</td></tr>
+                            </table>
                         </div>
                     `;
                 });
