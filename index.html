@@ -9,6 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- SheetJS (XLSX) library untuk Ekspor Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
@@ -60,9 +63,9 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             width: 217mm;
             height: 330mm;
-            padding-top: 10mm;     /* Margin atas 1 cm */
-            padding-left: 17mm;    /* Margin kiri 1.7 cm */
-            padding-right: 10mm;   /* Sisa margin kanan agar total tabel 19 cm pas */
+            padding-top: 10mm;
+            padding-left: 17mm;
+            padding-right: 10mm;
             padding-bottom: 10mm;
             margin: auto; 
             color: #000; 
@@ -73,7 +76,6 @@
             overflow: hidden;
         }
 
-        /* Ukuran Presisi Tabel Cetak */
         .sppd-table-fixed {
             width: 190mm !important;
             table-layout: fixed;
@@ -85,7 +87,6 @@
             table-layout: fixed;
         }
 
-        /* [POIN 2] SPPD Depan mengikuti lebar dan tinggi presisi seperti SPPD Belakang */
         .sppd-front-table {
             width: 190mm !important;
             height: 275mm !important;
@@ -96,7 +97,6 @@
             height: 50mm !important;
         }
 
-        /* [POIN 4] Turunkan Judul Dokumen sebesar 1.5 cm */
         .title-spacing {
             margin-top: 15mm !important;
         }
@@ -124,7 +124,6 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- DATALIST PENYEDIA SUGGESTION NAMA ASN -->
     <datalist id="listAsnNama"></datalist>
 
     <!-- HEADER NAVIGASI BAR -->
@@ -361,7 +360,7 @@
                             </div>
                         </div>
 
-                        <!-- [POIN 1] Rumpun 5 Kode Rekening di Bagian Bawah Section 4 -->
+                        <!-- Rumpun 5 Kode Rekening -->
                         <div class="bg-white p-3.5 rounded-lg border border-slate-200 pt-3">
                             <label class="block text-xs font-bold text-slate-800 mb-2">Input Rumpun Kode Rekening (5 Bagian):</label>
                             <div class="grid grid-cols-5 gap-2">
@@ -422,34 +421,51 @@
         <!-- TAB 2: RIWAYAT SPPD -->
         <section id="tab-history" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 mb-4">
-                    <div>
+                    <div class="flex items-center space-x-3">
+                        <!-- [POIN 2] Fitur Kembali ke Halaman Depan -->
+                        <button onclick="switchTab('create')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali ke Form Utama
+                        </button>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
                             <i class="fa-solid fa-folder-open text-gov-700"></i>
                             Riwayat Perjalanan Dinas
                         </h2>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <button onclick="exportDataJSON()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-lg border border-slate-300 flex items-center justify-center gap-1.5 transition-colors">
-                            <i class="fa-solid fa-download text-gov-700"></i> Backup JSON
+
+                    <!-- Fitur Ekspor Excel, Cetak PDF & Search -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- [POIN 1] Tombol Ekspor Excel -->
+                        <button onclick="exportToExcel()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i> Ekspor Excel (.xlsx)
                         </button>
-                        <label class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-lg border border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
-                            <i class="fa-solid fa-upload text-emerald-700"></i> Restore JSON
+                        
+                        <!-- [POIN 1] Tombol Cetak Rekap PDF -->
+                        <button onclick="printHistoryTable()" class="text-xs bg-gov-700 hover:bg-gov-800 text-white font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-print"></i> Cetak Rekap PDF
+                        </button>
+                        
+                        <button onclick="exportDataJSON()" title="Backup JSON" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-lg border border-slate-300 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-download text-gov-700"></i> Backup
+                        </button>
+                        <label title="Restore JSON" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-lg border border-slate-300 flex items-center gap-1 cursor-pointer transition-colors">
+                            <i class="fa-solid fa-upload text-emerald-700"></i> Restore
                             <input type="file" id="importFile" accept=".json" onchange="importDataJSON(event)" class="hidden">
                         </label>
-                        <div class="relative w-full sm:w-64">
-                            <input type="text" id="searchHistory" oninput="filterHistory()" placeholder="Cari nama, tujuan..." class="w-full pl-8 pr-3 py-1.5 text-xs sm:text-sm rounded-lg border border-slate-300 focus:outline-none">
+                        <div class="relative w-full sm:w-48">
+                            <input type="text" id="searchHistory" oninput="filterHistory()" placeholder="Cari nama, tujuan..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none">
                             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
                         </div>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto w-full">
-                    <table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[600px]">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[650px]">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                                 <th class="p-3">No. Surat</th>
-                                <th class="p-3">Pelaksana Utama</th>
+                                <th class="p-3">Pelaksana Utama & Pengikut</th>
                                 <th class="p-3">Tujuan</th>
                                 <th class="p-3">Tanggal</th>
                                 <th class="p-3">Total Biaya</th>
@@ -502,7 +518,6 @@
                 
                 <!-- 1. DOKUMEN SURAT PERINTAH TUGAS (ST.pdf) -->
                 <div id="doc-st" class="document-paper mb-8 hidden">
-                    <!-- [POIN 3] Kop Dibuat Lebih Besar & Menyesuaikan Lebar Kertas -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
@@ -512,7 +527,6 @@
                         </div>
                     </div>
 
-                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
                     <div class="text-center title-spacing mb-6">
                         <h3 class="font-bold text-base sm:text-lg underline uppercase tracking-widest">SURAT PERINTAH TUGAS</h3>
                         <p class="text-sm">NO. <span id="stNoSurat">003/SPT/TBD/VII/2026</span></p>
@@ -538,7 +552,6 @@
                         </tr>
                     </table>
 
-                    <!-- [POIN 8] Keterangan Dikeluarkan & Pada Tanggal Diletakkan di Atas Camat (Jarak 1 Spasi) -->
                     <div class="mt-12 flex justify-end font-official text-sm sppd-table-fixed">
                         <div class="w-64 text-center">
                             <p class="text-left">Dikeluarkan di : Malahar</p>
@@ -554,7 +567,6 @@
 
                 <!-- 2. DOKUMEN SPPD HALAMAN DEPAN -->
                 <div id="doc-sppd-depan" class="document-paper mb-8 hidden">
-                    <!-- [POIN 3] Kop Dibuat Lebih Besar -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
@@ -574,12 +586,10 @@
                         </div>
                     </div>
 
-                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
                     <div class="text-center title-spacing font-bold text-sm underline uppercase mb-4">
                         SURAT PERINTAH PERJALANAN DINAS<br>(SPPD)
                     </div>
 
-                    <!-- [POIN 2] Tabel Presisi Seperti SPPD Belakang -->
                     <table class="sppd-front-table border-collapse border border-black font-official text-xs">
                         <tbody>
                             <tr class="border-b border-black">
@@ -692,7 +702,6 @@
                 <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                     <table class="sppd-back-table border-collapse border border-black font-official text-xs">
                         <tbody>
-                            <!-- Baris 1 -->
                             <tr class="border-b border-black">
                                 <td class="p-2 w-1/2 border-r border-black align-top"></td>
                                 <td class="p-2 w-1/2 align-top">
@@ -706,7 +715,6 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 2 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -722,7 +730,6 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 3 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -738,7 +745,6 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 4 -->
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
@@ -754,7 +760,6 @@
                                     </table>
                                 </td>
                             </tr>
-                            <!-- Baris 5 -->
                             <tr class="border-b border-black">
                                 <td class="p-2 border-r border-black align-top">
                                     <p class="font-bold">Catatan Lain-lain :</p>
@@ -774,7 +779,6 @@
                                     </div>
                                 </td>
                             </tr>
-                            <!-- Baris 6 -->
                             <tr>
                                 <td colspan="2" class="p-2 font-official text-[9pt]">
                                     <p class="font-bold uppercase underline">PERHATIAN:</p>
@@ -788,7 +792,6 @@
                 <!-- 4. DOKUMEN LAPORAN PERJALANAN DINAS -->
                 <div id="doc-laporan" class="document-paper mb-8 hidden flex flex-col justify-between">
                     <div>
-                        <!-- [POIN 3] Kop Dibuat Lebih Besar -->
                         <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
                             <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                             <div class="text-center flex-1">
@@ -798,12 +801,10 @@
                             </div>
                         </div>
 
-                        <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
                         <div class="text-center title-spacing mb-6">
                             <h3 class="font-bold text-base underline uppercase tracking-wider">LAPORAN PERJALANAN DINAS</h3>
                         </div>
 
-                        <!-- [POIN 5 & 7] Spasi Berjarak Per Poin & Indentasi Tab Poin 3 -->
                         <div id="lapContentContainer" class="space-y-4 font-official text-sm leading-relaxed sppd-table-fixed">
                             <table class="w-full border-separate border-spacing-y-3">
                                 <tr class="align-top"><td class="w-48 font-semibold">1. Dasar</td><td class="w-4">:</td><td id="lapDasar">Atas Perintah Camat</td></tr>
@@ -812,7 +813,6 @@
                                     <td class="font-semibold">3. Lama Perjalanan</td><td>:</td>
                                     <td>
                                         <span id="lapLama">1 (Satu) Hari</span>
-                                        <!-- [POIN 7] Keterangan Dari & Sampai Tanggal Masuk 1 Tab -->
                                         <div class="pl-6 pt-1">
                                             <p>Dari Tanggal : <span id="lapTglMulai">-</span></p>
                                             <p>Sampai Tanggal : <span id="lapTglSelesai">-</span></p>
@@ -826,7 +826,6 @@
                         </div>
                     </div>
 
-                    <!-- [POIN 5 & 6] Keterangan Yang Melakukan Perjalanan Berjarak & Responsif Terhadap Jumlah Personil -->
                     <div id="lapSignatureSection" class="mt-8 font-official text-sm sppd-table-fixed pb-4">
                         <p class="font-bold mb-3">Yang Melakukan Perjalanan Dinas:</p>
                         <div id="lapTandaTanganPelaksana" class="space-y-3"></div>
@@ -835,7 +834,6 @@
 
                 <!-- 5. DOKUMEN KWITANSI -->
                 <div id="doc-kwitansi" class="document-paper mb-8 hidden">
-                    <!-- [POIN 3] Kop Dibuat Lebih Besar -->
                     <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                         <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
                         <div class="text-center flex-1">
@@ -845,7 +843,6 @@
                         </div>
                     </div>
 
-                    <!-- [POIN 4] Judul Diturunkan 1,5 cm -->
                     <div class="text-center title-spacing font-bold text-base underline uppercase mb-4">
                         KWITANSI
                     </div>
@@ -871,13 +868,11 @@
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <!-- [POIN 10] 4 Kolom Kode Rekening Menyesuaikan Isian Section 4 -->
                                 <th id="thKodeSeg1" class="border-r border-black p-1 w-10">5.1</th>
                                 <th id="thKodeSeg2" class="border-r border-black p-1 w-10">02</th>
                                 <th id="thKodeSeg3" class="border-r border-black p-1 w-10">04</th>
                                 <th id="thKodeSeg4" class="border-r border-black p-1 w-10">01</th>
                                 <th class="border-r border-black p-1">Uraian</th>
-                                <!-- [POIN 9] Header Merger Rincian Perhitungan & Kolom Satuan (Sat) -->
                                 <th colspan="3" class="border-r border-black p-1">Rincian Perhitungan</th>
                                 <th class="border-r border-black p-1 w-24">Jumlah (Rp)</th>
                                 <th class="p-1 w-24">Tanda Tangan</th>
@@ -1182,7 +1177,6 @@
                 biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
                 totalBiaya: calculateTotalBudget(),
 
-                // [POIN 1] Simpan Rumpun 5 Kode Rekening
                 rekSeg1: document.getElementById('rekSeg1').value || '5.1',
                 rekSeg2: document.getElementById('rekSeg2').value || '02',
                 rekSeg3: document.getElementById('rekSeg3').value || '04',
@@ -1303,7 +1297,6 @@
             document.getElementById('lapHasil').innerText = record.laporanHasil;
             document.getElementById('lapSaran').innerText = record.laporanSaran;
 
-            // [POIN 6] Pengaturan Spasi TTD Laporan Agar Muat 1 Halaman Lengkap
             const totalPersonil = 1 + (record.pengikut ? record.pengikut.length : 0);
             const lapTTD = document.getElementById('lapTandaTanganPelaksana');
             const lapContent = document.getElementById('lapContentContainer');
@@ -1339,7 +1332,7 @@
             }
             lapTTD.innerHTML = ttdHTML;
 
-            // [POIN 10] Sinkronisasi Header & Cell Rumpun Kode Rekening Kwitansi
+            // Rumpun Kode Rekening Kwitansi
             const seg1 = record.rekSeg1 || '5.1';
             const seg2 = record.rekSeg2 || '02';
             const seg3 = record.rekSeg3 || '04';
@@ -1380,7 +1373,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // [POIN 9] Kwitansi Dynamic Row (Vol, Sat, Harga Satuan)
+            // Kwitansi Dynamic Rows
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
@@ -1481,6 +1474,7 @@
             document.getElementById('previewModal').classList.add('hidden');
         }
 
+        // [POIN 3] Render Tabel Riwayat Memuat Nama-Nama Pengikut di Bawah Pelaksana Utama
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
             if (travelRecords.length === 0) {
@@ -1488,26 +1482,39 @@
                 return;
             }
 
-            tbody.innerHTML = travelRecords.map((item, index) => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-3 font-medium text-slate-900">${item.noSuratTugas}</td>
-                    <td class="p-3">
-                        <span class="font-semibold block">${item.namaPelaksana}</span>
-                        <span class="text-xs text-slate-500">NIP. ${item.nipPelaksana}</span>
-                    </td>
-                    <td class="p-3">${item.tempatTujuan}</td>
-                    <td class="p-3 text-xs">${item.tglMulai} s/d ${item.tglSelesai}</td>
-                    <td class="p-3 font-semibold text-emerald-700">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1">
-                            <i class="fa-solid fa-print"></i> Cetak
-                        </button>
-                        <button onclick="deleteRecord(${item.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = travelRecords.map((item, index) => {
+                let pengikutHTML = '';
+                if (item.pengikut && item.pengikut.length > 0) {
+                    pengikutHTML = `<div class="mt-1 pt-1 border-t border-slate-200 text-[11px] text-slate-600">
+                        <span class="font-semibold text-slate-700">Pengikut:</span>
+                        <ul class="list-disc list-inside space-y-0.5">
+                            ${item.pengikut.map(p => `<li>${p.nama} ${p.nip ? `(NIP. ${p.nip})` : ''}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-medium text-slate-900 align-top">${item.noSuratTugas}<br><span class="text-[11px] text-slate-500">${item.noSPPD}</span></td>
+                        <td class="p-3 align-top">
+                            <span class="font-bold text-gov-900 block">${item.namaPelaksana}</span>
+                            <span class="text-xs text-slate-500">NIP. ${item.nipPelaksana} (${item.jabatanPelaksana})</span>
+                            ${pengikutHTML}
+                        </td>
+                        <td class="p-3 align-top">${item.tempatTujuan}</td>
+                        <td class="p-3 text-xs align-top">${item.tglMulai} s/d ${item.tglSelesai}</td>
+                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center align-top">
+                            <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1 mb-1">
+                                <i class="fa-solid fa-print"></i> Cetak Dokumen
+                            </button>
+                            <button onclick="deleteRecord(${item.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function filterHistory() {
@@ -1515,22 +1522,82 @@
             const filtered = travelRecords.filter(r => 
                 r.namaPelaksana.toLowerCase().includes(query) ||
                 r.tempatTujuan.toLowerCase().includes(query) ||
-                r.noSuratTugas.toLowerCase().includes(query)
+                r.noSuratTugas.toLowerCase().includes(query) ||
+                (r.pengikut && r.pengikut.some(p => p.nama.toLowerCase().includes(query)))
             );
             
             const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = filtered.map((item) => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-medium">${item.noSuratTugas}</td>
-                    <td class="p-3">${item.namaPelaksana}</td>
-                    <td class="p-3">${item.tempatTujuan}</td>
-                    <td class="p-3 text-xs">${item.tglMulai}</td>
-                    <td class="p-3 font-semibold text-emerald-700">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="openPreviewModal(travelRecords.find(x => x.id === ${item.id}))" class="bg-gov-700 text-white px-2.5 py-1 rounded text-xs">Cetak</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map((item) => {
+                let pengikutHTML = '';
+                if (item.pengikut && item.pengikut.length > 0) {
+                    pengikutHTML = `<div class="mt-1 pt-1 border-t border-slate-200 text-[11px] text-slate-600">
+                        <span class="font-semibold text-slate-700">Pengikut:</span>
+                        <ul class="list-disc list-inside space-y-0.5">
+                            ${item.pengikut.map(p => `<li>${p.nama}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-medium align-top">${item.noSuratTugas}</td>
+                        <td class="p-3 align-top">
+                            <span class="font-semibold block">${item.namaPelaksana}</span>
+                            ${pengikutHTML}
+                        </td>
+                        <td class="p-3 align-top">${item.tempatTujuan}</td>
+                        <td class="p-3 text-xs align-top">${item.tglMulai}</td>
+                        <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center align-top">
+                            <button onclick="openPreviewModal(travelRecords.find(x => x.id === ${item.id}))" class="bg-gov-700 text-white px-2.5 py-1 rounded text-xs">Cetak</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // [POIN 1] Fitur Ekspor Rekapitulasi ke Excel (.xlsx)
+        function exportToExcel() {
+            if (travelRecords.length === 0) return alert("Belum ada data riwayat SPPD untuk diekspor!");
+
+            const dataExcel = [];
+            travelRecords.forEach((item, index) => {
+                const pengikutStr = item.pengikut && item.pengikut.length > 0 
+                    ? item.pengikut.map(p => `${p.nama} (${p.jabatan})`).join('; ') 
+                    : '-';
+
+                dataExcel.push({
+                    "No": index + 1,
+                    "No. Surat Tugas": item.noSuratTugas,
+                    "No. SPPD": item.noSPPD,
+                    "Pelaksana Utama": item.namaPelaksana,
+                    "NIP Pelaksana": item.nipPelaksana,
+                    "Jabatan Pelaksana": item.jabatanPelaksana,
+                    "Pengikut": pengikutStr,
+                    "Tempat Tujuan": item.tempatTujuan,
+                    "Maksud Perjalanan": item.maksudTujuan,
+                    "Tanggal Mulai": item.tglMulai,
+                    "Tanggal Selesai": item.tglSelesai,
+                    "Lama (Hari)": item.lamaHari,
+                    "Biaya per Orang (Rp)": item.biayaPerOrang,
+                    "Total Biaya (Rp)": item.totalBiaya,
+                    "Kode Rekening": `${item.rekSeg1}.${item.rekSeg2}.${item.rekSeg3}.${item.rekSeg4}.${item.rekSeg5}`,
+                    "Penandatangan (Camat)": item.namaCamat,
+                    "Bendahara": item.namaBendahara
+                });
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap SPPD");
+
+            XLSX.writeFile(workbook, `Rekap_SPPD_Kec_Tabundung_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        // [POIN 1] Fitur Cetak Rekapitulasi Riwayat ke PDF
+        function printHistoryTable() {
+            if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
+            window.print();
         }
 
         function deleteRecord(id) {
