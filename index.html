@@ -890,73 +890,74 @@
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
                     <!-- TABEL KWITANSI: KOLOM FLEKSIBEL SESUAI HURUF INPUT & HEADER HARGA SATUAN WRAPPED -->
-                    <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
-                        <thead>
-                            <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th rowspan="2" class="border-r border-black p-1 align-middle w-32 text-left">Rincian Kode Rekening</th>
-                                <th rowspan="2" class="border-r border-black p-1 align-middle text-left">Uraian</th>
-                                <th colspan="3" class="border-r border-black p-0.5">Rincian Perhitungan</th>
-                                <th rowspan="2" class="border-r border-black p-1 align-middle w-20">Jumlah (Rp)</th>
-                                <th rowspan="2" class="p-1 align-middle w-20">Tanda Tangan</th>
-                            </tr>
-                            <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                                <th class="border-r border-black p-0.5 w-auto whitespace-nowrap px-1">Vol</th>
-                                <th class="border-r border-black p-0.5 w-auto whitespace-nowrap px-1">Sat</th>
-                                <th class="border-r border-black p-0.5 w-auto whitespace-normal break-words leading-tight px-1 max-w-[4.5rem]">Harga Satuan</th>
-                            </tr>
-                            <tr class="border-b border-black text-center bg-slate-50 italic">
-                                <td class="border-r border-black p-0.5">1</td>
-                                <td class="border-r border-black p-0.5">2</td>
-                                <td class="border-r border-black p-0.5">3</td>
-                                <td class="border-r border-black p-0.5">4</td>
-                                <td class="border-r border-black p-0.5">5</td>
-                                <td class="border-r border-black p-0.5">6=(3x5)</td>
-                                <td class="p-0.5">7</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Baris 1: Level Kelompok (5.1.02) -->
-                            <tr class="border-b border-black font-bold">
-                                <td class="border-r border-black p-1 text-left font-mono" id="kwiRek1">5.1.02</td>
-                                <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
-                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
-                                <td class="p-1"></td>
-                            </tr>
-                            <!-- Baris 2: Level Jenis (5.1.02.04) -->
-                            <tr class="border-b border-black font-bold">
-                                <td class="border-r border-black p-1 text-left font-mono" id="kwiRek2">5.1.02.04</td>
-                                <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
-                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
-                                <td class="p-1"></td>
-                            </tr>
-                            <!-- Baris 3: Level Objek (5.1.02.04.01) -->
-                            <tr class="border-b border-black font-bold">
-                                <td class="border-r border-black p-1 text-left font-mono" id="kwiRek3">5.1.02.04.01</td>
-                                <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
-                                <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
-                                <td class="p-1"></td>
-                            </tr>
-                            <!-- Baris 4 & 5: Level Rincian Objek (5.1.02.04.01.00001) -->
-                            <tr class="border-b border-black font-bold">
-                                <td class="border-r border-black p-1 text-left font-mono align-top" rowspan="2" id="kwiRek4">5.1.02.04.01.00001</td>
-                                <td class="border-r border-black p-1 text-left font-bold" colspan="5">Belanja Perjalanan Dinas Dalam Daerah</td>
-                                <td class="p-1" rowspan="2"></td>
-                            </tr>
-                            <tr class="border-b border-black">
-                                <td class="border-r border-black p-1 text-left font-normal" colspan="5">
-                                    Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud">Dalam rangka Monitoring realisasi Pembayaran PBB-P2</span>
-                                </td>
-                            </tr>
-                            <!-- Dynamic Row Personil Kwitansi -->
-                            <tbody id="kwiDynamicRows"></tbody>
-                            <!-- Jumlah Terima -->
-                            <tr class="font-bold bg-slate-50 border-b border-black">
-                                <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
-                                <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
-                                <td class="p-1.5"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <!-- TABEL KWITANSI: KOLOM URAIAN DIPERBESAR MAKSIMAL -->
+<table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
+    <thead>
+        <tr class="bg-slate-100 border-b border-black text-center font-bold">
+            <th rowspan="2" class="border-r border-black p-1 align-middle w-28 text-left">Rincian Kode Rekening</th>
+            <th rowspan="2" class="border-r border-black p-1 align-middle text-left">Uraian</th>
+            <th colspan="3" class="border-r border-black p-0.5">Rincian Perhitungan</th>
+            <th rowspan="2" class="border-r border-black p-1 align-middle w-20">Jumlah (Rp)</th>
+            <th rowspan="2" class="p-1 align-middle w-16">Tanda Tangan</th>
+        </tr>
+        <tr class="bg-slate-100 border-b border-black text-center font-bold">
+            <th class="border-r border-black p-0.5 w-6 text-[10px] whitespace-nowrap">Vol</th>
+            <th class="border-r border-black p-0.5 w-7 text-[10px] whitespace-nowrap">Sat</th>
+            <th class="border-r border-black p-0.5 w-16 text-[10px] whitespace-nowrap">Harga Satuan</th>
+        </tr>
+        <tr class="border-b border-black text-center bg-slate-50 italic">
+            <td class="border-r border-black p-0.5">1</td>
+            <td class="border-r border-black p-0.5">2</td>
+            <td class="border-r border-black p-0.5">3</td>
+            <td class="border-r border-black p-0.5">4</td>
+            <td class="border-r border-black p-0.5">5</td>
+            <td class="border-r border-black p-0.5">6=(3x5)</td>
+            <td class="p-0.5">7</td>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Baris 1: Level Kelompok (5.1.02) -->
+        <tr class="border-b border-black font-bold">
+            <td class="border-r border-black p-1 text-left font-mono" id="kwiRek1">5.1.02</td>
+            <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
+            <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
+            <td class="p-1"></td>
+        </tr>
+        <!-- Baris 2: Level Jenis (5.1.02.04) -->
+        <tr class="border-b border-black font-bold">
+            <td class="border-r border-black p-1 text-left font-mono" id="kwiRek2">5.1.02.04</td>
+            <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
+            <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
+            <td class="p-1"></td>
+        </tr>
+        <!-- Baris 3: Level Objek (5.1.02.04.01) -->
+        <tr class="border-b border-black font-bold">
+            <td class="border-r border-black p-1 text-left font-mono" id="kwiRek3">5.1.02.04.01</td>
+            <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
+            <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
+            <td class="p-1"></td>
+        </tr>
+        <!-- Baris 4 & 5: Level Rincian Objek -->
+        <tr class="border-b border-black font-bold">
+            <td class="border-r border-black p-1 text-left font-mono align-top" rowspan="2" id="kwiRek4">5.1.02.04.01.00001</td>
+            <td class="border-r border-black p-1 text-left font-bold" colspan="5">Belanja Perjalanan Dinas Dalam Daerah</td>
+            <td class="p-1" rowspan="2"></td>
+        </tr>
+        <tr class="border-b border-black">
+            <td class="border-r border-black p-1 text-left font-normal" colspan="5">
+                Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud">Dalam rangka Monitoring realisasi Pembayaran PBB-P2</span>
+            </td>
+        </tr>
+        <!-- Dynamic Row Personil Kwitansi -->
+        <tbody id="kwiDynamicRows"></tbody>
+        <!-- Jumlah Terima -->
+        <tr class="font-bold bg-slate-50 border-b border-black">
+            <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
+            <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
+            <td class="p-1.5"></td>
+        </tr>
+    </tbody>
+</table>
 
                     <!-- Tanda Tangan: Pengguna Anggaran & Bendahara Pengeluaran Sejajar -->
                     <div class="grid grid-cols-2 gap-6 text-center text-xs font-official sppd-table-fixed mt-6">
@@ -1356,35 +1357,37 @@
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
             // Dynamic Rows Personil Kwitansi (Kolom Perhitungan Otomatis Sesuaikan Teks/Huruf)
-            const kwiRows = document.getElementById('kwiDynamicRows');
-            let rowsHTML = `
-                <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-0.5"></td>
-                    <td class="border-r border-black p-1">1. ${record.namaPelaksana}</td>
-                    <td class="border-r border-black p-0.5 text-center w-auto whitespace-nowrap px-1">1</td>
-                    <td class="border-r border-black p-0.5 text-center w-auto whitespace-nowrap px-1">OH</td>
-                    <td class="border-r border-black p-0.5 text-right w-auto whitespace-normal break-words px-1">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="border-r border-black p-0.5 text-right whitespace-nowrap px-1">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="p-0.5 text-center">1. ..........</td>
-                </tr>
-            `;
-            if (record.pengikut && record.pengikut.length > 0) {
-                record.pengikut.forEach((p, idx) => {
-                    const no = idx + 2;
-                    rowsHTML += `
-                        <tr class="border-b border-black align-top">
-                            <td class="border-r border-black p-0.5"></td>
-                            <td class="border-r border-black p-1">${no}. ${p.nama}</td>
-                            <td class="border-r border-black p-0.5 text-center w-auto whitespace-nowrap px-1">1</td>
-                            <td class="border-r border-black p-0.5 text-center w-auto whitespace-nowrap px-1">OH</td>
-                            <td class="border-r border-black p-0.5 text-right w-auto whitespace-normal break-words px-1">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="border-r border-black p-0.5 text-right whitespace-nowrap px-1">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="p-0.5 text-center">${no}. ..........</td>
-                        </tr>
-                    `;
-                });
-            }
-            kwiRows.innerHTML = rowsHTML;
+            // Dynamic Rows Personil Kwitansi (Uraian Luas & Nama 1 Baris)
+const kwiRows = document.getElementById('kwiDynamicRows');
+let rowsHTML = `
+    <tr class="border-b border-black align-top">
+        <td class="border-r border-black p-0.5"></td>
+        <td class="border-r border-black p-1 whitespace-nowrap">1. ${record.namaPelaksana}</td>
+        <td class="border-r border-black p-0.5 text-center whitespace-nowrap">1</td>
+        <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
+        <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+        <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+        <td class="p-0.5 text-center whitespace-nowrap">1. ..........</td>
+    </tr>
+`;
+
+if (record.pengikut && record.pengikut.length > 0) {
+    record.pengikut.forEach((p, idx) => {
+        const no = idx + 2;
+        rowsHTML += `
+            <tr class="border-b border-black align-top">
+                <td class="border-r border-black p-0.5"></td>
+                <td class="border-r border-black p-1 whitespace-nowrap">${no}. ${p.nama}</td>
+                <td class="border-r border-black p-0.5 text-center whitespace-nowrap">1</td>
+                <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
+                <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${record.biayaPerOrang.toLocaleString('id-ID')}</td>
+                <td class="p-0.5 text-center whitespace-nowrap">${no}. ..........</td>
+            </tr>
+        `;
+    });
+}
+kwiRows.innerHTML = rowsHTML;
 
             // Reset checkbox blangko
             document.getElementById('toggleBlangko').checked = false;
