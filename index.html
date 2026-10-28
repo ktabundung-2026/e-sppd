@@ -38,7 +38,7 @@
     <style>
         /* Setup Halaman Cetak F4 Baku (21.7 cm x 33 cm) */
         @page {
-            size: 217mm 330mm; /* Ukuran Kertas F4 Presisi 21,7 cm x 33 cm */
+            size: 217mm 330mm;
             margin: 0;
         }
 
@@ -58,11 +58,11 @@
         .document-paper {
             background-color: white;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 217mm;         /* Lebar Kertas 21.7 cm */
-            height: 330mm;        /* Panjang Kertas 33 cm */
-            padding-top: 10mm;     /* Margin atas 1 cm */
-            padding-left: 17mm;    /* Margin kiri 1.7 cm */
-            padding-right: 10mm;   /* Sisa margin kanan agar total tabel 19 cm pas */
+            width: 217mm;
+            height: 330mm;
+            padding-top: 10mm;
+            padding-left: 17mm;
+            padding-right: 10mm;
             padding-bottom: 10mm;
             margin: auto; 
             color: #000; 
@@ -70,23 +70,23 @@
             font-size: 10.5pt; 
             line-height: 1.25;
             box-sizing: border-box;
-            overflow: hidden; /* Menjaga agar pas 1 halaman */
+            overflow: hidden;
         }
 
         /* Ukuran Presisi Tabel Cetak */
         .sppd-table-fixed {
-            width: 190mm !important; /* Lebar tabel 19 cm */
+            width: 190mm !important;
             table-layout: fixed;
         }
 
         .sppd-back-table {
-            width: 190mm !important; /* Lebar tabel 19 cm */
-            height: 290mm !important; /* Panjang tabel 29 cm */
+            width: 190mm !important;
+            height: 290mm !important;
             table-layout: fixed;
         }
 
         .row-signature-5cm {
-            height: 50mm !important; /* Tinggi baris pengesahan 5 cm */
+            height: 50mm !important;
         }
 
         @media (max-width: 640px) {
@@ -111,6 +111,9 @@
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- DATALIST PENYEDIA SUGGESTION NAMA ASN -->
+    <datalist id="listAsnNama"></datalist>
 
     <!-- HEADER NAVIGASI BAR -->
     <header class="bg-gov-900 text-white shadow-md sticky top-0 z-30 no-print w-full">
@@ -253,30 +256,23 @@
 
                         <!-- Pelaksana Utama -->
                         <div class="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <span class="px-2.5 py-1 text-xs font-bold bg-gov-100 text-gov-800 rounded">Pelaksana Utama</span>
-                                <div class="w-full sm:w-72">
-                                    <select onchange="autofillPelaksana(this.value)" class="text-xs border border-gov-600 bg-gov-50 text-gov-900 rounded px-2.5 py-1.5 font-semibold w-full">
-                                        <option value="">-- Pilih ASN --</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            <span class="px-2.5 py-1 text-xs font-bold bg-gov-100 text-gov-800 rounded">Pelaksana Utama</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
                                 <div>
-                                    <label class="block text-[11px] text-slate-600 mb-0.5">Nama Lengkap</label>
-                                    <input type="text" id="namaPelaksana" required value="Naema Ana Hutar, ST" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <label class="block text-[11px] text-slate-600 mb-0.5">Nama Lengkap (Ketik/Pilih)</label>
+                                    <input type="text" id="namaPelaksana" list="listAsnNama" oninput="onNamaInputChanged('Pelaksana', this.value)" required value="Naema Ana Hutar, ST" placeholder="Ketik nama..." class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none font-semibold">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] text-slate-600 mb-0.5">NIP</label>
-                                    <input type="text" id="nipPelaksana" required value="198211082009032010" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <input type="text" id="nipPelaksana" required value="198211082009032010" placeholder="NIP" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] text-slate-600 mb-0.5">Pangkat / Golongan</label>
-                                    <input type="text" id="pangkatPelaksana" value="Penata Tk. I III/d" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <input type="text" id="pangkatPelaksana" value="Penata Tk. I III/d" placeholder="Pangkat/Gol" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] text-slate-600 mb-0.5">Jabatan</label>
-                                    <input type="text" id="jabatanPelaksana" required value="Kasie Kesos" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <input type="text" id="jabatanPelaksana" required value="Kasie Kesos" placeholder="Jabatan" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
                                 </div>
                             </div>
                         </div>
@@ -285,37 +281,43 @@
                         <div id="pengikutContainer" class="space-y-3"></div>
                     </div>
 
-                    <!-- 3. PENANDATANGAN & BENDAHARA -->
+                    <!-- 3. PENANDATANGAN & BENDAHARA (ISIAN MANUAL DENGAN AUTO-FILL KETIK) -->
                     <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
                         <h3 class="text-base font-bold text-gov-800 flex items-center gap-2 border-b border-slate-200 pb-2">
-                            <i class="fa-solid fa-signature"></i> 3. Penandatangan & Bendahara
+                            <i class="fa-solid fa-signature"></i> 3. Penandatangan (Camat) & Bendahara Pengeluaran
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Camat -->
+                            <!-- Camat (Nama, NIP, Pangkat) -->
                             <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold text-slate-700">Camat Tabundung</h4>
-                                    <select onchange="autofillCamat(this.value)" class="text-xs border border-slate-300 rounded px-2 py-1">
-                                        <option value="">-- Pilih --</option>
-                                    </select>
-                                </div>
+                                <h4 class="text-xs font-bold text-slate-700 border-b border-slate-100 pb-1">Camat Tabundung</h4>
                                 <div class="space-y-2 pt-1">
-                                    <input type="text" id="namaCamat" required value="RUDOLF UMBU RESI LOLY, ST" placeholder="Nama Camat" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
-                                    <input type="text" id="nipCamat" required value="197205212006041008" placeholder="NIP Camat" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
-                                    <input type="text" id="pangkatCamat" value="Pembina" placeholder="Pangkat Camat" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-0.5">Nama Camat (Ketik / Pilih)</label>
+                                        <input type="text" id="namaCamat" list="listAsnNama" oninput="onNamaInputChanged('Camat', this.value)" required value="RUDOLF UMBU RESI LOLY, ST" placeholder="Ketik/Pilih Nama Camat..." class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-0.5">NIP Camat</label>
+                                        <input type="text" id="nipCamat" required value="197205212006041008" placeholder="NIP Camat" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-0.5">Pangkat Camat</label>
+                                        <input type="text" id="pangkatCamat" value="Pembina" placeholder="Pangkat Camat" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Bendahara Pengeluaran -->
+
+                            <!-- Bendahara Pengeluaran (Nama, NIP) -->
                             <div class="bg-white p-3.5 rounded-lg border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold text-slate-700">Bendahara Pengeluaran</h4>
-                                    <select onchange="autofillBendahara(this.value)" class="text-xs border border-slate-300 rounded px-2 py-1">
-                                        <option value="">-- Pilih --</option>
-                                    </select>
-                                </div>
+                                <h4 class="text-xs font-bold text-slate-700 border-b border-slate-100 pb-1">Bendahara Pengeluaran</h4>
                                 <div class="space-y-2 pt-1">
-                                    <input type="text" id="namaBendahara" required value="DANIEL KAMBARU WINDI" placeholder="Nama Bendahara" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
-                                    <input type="text" id="nipBendahara" required value="19771231 200801 1 084" placeholder="NIP Bendahara" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-0.5">Nama Bendahara (Ketik / Pilih)</label>
+                                        <input type="text" id="namaBendahara" list="listAsnNama" oninput="onNamaInputChanged('Bendahara', this.value)" required value="DANIEL KAMBARU WINDI" placeholder="Ketik/Pilih Nama Bendahara..." class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-0.5">NIP Bendahara</label>
+                                        <input type="text" id="nipBendahara" required value="19771231 200801 1 084" placeholder="NIP Bendahara" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -438,6 +440,13 @@
                 <button onclick="switchDocView('laporan')" id="btnDocLaporan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Laporan</button>
                 <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi</button>
             </div>
+            
+            <!-- Sakelar Fitur Cetak Blangko Belakang -->
+            <div id="toggleBlangkoWrapper" class="hidden items-center gap-2 bg-amber-950/60 border border-amber-600/40 px-3 py-1 rounded-lg">
+                <input type="checkbox" id="toggleBlangko" onchange="toggleBlangkoBelakangMode(this.checked)" class="w-4 h-4 text-amber-500 rounded focus:ring-0 cursor-pointer">
+                <label for="toggleBlangko" class="text-xs font-semibold text-amber-200 cursor-pointer select-none">Cetak Blangko Kosong</label>
+            </div>
+
             <div class="flex items-center gap-2">
                 <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow flex items-center gap-1.5">
                     <i class="fa-solid fa-file-pdf"></i>
@@ -641,15 +650,16 @@
                 <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                     <table class="sppd-back-table border-collapse border border-black font-official text-xs">
                         <tbody>
-                            <!-- Baris 1 -->
+                            <!-- Baris 1: Keterangan SPPD Nomor dan Kedudukan Utama -->
                             <tr class="border-b border-black">
                                 <td class="p-2 w-1/2 border-r border-black align-top"></td>
                                 <td class="p-2 w-1/2 align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-28">Berangkat Dari</td><td>: Malahar</td></tr>
+                                        <tr><td class="w-28">SPPD Nomor</td><td>: <span class="data-fillable" id="bktNoSPPD">-</span></td></tr>
+                                        <tr><td class="w-28 pt-1">Berangkat Dari</td><td class="pt-1">: <span class="data-fillable">Malahar</span></td></tr>
                                         <tr><td colspan="2">(Tempat Kedudukan)</td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTgl1">-</span></td></tr>
-                                        <tr><td>Ke</td><td>: <span id="bktTujuan1">-</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTgl1">-</span></td></tr>
+                                        <tr><td>Ke</td><td>: <span class="data-fillable" id="bktTujuan1">-</span></td></tr>
                                         <tr><td colspan="2" class="pt-1 italic">Selaku Pelaksana Teknis Kegiatan</td></tr>
                                     </table>
                                 </td>
@@ -658,15 +668,15 @@
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-28">I. Tiba di</td><td>: <span id="bktTiba1">-</span></td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTglTiba1">-</span></td></tr>
+                                        <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                     </table>
                                 </td>
                                 <td class="p-2 align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-28">Berangkat dari</td><td>: <span id="bktBerangkat1">-</span></td></tr>
-                                        <tr><td>Ke</td><td>: Malahar</td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTglBerangkat1">-</span></td></tr>
+                                        <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
+                                        <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                     </table>
                                 </td>
                             </tr>
@@ -674,15 +684,15 @@
                             <tr class="border-b border-black row-signature-5cm">
                                 <td class="p-2 border-r border-black align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-28">II. Tiba di</td><td>: <span id="bktTiba2">-</span></td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTglTiba2">-</span></td></tr>
+                                        <tr><td class="w-28">II. Tiba di</td><td>: <span class="data-fillable" id="bktTiba2">-</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
                                     </table>
                                 </td>
                                 <td class="p-2 align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-28">Berangkat dari</td><td>: <span id="bktBerangkat2">-</span></td></tr>
-                                        <tr><td>Ke</td><td>: Malahar</td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTglBerangkat2">-</span></td></tr>
+                                        <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat2">-</span></td></tr>
+                                        <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat2">-</span></td></tr>
                                     </table>
                                 </td>
                             </tr>
@@ -709,8 +719,8 @@
                                 </td>
                                 <td class="p-2 align-top">
                                     <table class="w-full">
-                                        <tr><td class="w-32">IV. Tiba Kembali di</td><td>: Malahar</td></tr>
-                                        <tr><td>Pada Tanggal</td><td>: <span id="bktTglAkhir">-</span></td></tr>
+                                        <tr><td class="w-32">IV. Tiba Kembali di</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglAkhir">-</span></td></tr>
                                     </table>
                                     <p class="mt-1 text-[9.5pt]">Telah diperiksa dengan keterangan bahwa perjalanan dinas tersebut di atas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.</p>
                                     <div class="text-center mt-2">
@@ -951,22 +961,20 @@
 
             calculateDuration();
             calculateTotalBudget();
-            
-            autofillCamat("197205212006041008");
-            autofillBendahara("197712312008011084");
         };
 
         function populateSelectOptions() {
-            const selectPegawai = document.querySelectorAll('select[onchange^="autofill"]');
-            selectPegawai.forEach(select => {
-                DATA_ASN_TABUNDUNG.forEach(asn => {
-                    const opt = document.createElement('option');
-                    opt.value = asn.nip;
-                    opt.innerText = `${asn.nama} (${asn.jabatan})`;
-                    select.appendChild(opt);
-                });
+            // Populate Datalist ASN Nama
+            const datalistAsn = document.getElementById('listAsnNama');
+            datalistAsn.innerHTML = '';
+            DATA_ASN_TABUNDUNG.forEach(asn => {
+                const opt = document.createElement('option');
+                opt.value = asn.nama;
+                opt.innerText = `${asn.jabatan} - NIP. ${asn.nip}`;
+                datalistAsn.appendChild(opt);
             });
 
+            // Populate Dropdown Desa
             const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
             if(selectDesa) {
                 DAFTAR_DESA_TABUNDUNG.forEach(desa => {
@@ -978,35 +986,26 @@
             }
         }
 
+        // Auto-fill NIP & Pangkat saat memasukkan Nama pada Pelaksana / Camat / Bendahara
+        function onNamaInputChanged(role, namaVal) {
+            if (!namaVal) return;
+            const match = DATA_ASN_TABUNDUNG.find(a => a.nama.trim().toLowerCase() === namaVal.trim().toLowerCase());
+            if (match) {
+                if (role === 'Pelaksana') {
+                    document.getElementById('nipPelaksana').value = match.nip;
+                    document.getElementById('pangkatPelaksana').value = match.pangkat || '-';
+                    document.getElementById('jabatanPelaksana').value = match.jabatan;
+                } else if (role === 'Camat') {
+                    document.getElementById('nipCamat').value = match.nip;
+                    document.getElementById('pangkatCamat').value = match.pangkat || '-';
+                } else if (role === 'Bendahara') {
+                    document.getElementById('nipBendahara').value = match.nip;
+                }
+            }
+        }
+
         function selectTujuanDesa(val) {
             if(val) document.getElementById('tempatTujuan').value = val;
-        }
-
-        function autofillPelaksana(nip) {
-            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
-            if(asn) {
-                document.getElementById('namaPelaksana').value = asn.nama;
-                document.getElementById('nipPelaksana').value = asn.nip;
-                document.getElementById('jabatanPelaksana').value = asn.jabatan;
-                document.getElementById('pangkatPelaksana').value = asn.pangkat || '-';
-            }
-        }
-
-        function autofillCamat(nip) {
-            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
-            if(asn) {
-                document.getElementById('namaCamat').value = asn.nama;
-                document.getElementById('nipCamat').value = asn.nip;
-                document.getElementById('pangkatCamat').value = asn.pangkat || '-';
-            }
-        }
-
-        function autofillBendahara(nip) {
-            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip.replace(/\s+/g,'') === nip.replace(/\s+/g,''));
-            if(asn) {
-                document.getElementById('namaBendahara').value = asn.nama;
-                document.getElementById('nipBendahara').value = asn.nip;
-            }
         }
 
         function addOfficerRow() {
@@ -1015,11 +1014,6 @@
             const div = document.createElement('div');
             div.id = `pengikut-row-${pengikutCount}`;
             div.className = 'bg-white p-3.5 rounded-lg border border-slate-200 space-y-2';
-            
-            let options = `<option value="">-- Pilih Pengikut ASN --</option>`;
-            DATA_ASN_TABUNDUNG.forEach(asn => {
-                options += `<option value="${asn.nip}">${asn.nama}</option>`;
-            });
 
             div.innerHTML = `
                 <div class="flex items-center justify-between">
@@ -1028,11 +1022,8 @@
                         <i class="fa-solid fa-trash"></i> Hapus
                     </button>
                 </div>
-                <select onchange="autofillPengikutRow(${pengikutCount}, this.value)" class="p-1.5 text-xs rounded border border-slate-300 w-full mb-2">
-                    ${options}
-                </select>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
-                    <input type="text" placeholder="Nama Lengkap" class="p-1.5 text-xs rounded border border-slate-300 w-full pengikut-nama">
+                    <input type="text" list="listAsnNama" oninput="autofillPengikutRow(${pengikutCount}, this.value)" placeholder="Nama Lengkap (Ketik/Pilih)" class="p-1.5 text-xs font-semibold rounded border border-slate-300 w-full pengikut-nama">
                     <input type="text" placeholder="NIP" class="p-1.5 text-xs rounded border border-slate-300 w-full pengikut-nip">
                     <input type="text" placeholder="Pangkat/Gol" class="p-1.5 text-xs rounded border border-slate-300 w-full pengikut-pangkat">
                     <input type="text" placeholder="Jabatan / Keterangan" class="p-1.5 text-xs rounded border border-slate-300 w-full pengikut-jabatan">
@@ -1041,11 +1032,10 @@
             container.appendChild(div);
         }
 
-        function autofillPengikutRow(id, nip) {
-            const asn = DATA_ASN_TABUNDUNG.find(a => a.nip === nip);
+        function autofillPengikutRow(id, namaVal) {
+            const asn = DATA_ASN_TABUNDUNG.find(a => a.nama.trim().toLowerCase() === namaVal.trim().toLowerCase());
             const row = document.getElementById(`pengikut-row-${id}`);
             if(asn && row) {
-                row.querySelector('.pengikut-nama').value = asn.nama;
                 row.querySelector('.pengikut-nip').value = asn.nip;
                 row.querySelector('.pengikut-pangkat').value = asn.pangkat || '-';
                 row.querySelector('.pengikut-jabatan').value = asn.jabatan;
@@ -1218,6 +1208,7 @@
             }
 
             // SPPD Halaman Belakang (Lembar II Pengesahan)
+            document.getElementById('bktNoSPPD').innerText = record.noSPPD;
             document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktTujuan1').innerText = record.tempatTujuan;
             document.getElementById('bktTiba1').innerText = record.tempatTujuan;
@@ -1315,6 +1306,10 @@
             }
             kwiRows.innerHTML = rowsHTML;
 
+            // Reset checkbox blangko
+            document.getElementById('toggleBlangko').checked = false;
+            toggleBlangkoBelakangMode(false);
+
             document.getElementById('previewModal').classList.remove('hidden');
             switchDocView('st');
         }
@@ -1330,6 +1325,15 @@
             });
             document.getElementById(`doc-${docType}`).classList.remove('hidden');
 
+            const toggleWrapper = document.getElementById('toggleBlangkoWrapper');
+            if (docType === 'sppd-belakang') {
+                toggleWrapper.classList.remove('hidden');
+                toggleWrapper.classList.add('flex');
+            } else {
+                toggleWrapper.classList.add('hidden');
+                toggleWrapper.classList.remove('flex');
+            }
+
             document.querySelectorAll('.doc-tab-btn').forEach(btn => {
                 btn.className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white";
             });
@@ -1344,6 +1348,22 @@
             if (activeBtn) {
                 activeBtn.className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium bg-gov-700 text-white";
             }
+        }
+
+        function toggleBlangkoBelakangMode(isBlangko) {
+            const documentBelakang = document.getElementById('doc-sppd-belakang');
+            const fillableElements = documentBelakang.querySelectorAll('.data-fillable');
+            
+            fillableElements.forEach(el => {
+                if (isBlangko) {
+                    el.setAttribute('data-original', el.innerText);
+                    el.innerText = '';
+                } else {
+                    if (el.hasAttribute('data-original')) {
+                        el.innerText = el.getAttribute('data-original');
+                    }
+                }
+            });
         }
 
         function closePreviewModal() {
