@@ -8,10 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & Tinos -->
+    <!-- Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -317,7 +315,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 5: RINGKASAN LAPORAN HASIL -->
+                    <!-- SECTION 5: RINGKASAN LAPORAN HASIL (Untuk Laporan Perjalanan Dinas) -->
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
                         <h3 class="text-md font-semibold text-gov-800 flex items-center gap-2 border-b border-slate-200 pb-2">
                             <i class="fa-solid fa-file-lines"></i> 5. Draft Laporan Hasil Perjalanan Dinas
@@ -535,7 +533,7 @@
                     </div>
                 </div>
 
-                <!-- DOCUMENT 2: SPPD (SURAT PERINTAH PERJALANAN DINAS) -->
+                <!-- DOCUMENT 2: SPPD (SURAT PERINTH PERJALANAN DINAS) -->
                 <div id="doc-sppd" class="document-paper mb-8 hidden">
                     <!-- Kop Surat -->
                     <div class="text-center border-b-4 border-double border-black pb-2 mb-4">
@@ -556,7 +554,7 @@
                     </div>
 
                     <div class="text-center font-bold text-base underline uppercase mb-4">
-                        SURAT PERINTAH PERJALANAN DINAS (SPPD)
+                        SURAT PERINTH PERJALANAN DINAS (SPPD)
                     </div>
 
                     <table class="w-full border-collapse border border-black font-official text-xs">
@@ -647,7 +645,7 @@
                         </div>
                     </div>
 
-                    <!-- PAGE BREAK FOR SPPD LEMBAR II -->
+                    <!-- PAGE BREAK FOR SPPD LEMBAR II (BACK PAGE STAMP AREA) -->
                     <div class="page-break my-8 border-t-2 border-dashed border-slate-300 pt-8 no-print-break"></div>
 
                     <!-- SPPD LEMBAR II -->
@@ -867,13 +865,13 @@
                 <button onclick="closeGasModal()" class="text-slate-300 hover:text-white text-2xl font-bold">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto space-y-4 text-sm text-slate-700">
-                <p>Aplikasi ini dapat dihubungkan langsung ke <strong>Google Sheets</strong> dan <strong>Google Drive</strong> menggunakan Google Apps Script agar semua data tersimpan di Cloud dan PDF tergenerate otomatis di Drive.</p>
+                <p>Aplikasi ini dapat dihubungkan langsung ke <strong>Google Sheets</strong> dan **Google Drive** menggunakan Google Apps Script agar semua data tersimpan di Cloud dan PDF tergenerate otomatis di Drive.</p>
                 
                 <h4 class="font-bold text-gov-800">Langkah Pemasangan Script GAS:</h4>
                 <ol class="list-decimal pl-5 space-y-1 text-xs">
                     <li>Buka Google Spreadsheet baru di Google Drive Anda.</li>
                     <li>Buka menu <strong>Ekstensi &gt; Apps Script</strong>.</li>
-                    <li>Hapus kode bawaan, lalu <strong>Salin / Paste</strong> kode di bawah ini ke dalam <code>Code.gs</code>.</li>
+                    <li>Hapus kode bawaan, lalu **Salin / Paste** kode di bawah ini ke dalam `Code.gs`.</li>
                     <li>Klik <strong>Terapkan (Deploy) &gt; Terapkan sebagai Aplikasi Web (Web App)</strong>.</li>
                     <li>Akses set ke: <em>Anyone (Siapa Saja)</em>. Simpan URL Web App tersebut.</li>
                 </ol>
@@ -942,40 +940,17 @@ function doPost(e) {
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SYNCHRONIZED & COMBINED) -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Config Supabase (Ganti URL & API Key sesuai project Supabase Anda)
-        const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw';
-        
-        let supabaseClient = null;
-        if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-
         // State Storage
         let travelRecords = [];
         let currentRecord = null;
         let pengikutCount = 0;
 
         // On Page Load
-        window.onload = async function() {
-            if (supabaseClient) {
-                await fetchRecordsFromSupabase();
-            } else {
-                loadRecordsFromLocalStorage();
-            }
-            
-            // Set default tanggal hari ini
-            document.getElementById('tglSurat').valueAsDate = new Date();
-            document.getElementById('tglMulai').valueAsDate = new Date();
-            document.getElementById('tglSelesai').valueAsDate = new Date();
-            calculateDuration();
-        };
-
-        // Fallback: Load data dari localStorage
-        function loadRecordsFromLocalStorage() {
-            const savedData = localStorage.getItem('sppd_catat');
+        window.onload = function() {
+            // Load saved data from localStorage
+            const savedData = localStorage.getItem('sppd_records');
             if (savedData) {
                 try {
                     travelRecords = JSON.parse(savedData);
@@ -984,59 +959,11 @@ function doPost(e) {
                 }
             }
             renderHistoryTable();
-        }
-
-        // Ambil data dari tabel Supabase
-        async function fetchRecordsFromSupabase() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('sppd_catat')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                // Mapping field nama dari Supabase (snake_case) ke camelCase UI
-                travelRecords = data.map(item => ({
-                    id: item.id,
-                    noSuratTugas: item.no_surat_tugas,
-                    noSPPD: item.no_sppd,
-                    maksudTujuan: item.maksud_tujuan,
-                    tempatBerangkat: item.tempat_berangkat,
-                    tempatTujuan: item.tempat_tujuan,
-                    alatAngkutan: item.alat_angkutan,
-                    mataAnggaran: item.mata_anggaran,
-                    tglMulai: item.tgl_mulai,
-                    tglSelesai: item.tgl_selesai,
-                    lamaHari: item.lama_hari,
-                    tglSurat: item.tgl_surat,
-                    namaPelaksana: item.nama_pelaksana,
-                    nipPelaksana: item.nip_pelaksana,
-                    jabatanPelaksana: item.jabatan_pelaksana,
-                    pangkatPelaksana: item.pangkat_pelaksana,
-                    pengikut: item.pengikut || [],
-                    namaCamat: item.nama_camat,
-                    nipCamat: item.nip_camat,
-                    pangkatCamat: item.pangkat_camat,
-                    namaBendahara: item.nama_bendahara,
-                    nipBendahara: item.nip_bendahara,
-                    uangHarian: item.uang_harian,
-                    biayaTransport: item.biaya_transport,
-                    biayaPenginapan: item.biaya_penginapan,
-                    biayaLain: item.biaya_lain,
-                    totalBiaya: item.total_biaya,
-                    laporanHasil: item.laporan_hasil,
-                    laporanSaran: item.laporan_saran,
-                    kopPemkab: item.kop_pemkab,
-                    kopKecamatan: item.kop_kecamatan,
-                    kopAlamat: item.kop_alamat
-                }));
-
-                renderHistoryTable();
-            } catch (err) {
-                console.warn('Gagal terkoneksi ke Supabase, mengalihkan ke LocalStorage:', err.message);
-                loadRecordsFromLocalStorage();
-            }
+            // Set default date to today
+            document.getElementById('tglSurat').valueAsDate = new Date();
+            document.getElementById('tglMulai').valueAsDate = new Date();
+            document.getElementById('tglSelesai').valueAsDate = new Date();
+            calculateDuration();
         }
 
         // Tab Navigation Switcher
@@ -1071,17 +998,13 @@ function doPost(e) {
 
         // Calculate Travel Duration (Days)
         function calculateDuration() {
-            const tglMulaiVal = document.getElementById('tglMulai').value;
-            const tglSelesaiVal = document.getElementById('tglSelesai').value;
-
-            if (tglMulaiVal && tglSelesaiVal) {
-                const tglMulai = new Date(tglMulaiVal);
-                const tglSelesai = new Date(tglSelesaiVal);
-                if (!isNaN(tglMulai) && !isNaN(tglSelesai)) {
-                    const diffTime = tglSelesai - tglMulai;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                    document.getElementById('lamaHari').value = diffDays > 0 ? diffDays : 1;
-                }
+            const tglMulai = new Date(document.getElementById('tglMulai').value);
+            const tglSelesai = new Date(document.getElementById('tglSelesai').value);
+            
+            if (tglMulai && tglSelesai && !isNaN(tglMulai) && !isNaN(tglSelesai)) {
+                const diffTime = Math.abs(tglSelesai - tglMulai);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('lamaHari').value = diffDays > 0 ? diffDays : 1;
             }
         }
 
@@ -1098,8 +1021,8 @@ function doPost(e) {
             return total;
         }
 
-        // Form Submit Handler (Support Supabase & LocalStorage)
-        async function handleFormSubmit(e) {
+        // Form Submit Handler
+        function handleFormSubmit(e) {
             e.preventDefault();
             
             // Collect Pengikut Data
@@ -1108,7 +1031,7 @@ function doPost(e) {
                 const nama = row.querySelector('.pengikut-nama').value;
                 const nip = row.querySelector('.pengikut-nip').value;
                 const jabatan = row.querySelector('.pengikut-jabatan').value;
-                if (nama && nama.trim()) {
+                if (nama.trim()) {
                     pengikutList.push({ nama, nip, jabatan });
                 }
             });
@@ -1124,7 +1047,7 @@ function doPost(e) {
                 mataAnggaran: document.getElementById('mataAnggaran').value,
                 tglMulai: document.getElementById('tglMulai').value,
                 tglSelesai: document.getElementById('tglSelesai').value,
-                lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
+                lamaHari: document.getElementById('lamaHari').value,
                 tglSurat: document.getElementById('tglSurat').value,
                 
                 // Officers
@@ -1156,59 +1079,11 @@ function doPost(e) {
                 kopAlamat: document.getElementById('kopAlamat').value,
             };
 
-            if (supabaseClient) {
-                const payload = {
-                    no_surat_tugas: record.noSuratTugas,
-                    no_sppd: record.noSPPD,
-                    maksud_tujuan: record.maksudTujuan,
-                    tempat_berangkat: record.tempatBerangkat,
-                    tempat_tujuan: record.tempatTujuan,
-                    alat_angkutan: record.alatAngkutan,
-                    mata_anggaran: record.mataAnggaran,
-                    tgl_mulai: record.tglMulai,
-                    tgl_selesai: record.tglSelesai,
-                    lama_hari: record.lamaHari,
-                    tgl_surat: record.tglSurat,
-                    nama_pelaksana: record.namaPelaksana,
-                    nip_pelaksana: record.nipPelaksana,
-                    jabatan_pelaksana: record.jabatanPelaksana,
-                    pangkat_pelaksana: record.pangkatPelaksana,
-                    pengikut: record.pengikut,
-                    nama_camat: record.namaCamat,
-                    nip_camat: record.nipCamat,
-                    pangkat_camat: record.pangkatCamat,
-                    nama_bendahara: record.namaBendahara,
-                    nip_bendahara: record.nipBendahara,
-                    uang_harian: record.uangHarian,
-                    biaya_transport: record.biayaTransport,
-                    biaya_penginapan: record.biayaPenginapan,
-                    biaya_lain: record.biayaLain,
-                    total_biaya: record.totalBiaya,
-                    laporan_hasil: record.laporanHasil,
-                    laporan_saran: record.laporanSaran,
-                    kop_pemkab: record.kopPemkab,
-                    kop_kecamatan: record.kopKecamatan,
-                    kop_alamat: record.kopAlamat
-                };
-
-                const { data, error } = await supabaseClient
-                    .from('sppd_catat')
-                    .insert([payload])
-                    .select();
-
-                if (error) {
-                    alert('Gagal menyimpan data ke Supabase: ' + error.message);
-                    return;
-                }
-
-                alert('Data SPPD berhasil tersimpan di Supabase!');
-                await fetchRecordsFromSupabase();
-            } else {
-                travelRecords.unshift(record);
-                localStorage.setItem('sppd_catat', JSON.stringify(travelRecords));
-                renderHistoryTable();
-            }
-
+            // Save locally
+            travelRecords.unshift(record);
+            localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+            
+            renderHistoryTable();
             openPreviewModal(record);
         }
 
@@ -1219,12 +1094,8 @@ function doPost(e) {
             // Date Formatter Helper
             const formatDate = (str) => {
                 if(!str) return '-';
-                const parts = str.split('-');
-                if(parts.length === 3) {
-                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                }
-                return str;
+                const d = new Date(str);
+                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             };
 
             // Kop Surat Sync
@@ -1410,24 +1281,11 @@ function doPost(e) {
             `).join('');
         }
 
-        async function deleteRecord(id) {
+        function deleteRecord(id) {
             if(confirm("Apakah Anda yakin ingin menghapus data perjalanan dinas ini?")) {
-                if (supabaseClient) {
-                    const { error } = await supabaseClient
-                        .from('sppd_catat')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) {
-                        alert('Gagal menghapus data dari Tabel: ' + error.message);
-                        return;
-                    }
-                    await fetchRecordsFromSupabase();
-                } else {
-                    travelRecords = travelRecords.filter(r => r.id !== id);
-                    localStorage.setItem('sppd_catat', JSON.stringify(travelRecords));
-                    renderHistoryTable();
-                }
+                travelRecords = travelRecords.filter(r => r.id !== id);
+                localStorage.setItem('sppd_records', JSON.stringify(travelRecords));
+                renderHistoryTable();
             }
         }
 
@@ -1476,9 +1334,9 @@ function doPost(e) {
         // Helper: Convert Number to Words (Terbilang Bahasa Indonesia)
         function numberToWords(amount) {
             const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            let num = Math.floor(Math.abs(amount));
+            let num = Math.floor(amount);
             if (num === 0) return "Nol";
-
+            
             function convert(n) {
                 if (n < 12) return words[n];
                 if (n < 20) return convert(n - 10) + " Belas";
@@ -1488,7 +1346,6 @@ function doPost(e) {
                 if (n < 2000) return "Seribu " + convert(n - 1000);
                 if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
                 if (n < 1000000000) return convert(Math.floor(n / 1000000)) + " Juta " + convert(n % 1000000);
-                if (n < 1000000000000) return convert(Math.floor(n / 1000000000)) + " Miliar " + convert(n % 1000000000);
                 return n.toString();
             }
             return convert(num).replace(/\s+/g, ' ').trim();
