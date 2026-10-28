@@ -36,9 +36,9 @@
     </script>
     
     <style>
-        /* Setup Halaman Cetak F4 Baku */
+        /* Setup Halaman Cetak F4 Baku (21.7 cm x 33 cm) */
         @page {
-            size: 210mm 330mm; /* Ukuran Kertas F4 */
+            size: 217mm 330mm; /* Ukuran Kertas F4 Presisi 21,7 cm x 33 cm */
             margin: 0;
         }
 
@@ -46,7 +46,7 @@
             body * { visibility: hidden; }
             .print-area, .print-area * { visibility: visible; }
             .print-area {
-                position: absolute; left: 0; top: 0; width: 210mm; height: 330mm;
+                position: absolute; left: 0; top: 0; width: 217mm; height: 330mm;
                 margin: 0; padding: 0; background: white !important;
                 color: black !important; font-family: 'Tinos', Georgia, serif !important;
             }
@@ -58,11 +58,11 @@
         .document-paper {
             background-color: white;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 210mm; 
-            height: 330mm; 
-            padding-top: 10mm;     /* 1 cm dari pinggir atas */
-            padding-left: 17mm;    /* 1.7 cm dari pinggir kiri */
-            padding-right: 23mm;   /* Sisa margin kanan agar total tabel 19 cm */
+            width: 217mm;         /* Lebar Kertas 21.7 cm */
+            height: 330mm;        /* Panjang Kertas 33 cm */
+            padding-top: 10mm;     /* Margin atas 1 cm */
+            padding-left: 17mm;    /* Margin kiri 1.7 cm */
+            padding-right: 10mm;   /* Sisa margin kanan agar total tabel 19 cm pas */
             padding-bottom: 10mm;
             margin: auto; 
             color: #000; 
@@ -80,13 +80,13 @@
         }
 
         .sppd-back-table {
-            width: 190mm !important;
+            width: 190mm !important; /* Lebar tabel 19 cm */
             height: 290mm !important; /* Panjang tabel 29 cm */
             table-layout: fixed;
         }
 
         .row-signature-5cm {
-            height: 50mm !important; /* Lebar/Tinggi baris pengesahan 5 cm */
+            height: 50mm !important; /* Tinggi baris pengesahan 5 cm */
         }
 
         @media (max-width: 640px) {
@@ -428,7 +428,7 @@
         <div class="bg-slate-900 text-white p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print border-b border-slate-800">
             <div class="flex items-center space-x-2">
                 <span class="text-amber-400 text-lg"><i class="fa-solid fa-print"></i></span>
-                <h3 class="font-bold text-sm sm:text-base">Pratinjau Cetak SPPD (Ukuran Kertas F4)</h3>
+                <h3 class="font-bold text-sm sm:text-base">Pratinjau Cetak SPPD (Ukuran Kertas F4: 21,7 x 33 cm)</h3>
             </div>
             <!-- Switcher Halaman Dokumen -->
             <div class="flex flex-wrap items-center gap-1.5 bg-slate-800 p-1 rounded-lg">
