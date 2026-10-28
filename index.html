@@ -195,7 +195,7 @@
                             <textarea id="maksudTujuan" rows="2" required placeholder="Dalam rangka Monitoring realisasi Pembayaran PBB-P2..." class="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">Dalam rangka Monitoring realisasi Pembayaran PBB-P2 di Desa Billa Selama 1 (Satu) Hari pada Tanggal, 05 Agustus 2026</textarea>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Berangkat</label>
                                 <input type="text" id="tempatBerangkat" required value="Malahar" class="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
@@ -209,6 +209,10 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Tujuan (Teks)</label>
                                 <input type="text" id="tempatTujuan" required value="Desa Billa" placeholder="Ketik tempat tujuan..." class="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Kepala Desa / Pejabat</label>
+                                <input type="text" id="namaKades" placeholder="Nama Kepala Desa..." class="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
                             </div>
                         </div>
 
@@ -705,6 +709,12 @@
                                         <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                     </table>
+                                    <!-- Tanda Tangan / Nama Kepala Desa di Tiba Desa (Tengah) -->
+                                    <div class="mt-8 text-center">
+                                        <p class="font-bold">Kepala Desa <span class="data-fillable" id="bktNamaDesa1">-</span>,</p>
+                                        <div class="h-12"></div>
+                                        <p class="font-bold underline uppercase" id="bktKadesNama1">-</p>
+                                    </div>
                                 </td>
                                 <td class="p-2 align-top">
                                     <table class="w-full">
@@ -712,6 +722,12 @@
                                         <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                     </table>
+                                    <!-- Tanda Tangan / Nama Kepala Desa di Berangkat Desa (Tengah) -->
+                                    <div class="mt-8 text-center">
+                                        <p class="font-bold">Kepala Desa <span class="data-fillable" id="bktNamaDesa2">-</span>,</p>
+                                        <div class="h-12"></div>
+                                        <p class="font-bold underline uppercase" id="bktKadesNama2">-</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr class="border-b border-black row-signature-5cm">
@@ -885,7 +901,7 @@
 
                     <p class="font-official text-xs font-semibold mb-1 sppd-table-fixed">Dengan Rincian Sebagai berikut :</p>
 
-                    <!-- TABEL KWITANSI: KOLOM KODE REKENING PAS DIGIT, URAIAN DIPERLEBAR, BIAYA/VOL/SAT RINGKAS -->
+                    <!-- TABEL KWITANSI -->
                     <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                         <thead>
                             <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -911,28 +927,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Baris 1: Level Kelompok (5.1.02) -->
                             <tr class="border-b border-black font-bold">
                                 <td class="border-r border-black p-1 text-left font-mono whitespace-nowrap" id="kwiRek1">5.1.02</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA LANGSUNG</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaLangsungVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 2: Level Jenis (5.1.02.04) -->
                             <tr class="border-b border-black font-bold">
                                 <td class="border-r border-black p-1 text-left font-mono whitespace-nowrap" id="kwiRek2">5.1.02.04</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">BELANJA PEGAWAI</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPegawaiVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 3: Level Objek (5.1.02.04.01) -->
                             <tr class="border-b border-black font-bold">
                                 <td class="border-r border-black p-1 text-left font-mono whitespace-nowrap" id="kwiRek3">5.1.02.04.01</td>
                                 <td class="border-r border-black p-1 text-left" colspan="4">Belanja Perjalanan Dinas</td>
                                 <td class="border-r border-black p-1 text-right" id="kwiBelanjaPerjalananVal">-</td>
                                 <td class="p-1"></td>
                             </tr>
-                            <!-- Baris 4 & 5: Level Rincian Objek -->
                             <tr class="border-b border-black font-bold">
                                 <td class="border-r border-black p-1 text-left font-mono align-top whitespace-nowrap" rowspan="2" id="kwiRek4">5.1.02.04.01.00001</td>
                                 <td class="border-r border-black p-1 text-left font-bold whitespace-nowrap" colspan="5">Belanja Perjalanan Dinas Dalam Daerah</td>
@@ -943,9 +955,7 @@
                                     Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud">Dalam rangka Monitoring realisasi Pembayaran PBB-P2</span>
                                 </td>
                             </tr>
-                            <!-- Dynamic Row Personil Kwitansi -->
                             <tbody id="kwiDynamicRows"></tbody>
-                            <!-- Jumlah Terima -->
                             <tr class="font-bold bg-slate-50 border-b border-black">
                                 <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
                                 <td class="border-r border-black p-1.5 text-right" id="kwiJumlahTerima">-</td>
@@ -1030,7 +1040,7 @@
         };
 
         function populateSelectOptions() {
-            // Populate Dropdown Pelaksana Utama (Hanya Nama)
+            // Dropdown Pelaksana Utama (Nama Saja)
             const selectPelaksana = document.getElementById('namaPelaksana');
             if (selectPelaksana) {
                 selectPelaksana.innerHTML = '<option value="">-- Pilih ASN --</option>';
@@ -1042,7 +1052,7 @@
                 });
             }
 
-            // Populate Datalist ASN
+            // Datalist ASN
             const datalistAsn = document.getElementById('listAsnNama');
             if (datalistAsn) {
                 datalistAsn.innerHTML = '';
@@ -1054,7 +1064,7 @@
                 });
             }
 
-            // Populate Dropdown Desa Tujuan
+            // Dropdown Desa Tujuan
             const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
             if (selectDesa) {
                 selectDesa.innerHTML = '<option value="">-- Pilih Desa --</option>';
@@ -1177,6 +1187,7 @@
                 maksudTujuan: document.getElementById('maksudTujuan').value,
                 tempatBerangkat: document.getElementById('tempatBerangkat').value,
                 tempatTujuan: document.getElementById('tempatTujuan').value,
+                namaKades: document.getElementById('namaKades').value || '....................',
                 alatAngkutan: document.getElementById('alatAngkutan').value,
                 dasarPelaksanaan: document.getElementById('dasarPelaksanaan').value,
                 mataAnggaran: document.getElementById('mataAnggaran').value,
@@ -1313,6 +1324,12 @@
             document.getElementById('bktCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('bktCamatNip').innerText = record.nipCamat;
 
+            // Update Kepala Desa di SPPD Belakang
+            document.getElementById('bktNamaDesa1').innerText = record.tempatTujuan;
+            document.getElementById('bktNamaDesa2').innerText = record.tempatTujuan;
+            document.getElementById('bktKadesNama1').innerText = record.namaKades || '....................';
+            document.getElementById('bktKadesNama2').innerText = record.namaKades || '....................';
+
             // Laporan
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan;
             document.getElementById('lapTujuan').innerText = record.tempatTujuan;
@@ -1349,7 +1366,7 @@
             }
             lapTTD.innerHTML = ttdHTML;
 
-            // Pengisian Rumpun Kode Rekening 1 Kolom
+            // Rumpun Kode Rekening
             const seg1 = record.rekSeg1 || '5.1';
             const seg2 = record.rekSeg2 || '02';
             const seg3 = record.rekSeg3 || '04';
@@ -1374,8 +1391,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // Dynamic Rows Personil Kwitansi
-            // Dynamic Rows Personil Kwitansi (Uraian Luas & Nama 1 Baris)
+            // Dynamic Rows Personil Kwitansi (Tanda Tangan Rata Kiri)
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
@@ -1519,7 +1535,6 @@
                 `;
             }).join('');
 
-            // Render rekap total biaya pada akhir kolom riwayat
             tfoot.innerHTML = `
                 <tr>
                     <td colspan="4" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya Perjalanan Dinas:</td>
