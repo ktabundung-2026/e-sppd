@@ -52,6 +52,20 @@
             }
             .no-print { display: none !important; }
             .page-break { page-break-before: always; }
+
+            /* Khusus Mode Cetak Rekap Riwayat */
+            body.printing-rekap * { visibility: hidden !important; }
+            body.printing-rekap #rekapPrintSection, 
+            body.printing-rekap #rekapPrintSection * { visibility: visible !important; }
+            body.printing-rekap #rekapPrintSection {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                padding: 15mm !important;
+                background: white !important;
+                color: black !important;
+            }
         }
         
         /* Format Kertas F4 Visual Layar */
@@ -90,12 +104,20 @@
             table-layout: fixed;
         }
 
-        .row-signature-5cm {
-            height: 50mm !important;
+        .row-signature-cell {
+            height: 48mm !important;
+            max-height: 48mm !important;
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .title-spacing {
             margin-top: 15mm !important;
+        }
+
+        /* Menjaga keteraturan tampilan blangko kosong */
+        .data-fillable:empty::before {
+            content: "\00a0";
         }
 
         @media (max-width: 640px) {
@@ -109,7 +131,7 @@
                 width: 100% !important;
                 height: auto !important;
             }
-            .row-signature-5cm {
+            .row-signature-cell {
                 height: auto !important;
             }
         }
@@ -347,6 +369,13 @@
                                 Hitung Total
                             </button>
                         </div>
+
+                        <!-- Tambahan Field: Kode Sub Kegiatan -->
+                        <div class="bg-white p-3.5 rounded-lg border border-slate-200">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">Kode Sub Kegiatan APBD</label>
+                            <input type="text" id="kodeSubKegiatan" value="7.01.01.2.01.0003" placeholder="Contoh: 7.01.01.2.01.0003" class="w-full px-3 py-2 text-xs sm:text-sm font-mono font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                            <p class="text-[11px] text-slate-500 mt-1">Kode Sub Kegiatan ini akan ditampilkan pada Tabel Riwayat dan Rekap Cetak PDF.</p>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -456,10 +485,11 @@
                 </div>
 
                 <div class="overflow-x-auto w-full">
-                    <table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[650px]">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[750px]">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                                 <th class="p-3">No. Surat</th>
+                                <th class="p-3">Kode Sub Kegiatan</th>
                                 <th class="p-3">Pelaksana Utama & Pengikut</th>
                                 <th class="p-3">Tujuan</th>
                                 <th class="p-3">Tanggal</th>
@@ -475,6 +505,30 @@
         </section>
 
     </main>
+
+    <!-- SECTION KHUSUS UNTUK CETAK REKAP RIWAYAT -->
+    <div id="rekapPrintSection" class="hidden">
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h2>
+            <h1 class="text-2xl font-bold uppercase font-official">KECAMATAN TABUNDUNG</h1>
+            <p class="text-sm font-semibold mt-1">REKAPITULASI REALISASI PERJALANAN DINAS (SPPD)</p>
+        </div>
+        <table class="w-full text-xs font-official border-collapse border border-black">
+            <thead>
+                <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                    <th class="border border-black p-2">No.</th>
+                    <th class="border border-black p-2">No. Surat / SPPD</th>
+                    <th class="border border-black p-2">Kode Sub Kegiatan</th>
+                    <th class="border border-black p-2">Pelaksana Dinas</th>
+                    <th class="border border-black p-2">Tujuan</th>
+                    <th class="border border-black p-2">Tanggal</th>
+                    <th class="border border-black p-2">Total Biaya (Rp)</th>
+                </tr>
+            </thead>
+            <tbody id="rekapPrintTableBody"></tbody>
+            <tfoot id="rekapPrintTableFooter" class="font-bold"></tfoot>
+        </table>
+    </div>
 
     <!-- MODAL PRATINJAU DOKUMEN CETAK -->
     <div id="previewModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex flex-col justify-between overflow-hidden">
@@ -686,7 +740,7 @@
                     </div>
                 </div>
 
-                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG -->
+                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG (Bentuk Tabel Terkunci Presisi) -->
                 <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                     <table class="sppd-back-table border-collapse border border-black font-official text-xs">
                         <tbody>
@@ -703,39 +757,35 @@
                                     </table>
                                 </td>
                             </tr>
-                            <tr class="border-b border-black row-signature-5cm">
-                                <td class="p-2 border-r border-black align-top relative">
+                            <tr class="border-b border-black row-signature-cell">
+                                <td class="p-2 border-r border-black align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                     </table>
-                                    <!-- Nama Kepala Desa di Kolom 1 (Diturunkan mendekati garis batas) -->
-                                    <div class="mt-16 text-center">
-                                        <div class="h-12"></div>
+                                    <div class="absolute bottom-2 left-0 right-0 text-center">
                                         <p class="font-bold underline uppercase data-fillable" id="bktKadesNama1">-</p>
                                     </div>
                                 </td>
-                                <td class="p-2 align-top relative">
+                                <td class="p-2 align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
                                         <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                     </table>
-                                    <!-- Nama Kepala Desa di Kolom 2 (Diturunkan mendekati garis batas) -->
-                                    <div class="mt-16 text-center">
-                                        <div class="h-12"></div>
+                                    <div class="absolute bottom-2 left-0 right-0 text-center">
                                         <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="border-b border-black row-signature-5cm">
-                                <td class="p-2 border-r border-black align-top">
+                            <tr class="border-b border-black row-signature-cell">
+                                <td class="p-2 border-r border-black align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">II. Tiba di</td><td>: <span class="data-fillable" id="bktTiba2">-</span></td></tr>
                                         <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
                                     </table>
                                 </td>
-                                <td class="p-2 align-top">
+                                <td class="p-2 align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat2">-</span></td></tr>
                                         <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
@@ -743,14 +793,14 @@
                                     </table>
                                 </td>
                             </tr>
-                            <tr class="border-b border-black row-signature-5cm">
-                                <td class="p-2 border-r border-black align-top">
+                            <tr class="border-b border-black row-signature-cell">
+                                <td class="p-2 border-r border-black align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">III. Tiba di</td><td>: </td></tr>
                                         <tr><td>Pada Tanggal</td><td>: </td></tr>
                                     </table>
                                 </td>
-                                <td class="p-2 align-top">
+                                <td class="p-2 align-top relative h-[48mm]">
                                     <table class="w-full">
                                         <tr><td class="w-28">Berangkat dari</td><td>: </td></tr>
                                         <tr><td>Ke</td><td>: </td></tr>
@@ -1038,7 +1088,6 @@
         };
 
         function populateSelectOptions() {
-            // Dropdown Pelaksana Utama (Nama Saja)
             const selectPelaksana = document.getElementById('namaPelaksana');
             if (selectPelaksana) {
                 selectPelaksana.innerHTML = '<option value="">-- Pilih ASN --</option>';
@@ -1050,7 +1099,6 @@
                 });
             }
 
-            // Datalist ASN
             const datalistAsn = document.getElementById('listAsnNama');
             if (datalistAsn) {
                 datalistAsn.innerHTML = '';
@@ -1062,7 +1110,6 @@
                 });
             }
 
-            // Dropdown Desa Tujuan
             const selectDesa = document.querySelector('select[onchange="selectTujuanDesa(this.value)"]');
             if (selectDesa) {
                 selectDesa.innerHTML = '<option value="">-- Pilih Desa --</option>';
@@ -1206,6 +1253,7 @@
                 namaBendahara: document.getElementById('namaBendahara').value,
                 nipBendahara: document.getElementById('nipBendahara').value,
 
+                kodeSubKegiatan: document.getElementById('kodeSubKegiatan').value || '-',
                 biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
                 totalBiaya: calculateTotalBudget(),
 
@@ -1322,7 +1370,6 @@
             document.getElementById('bktCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('bktCamatNip').innerText = record.nipCamat;
 
-            // Update Nama Kepala Desa pada Kolom 1 dan Kolom 2 SPPD Belakang
             const kadesName = record.namaKades || '....................';
             document.getElementById('bktKadesNama1').innerText = kadesName;
             document.getElementById('bktKadesNama2').innerText = kadesName;
@@ -1388,7 +1435,7 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // Dynamic Rows Personil Kwitansi (Tanda Tangan Rata Kiri)
+            // Dynamic Rows Personil Kwitansi
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
@@ -1419,7 +1466,6 @@
             }
             kwiRows.innerHTML = rowsHTML;
 
-            // Reset checkbox blangko
             document.getElementById('toggleBlangko').checked = false;
             toggleBlangkoBelakangMode(false);
 
@@ -1488,7 +1534,7 @@
             const tfoot = document.getElementById('historyTableFooter');
 
             if (travelRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Belum ada riwayat perjalanan dinas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 text-xs">Belum ada riwayat perjalanan dinas.</td></tr>`;
                 tfoot.innerHTML = '';
                 return;
             }
@@ -1512,6 +1558,7 @@
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-3 font-medium text-slate-900 align-top">${item.noSuratTugas}<br><span class="text-[11px] text-slate-500">${item.noSPPD}</span></td>
+                        <td class="p-3 font-mono font-bold text-gov-800 text-xs align-top">${item.kodeSubKegiatan || '-'}</td>
                         <td class="p-3 align-top">
                             <span class="font-bold text-gov-900 block">${item.namaPelaksana}</span>
                             <span class="text-xs text-slate-500">NIP. ${item.nipPelaksana} (${item.jabatanPelaksana})</span>
@@ -1534,7 +1581,7 @@
 
             tfoot.innerHTML = `
                 <tr>
-                    <td colspan="4" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya Perjalanan Dinas:</td>
+                    <td colspan="5" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya Perjalanan Dinas:</td>
                     <td class="p-3 text-emerald-800 text-sm font-extrabold whitespace-nowrap">Rp ${totalBiayaKeseluruhan.toLocaleString('id-ID')}</td>
                     <td class="p-3"></td>
                 </tr>
@@ -1547,6 +1594,7 @@
                 r.namaPelaksana.toLowerCase().includes(query) ||
                 r.tempatTujuan.toLowerCase().includes(query) ||
                 r.noSuratTugas.toLowerCase().includes(query) ||
+                (r.kodeSubKegiatan && r.kodeSubKegiatan.toLowerCase().includes(query)) ||
                 (r.pengikut && r.pengikut.some(p => p.nama.toLowerCase().includes(query)))
             );
             
@@ -1554,7 +1602,7 @@
             const tfoot = document.getElementById('historyTableFooter');
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Data tidak ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 text-xs">Data tidak ditemukan.</td></tr>`;
                 tfoot.innerHTML = '';
                 return;
             }
@@ -1578,6 +1626,7 @@
                 return `
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-medium align-top">${item.noSuratTugas}</td>
+                        <td class="p-3 font-mono font-bold text-gov-800 text-xs align-top">${item.kodeSubKegiatan || '-'}</td>
                         <td class="p-3 align-top">
                             <span class="font-semibold block">${item.namaPelaksana}</span>
                             ${pengikutHTML}
@@ -1594,16 +1643,51 @@
 
             tfoot.innerHTML = `
                 <tr>
-                    <td colspan="4" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya (Hasil Cari):</td>
+                    <td colspan="5" class="p-3 text-right text-slate-700 uppercase tracking-wider text-xs">Total Biaya (Hasil Cari):</td>
                     <td class="p-3 text-emerald-800 text-sm font-extrabold whitespace-nowrap">Rp ${totalBiayaKeseluruhan.toLocaleString('id-ID')}</td>
                     <td class="p-3"></td>
                 </tr>
             `;
         }
 
+        /* Fungsi Cetak Rekap Tabel Riwayat PDF */
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
+
+            const rekapBody = document.getElementById('rekapPrintTableBody');
+            const rekapFooter = document.getElementById('rekapPrintTableFooter');
+            let totalBiaya = 0;
+
+            rekapBody.innerHTML = travelRecords.map((item, idx) => {
+                totalBiaya += (item.totalBiaya || 0);
+                let personilStr = item.namaPelaksana;
+                if(item.pengikut && item.pengikut.length > 0) {
+                    personilStr += `, ` + item.pengikut.map(p => p.nama).join(', ');
+                }
+
+                return `
+                    <tr>
+                        <td class="border border-black p-2 text-center">${idx + 1}</td>
+                        <td class="border border-black p-2">${item.noSuratTugas}<br><span class="text-[10px] text-slate-600">${item.noSPPD}</span></td>
+                        <td class="border border-black p-2 font-mono text-center">${item.kodeSubKegiatan || '-'}</td>
+                        <td class="border border-black p-2">${personilStr}</td>
+                        <td class="border border-black p-2">${item.tempatTujuan}</td>
+                        <td class="border border-black p-2 text-center whitespace-nowrap">${item.tglMulai} s/d ${item.tglSelesai}</td>
+                        <td class="border border-black p-2 text-right font-bold">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            rekapFooter.innerHTML = `
+                <tr class="bg-slate-50">
+                    <td colspan="6" class="border border-black p-2 text-right uppercase">Total Keseluruhan Realisasi:</td>
+                    <td class="border border-black p-2 text-right text-emerald-800 font-extrabold">Rp ${totalBiaya.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+
+            document.body.classList.add('printing-rekap');
             window.print();
+            document.body.classList.remove('printing-rekap');
         }
 
         function deleteRecord(id) {
