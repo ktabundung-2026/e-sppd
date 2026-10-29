@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>e-SPPD Kecamatan Tabundung - Kabupaten Sumba Timur</title>
     
+    <!-- PWA Link & Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="apple-touch-icon" href="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png">
+
     <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1042,8 +1047,17 @@
         </div>
     </div>
 
-    <!-- LOGIKA JAVASCRIPT APLIKASI -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
+        // Service Worker Registration for PWA Offline Support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('Service Worker Registered Successfully:', reg.scope))
+                    .catch((err) => console.error('Service Worker Registration Failed:', err));
+            });
+        }
+
         const DATA_ASN_TABUNDUNG = [
             { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
             { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I III/d" },
@@ -1076,17 +1090,132 @@
         let pengikutCount = 0;
 
         window.onload = function() {
+            setupNetworkListeners();
             populateSelectOptions();
+            loadLocalRecords();
 
+            calculateDuration();
+            calculateTotalBudget();
+        };
+
+        function setupNetworkListeners() {
+            updateNetworkBadge();
+            window.addEventListener('online', () => {
+                updateNetworkBadge();
+                showNotification('Terhubung ke Internet (GitHub Pages Live)', 'info');
+            });
+            window.addEventListener('offline', () => {
+                updateNetworkBadge();
+                showNotification('Mode Offline (Data tersimpan lokal di browser)', 'warning');
+            });
+        }
+
+        function updateNetworkBadge() {
+            let badge = document.getElementById('network-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.id = 'network-badge';
+                document.body.appendChild(badge);
+            }
+
+            if (navigator.onLine) {
+                badge.className = 'fixed bottom-4 right-4 z-40 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 shadow-lg bg-emerald-600 text-white';
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Online (PWA Active)`;
+            } else {
+                badge.className = 'fixed bottom-4 right-4 z-40 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 shadow-lg bg-amber-600 text-white';
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Mode Offline`;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                info: 'bg-gov-800 text-white',
+                success: 'bg-emerald-700 text-white',
+                warning: 'bg-amber-700 text-white',
+                error: 'bg-rose-700 text-white'
+            };
+            const toast = document.createElement('div');
+            toast.className = `fixed top-20 right-4 z-50 px-4 py-2.5 rounded-lg text-xs font-medium shadow-md transition-all ${colors[type]}`;
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function loadLocalRecords() {
             const savedData = localStorage.getItem('sppd_records_tabundung');
             if (savedData) {
                 try { travelRecords = JSON.parse(savedData); } catch(e) { travelRecords = []; }
             }
             renderHistoryTable();
+        }
 
-            calculateDuration();
-            calculateTotalBudget();
-        };
+        function saveLocalRecords() {
+            localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
+            renderHistoryTable();
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const pengikutList = [];
+            document.querySelectorAll('#pengikutContainer > div').forEach(row => {
+                const nama = row.querySelector('.pengikut-nama').value;
+                const nip = row.querySelector('.pengikut-nip').value;
+                const pangkat = row.querySelector('.pengikut-pangkat').value;
+                const jabatan = row.querySelector('.pengikut-jabatan').value;
+                if (nama && nama.trim()) {
+                    pengikutList.push({ nama, nip, pangkat, jabatan });
+                }
+            });
+
+            const record = {
+                id: Date.now(),
+                noSuratTugas: document.getElementById('noSuratTugas').value,
+                noSPPD: document.getElementById('noSPPD').value,
+                maksudTujuan: document.getElementById('maksudTujuan').value,
+                tempatBerangkat: document.getElementById('tempatBerangkat').value,
+                tempatTujuan: document.getElementById('tempatTujuan').value,
+                namaKades: document.getElementById('namaKades').value || '....................',
+                alatAngkutan: document.getElementById('alatAngkutan').value,
+                dasarPelaksanaan: document.getElementById('dasarPelaksanaan').value,
+                mataAnggaran: document.getElementById('mataAnggaran').value,
+                tglMulai: document.getElementById('tglMulai').value,
+                tglSelesai: document.getElementById('tglSelesai').value,
+                lamaHari: document.getElementById('lamaHari').value,
+                tglSurat: document.getElementById('tglSurat').value,
+                
+                namaPelaksana: document.getElementById('namaPelaksana').value,
+                nipPelaksana: document.getElementById('nipPelaksana').value,
+                jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
+                pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
+                pengikut: pengikutList,
+
+                namaCamat: document.getElementById('namaCamat').value,
+                nipCamat: document.getElementById('nipCamat').value,
+                pangkatCamat: document.getElementById('pangkatCamat').value,
+                namaBendahara: document.getElementById('namaBendahara').value,
+                nipBendahara: document.getElementById('nipBendahara').value,
+
+                kodeSubKegiatan: document.getElementById('kodeSubKegiatan').value || '-',
+                biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
+                totalBiaya: calculateTotalBudget(),
+
+                rekSeg1: document.getElementById('rekSeg1').value || '5.1',
+                rekSeg2: document.getElementById('rekSeg2').value || '02',
+                rekSeg3: document.getElementById('rekSeg3').value || '04',
+                rekSeg4: document.getElementById('rekSeg4').value || '01',
+                rekSeg5: document.getElementById('rekSeg5').value || '00001',
+
+                laporanHasil: document.getElementById('laporanHasil').value,
+                laporanSaran: document.getElementById('laporanSaran').value,
+            };
+
+            travelRecords.unshift(record);
+            saveLocalRecords();
+
+            showNotification('Data SPPD berhasil tersimpan!', 'success');
+            openPreviewModal(record);
+        }
 
         function populateSelectOptions() {
             const selectPelaksana = document.getElementById('namaPelaksana');
@@ -1212,69 +1341,6 @@
             return total;
         }
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const pengikutList = [];
-            document.querySelectorAll('#pengikutContainer > div').forEach(row => {
-                const nama = row.querySelector('.pengikut-nama').value;
-                const nip = row.querySelector('.pengikut-nip').value;
-                const pangkat = row.querySelector('.pengikut-pangkat').value;
-                const jabatan = row.querySelector('.pengikut-jabatan').value;
-                if (nama && nama.trim()) {
-                    pengikutList.push({ nama, nip, pangkat, jabatan });
-                }
-            });
-
-            const record = {
-                id: Date.now(),
-                noSuratTugas: document.getElementById('noSuratTugas').value,
-                noSPPD: document.getElementById('noSPPD').value,
-                maksudTujuan: document.getElementById('maksudTujuan').value,
-                tempatBerangkat: document.getElementById('tempatBerangkat').value,
-                tempatTujuan: document.getElementById('tempatTujuan').value,
-                namaKades: document.getElementById('namaKades').value || '....................',
-                alatAngkutan: document.getElementById('alatAngkutan').value,
-                dasarPelaksanaan: document.getElementById('dasarPelaksanaan').value,
-                mataAnggaran: document.getElementById('mataAnggaran').value,
-                tglMulai: document.getElementById('tglMulai').value,
-                tglSelesai: document.getElementById('tglSelesai').value,
-                lamaHari: document.getElementById('lamaHari').value,
-                tglSurat: document.getElementById('tglSurat').value,
-                
-                namaPelaksana: document.getElementById('namaPelaksana').value,
-                nipPelaksana: document.getElementById('nipPelaksana').value,
-                jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
-                pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
-                pengikut: pengikutList,
-
-                namaCamat: document.getElementById('namaCamat').value,
-                nipCamat: document.getElementById('nipCamat').value,
-                pangkatCamat: document.getElementById('pangkatCamat').value,
-                namaBendahara: document.getElementById('namaBendahara').value,
-                nipBendahara: document.getElementById('nipBendahara').value,
-
-                kodeSubKegiatan: document.getElementById('kodeSubKegiatan').value || '-',
-                biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
-                totalBiaya: calculateTotalBudget(),
-
-                rekSeg1: document.getElementById('rekSeg1').value || '5.1',
-                rekSeg2: document.getElementById('rekSeg2').value || '02',
-                rekSeg3: document.getElementById('rekSeg3').value || '04',
-                rekSeg4: document.getElementById('rekSeg4').value || '01',
-                rekSeg5: document.getElementById('rekSeg5').value || '00001',
-
-                laporanHasil: document.getElementById('laporanHasil').value,
-                laporanSaran: document.getElementById('laporanSaran').value,
-            };
-
-            travelRecords.unshift(record);
-            localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
-            
-            renderHistoryTable();
-            openPreviewModal(record);
-        }
-
         function openPreviewModal(record) {
             const formatDate = (str) => {
                 if(!str) return '-';
@@ -1344,7 +1410,6 @@
             document.getElementById('sppdCamatPangkat').innerText = record.pangkatCamat;
             document.getElementById('sppdCamatNip').innerText = record.nipCamat;
 
-            // Pengikut SPPD Depan
             const sppdPengikutContainer = document.getElementById('sppdPengikutTabel');
             if (record.pengikut && record.pengikut.length > 0) {
                 sppdPengikutContainer.innerHTML = record.pengikut.map((p, idx) => `
@@ -1423,7 +1488,7 @@
             document.getElementById('kwiRek3').innerText = `${seg1}.${seg2}.${seg3}.${seg4}`;
             document.getElementById('kwiRek4').innerText = `${seg1}.${seg2}.${seg3}.${seg4}.${seg5}`;
 
-            // Kwitansi Data
+            // Kwitansi
             document.getElementById('kwiTerbilang').innerText = numberToWords(record.totalBiaya) + ' Rupiah';
             document.getElementById('kwiMaksud').innerText = record.maksudTujuan;
             document.getElementById('kwiBelanjaLangsungVal').innerText = record.totalBiaya.toLocaleString('id-ID');
@@ -1436,7 +1501,6 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara;
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara;
 
-            // Dynamic Rows Personil Kwitansi
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
                 <tr class="border-b border-black align-top">
@@ -1558,7 +1622,10 @@
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-3 font-medium text-slate-900 align-top">${item.noSuratTugas}<br><span class="text-[11px] text-slate-500">${item.noSPPD}</span></td>
+                        <td class="p-3 font-medium text-slate-900 align-top">
+                            ${item.noSuratTugas}<br>
+                            <span class="text-[11px] text-slate-500">${item.noSPPD}</span>
+                        </td>
                         <td class="p-3 font-mono font-bold text-gov-800 text-xs align-top">${item.kodeSubKegiatan || '-'}</td>
                         <td class="p-3 align-top">
                             <span class="font-bold text-gov-900 block">${item.namaPelaksana}</span>
@@ -1570,7 +1637,7 @@
                         <td class="p-3 font-semibold text-emerald-700 align-top">Rp ${itemTotal.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-center align-top">
                             <button onclick="openPreviewModal(travelRecords[${index}])" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition-colors mr-1 mb-1">
-                                <i class="fa-solid fa-print"></i> Cetak Dokumen
+                                <i class="fa-solid fa-print"></i> Cetak
                             </button>
                             <button onclick="deleteRecord(${item.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs">
                                 <i class="fa-solid fa-trash"></i>
@@ -1651,7 +1718,6 @@
             `;
         }
 
-        /* Fungsi Cetak Rekap Tabel Riwayat PDF (Diperbaiki) */
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
 
@@ -1687,13 +1753,11 @@
                 </tr>
             `;
 
-            // Tampilkan section rekap sementara untuk penyiapan cetak
             rekapSection.classList.remove('hidden');
             document.body.classList.add('printing-rekap');
 
             setTimeout(() => {
                 window.print();
-                // Sembunyikan kembali setelah dialog pencetakan ditutup
                 document.body.classList.remove('printing-rekap');
                 rekapSection.classList.add('hidden');
             }, 100);
@@ -1702,8 +1766,7 @@
         function deleteRecord(id) {
             if(confirm("Hapus data perjalanan dinas ini?")) {
                 travelRecords = travelRecords.filter(r => r.id !== id);
-                localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
-                renderHistoryTable();
+                saveLocalRecords();
             }
         }
 
@@ -1725,8 +1788,7 @@
                     const imported = JSON.parse(event.target.result);
                     if (Array.isArray(imported) && confirm(`Restore ${imported.length} data riwayat SPPD?`)) {
                         travelRecords = [...imported, ...travelRecords];
-                        localStorage.setItem('sppd_records_tabundung', JSON.stringify(travelRecords));
-                        renderHistoryTable();
+                        saveLocalRecords();
                         alert("Data berhasil dipulihkan!");
                     }
                 } catch (err) { alert("Format file JSON tidak valid."); }
