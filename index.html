@@ -65,6 +65,7 @@
                 padding: 15mm !important;
                 background: white !important;
                 color: black !important;
+                display: block !important;
             }
         }
         
@@ -370,7 +371,7 @@
                             </button>
                         </div>
 
-                        <!-- Tambahan Field: Kode Sub Kegiatan -->
+                        <!-- Kode Sub Kegiatan APBD -->
                         <div class="bg-white p-3.5 rounded-lg border border-slate-200">
                             <label class="block text-xs font-bold text-slate-800 mb-1">Kode Sub Kegiatan APBD</label>
                             <input type="text" id="kodeSubKegiatan" value="7.01.01.2.01.0003" placeholder="Contoh: 7.01.01.2.01.0003" class="w-full px-3 py-2 text-xs sm:text-sm font-mono font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
@@ -740,7 +741,7 @@
                     </div>
                 </div>
 
-                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG (Bentuk Tabel Terkunci Presisi) -->
+                <!-- 3. DOKUMEN SPPD HALAMAN BELAKANG -->
                 <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                     <table class="sppd-back-table border-collapse border border-black font-official text-xs">
                         <tbody>
@@ -1650,10 +1651,11 @@
             `;
         }
 
-        /* Fungsi Cetak Rekap Tabel Riwayat PDF */
+        /* Fungsi Cetak Rekap Tabel Riwayat PDF (Diperbaiki) */
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
 
+            const rekapSection = document.getElementById('rekapPrintSection');
             const rekapBody = document.getElementById('rekapPrintTableBody');
             const rekapFooter = document.getElementById('rekapPrintTableFooter');
             let totalBiaya = 0;
@@ -1685,9 +1687,16 @@
                 </tr>
             `;
 
+            // Tampilkan section rekap sementara untuk penyiapan cetak
+            rekapSection.classList.remove('hidden');
             document.body.classList.add('printing-rekap');
-            window.print();
-            document.body.classList.remove('printing-rekap');
+
+            setTimeout(() => {
+                window.print();
+                // Sembunyikan kembali setelah dialog pencetakan ditutup
+                document.body.classList.remove('printing-rekap');
+                rekapSection.classList.add('hidden');
+            }, 100);
         }
 
         function deleteRecord(id) {
