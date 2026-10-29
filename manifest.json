@@ -1,0 +1,22 @@
+{
+  "short_name": "e-SPPD",
+  "name": "e-SPPD Kecamatan Tabundung",
+  "description": "Sistem Informasi Perjalanan Dinas Kecamatan Tabundung - Kabupaten Sumba Timur",
+  "icons": [
+    {
+      "src": "https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0c4a6e",
+  "theme_color": "#0c4a6e",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}
