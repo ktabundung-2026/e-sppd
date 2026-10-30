@@ -161,14 +161,21 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
                     <p class="text-xs font-bold text-slate-400 uppercase">Total Trip Penugasan</p>
                     <p id="statTotalTrip" class="text-2xl font-black text-amber-600">0 Perjalanan</p>
-                    <p class="text-[10px] text-slate-500">17 ASN Kecamatan Tabundung</p>
+                    <p class="text-[10px] text-slate-500">ASN Kecamatan Tabundung</p>
                 </div>
             </div>
 
+            <!-- Rekapitulasi per SK -->
             <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
                 <h3 class="text-md font-bold text-slate-800 mb-3 flex items-center justify-between">
                     <span><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i> Rekap Perdin Per Sub Kegiatan (SK)</span>
                 </h3>
+
+                <!-- INDIKATOR STATUS SISA TARGET OH (INFORMASI UNTUK OPERATOR) -->
+                <div id="skStatusAlert" class="mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all">
+                    <!-- Status otomatis terisi via JavaScript -->
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left border-collapse">
                         <thead>
@@ -314,6 +321,7 @@
             }
         }
 
+        // Validasi dan Simpan Penugasan Baru
         document.getElementById("perdinForm").addEventListener("submit", (e) => {
             e.preventDefault();
             
@@ -339,6 +347,21 @@
             const durasiHari = parseInt(document.getElementById("jumlahHari").value) || 1;
             const jumlahPersonel = 1 + pengikutList.length;
             const totalOHTrip = parseInt(jumlahPersonel * durasiHari);
+
+            // HITUNG AKUMULASI OH SAAT INI
+            const currentTotalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+            const sisaOH = targetTotalOHGlobal - currentTotalOH;
+
+            // VALIDASI PEMBLOKIRAN JIKA MELEBIHI TARGET TOTAL OH
+            if (currentTotalOH >= targetTotalOHGlobal) {
+                alert(`PENUGASAN DITOLAK!\n\nTarget Total OH (${targetTotalOHGlobal} OH) sudah habis/terpenuhi. Anda tidak dapat menambah trip penugasan baru lagi.`);
+                return;
+            }
+
+            if (totalOHTrip > sisaOH) {
+                alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH (${jumlahPersonel} Personel x ${durasiHari} Hari), sedangkan sisa kuota OH yang tersedia hanya ${sisaOH} OH.\n\nSilakan kurangi jumlah pengikut atau durasi hari.`);
+                return;
+            }
 
             const kodeSKVal = document.getElementById("kodeSK").value.trim();
             const targetOHSKVal = parseInt(document.getElementById("targetOHSK").value);
@@ -368,6 +391,48 @@
             document.getElementById("pengikutContainer").innerHTML = "";
             autoFillUtama();
         });
+
+        // Perbarui Statistik & Tampilan Alert Informasi Operator
+        function renderStats() {
+            const totalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+            const totalSK = new Set(perdinLog.map(item => item.kodeSK)).size;
+            const totalTrip = perdinLog.length;
+            const sisaOH = targetTotalOHGlobal - totalOH;
+
+            document.getElementById("statTotalOH").textContent = `${totalOH} OH`;
+            document.getElementById("statTotalSK").textContent = `${totalSK} SK`;
+            document.getElementById("statTotalTrip").textContent = `${totalTrip} Perjalanan`;
+            document.getElementById("displayTargetTotalOH").textContent = targetTotalOHGlobal;
+
+            const percentProgress = Math.min(Math.round((totalOH / targetTotalOHGlobal) * 100), 100);
+            document.getElementById("progressBarTotalOH").style.width = `${percentProgress}%`;
+
+            if (perdinLog.length > 0) {
+                document.getElementById("displayRekeningActive").textContent = `Rek: ${perdinLog[perdinLog.length - 1].kodeRekening}`;
+            }
+
+            // ELEMEN ALERT INFORMASI SISA OH UNTUK OPERATOR
+            const alertBox = document.getElementById("skStatusAlert");
+            if (sisaOH > 0) {
+                alertBox.className = "mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border bg-emerald-50 text-emerald-900 border-emerald-200 shadow-sm";
+                alertBox.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                        <span>Kuota Target Total OH Masih Tersedia: <strong>${sisaOH} OH lagi</strong> (Realisasi: ${totalOH} dari ${targetTotalOHGlobal} OH).</span>
+                    </div>
+                    <span class="bg-emerald-200 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Bisa Tambah Trip</span>
+                `;
+            } else {
+                alertBox.className = "mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border bg-rose-50 text-rose-900 border-rose-200 shadow-sm";
+                alertBox.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                        <span>KUOTA OH HABIS! Realisasi telah mencapai target maksimal (<strong>${totalOH} / ${targetTotalOHGlobal} OH</strong>). Trip penugasan baru telah dikunci.</span>
+                    </div>
+                    <span class="bg-rose-200 text-rose-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kunci Tambah Trip</span>
+                `;
+            }
+        }
 
         function deleteItem(id) {
             perdinLog = perdinLog.filter(item => item.id !== id);
