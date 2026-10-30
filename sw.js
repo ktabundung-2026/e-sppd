@@ -1,7 +1,8 @@
-const CACHE_NAME = 'e-sppd-tabundung-v1';
+const CACHE_NAME = 'e-sppd-eperdin-tabundung-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './perdin.html', // <-- Ditambahkan agar E-Perdin bisa dibuka offline
   './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
@@ -9,11 +10,11 @@ const ASSETS_TO_CACHE = [
   'https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png'
 ];
 
-// Instalasii Service Worker & Caching Aset
+// Instalasi Service Worker & Caching Aset Utama
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching all app assets');
+      console.log('[Service Worker] Caching all integrated app assets');
       return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
   );
@@ -40,8 +41,8 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Jika jaringan tersedia, perbarui cache secara dinamis
-        if (event.request.method === 'GET' && response.status === 200) {
+        // Toleransi status 200 (OK) dan 0 (Opaque CDN External)
+        if (event.request.method === 'GET' && (response.status === 200 || response.status === 0)) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
@@ -50,12 +51,13 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Jika offline atau jaringan gagal, gunakan data dari Cache
+        // Jika offline, ambil dari Cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          if (event.request.headers.get('accept').includes('text/html')) {
+          // Fallback navigasi halaman utama saat offline
+          if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
             return caches.match('./index.html');
           }
         });
