@@ -4,16 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Perdin Kecamatan Tabundung</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="apple-touch-icon" href="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png">
+
+    <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen">
 
-    <!-- Header E-Perdin -->
-    <header class="bg-indigo-900 text-white shadow-lg">
+    <!-- Header / Navbar -->
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center space-x-3 mb-2 md:mb-0">
-                <a href="index.html" class="bg-indigo-800 hover:bg-indigo-700 p-2 rounded-lg text-amber-300 mr-2 transition" title="Kembali ke E-SPPD">
+                <a href="index.html" class="bg-indigo-800 hover:bg-indigo-700 p-2 rounded-lg text-amber-300 transition" title="Kembali ke E-SPPD">
                     <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
                 <div>
@@ -23,20 +29,450 @@
             </div>
             
             <div class="flex items-center space-x-3">
-                <a href="index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow transition">
-                    <i class="fa-solid fa-file-contract mr-1"></i> Buka E-SPPD
+                <a href="index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-contract"></i>
+                    <span>Buka E-SPPD</span>
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- KONTEN UTAMA E-PERDIN SAMA DENGAN SCRIPT e-Perdin.txt LENGKAP -->
     <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- (Gunakan seluruh formulir & dashboard rekapitulasi dari e-Perdin.txt) -->
+
+        <!-- Formulir Input Perdin (Sisi Kiri) -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-md border border-slate-200">
+            <h2 class="text-lg font-bold text-indigo-950 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between">
+                <span><i class="fa-solid fa-pen-to-square text-indigo-600 mr-2"></i> Input Penugasan Perdin Tim</span>
+            </h2>
+
+            <form id="perdinForm" class="space-y-4">
+                <!-- 1. Kode Sub Kegiatan & Target OH SK -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
+                        <input type="text" id="kodeSK" required placeholder="Contoh: 7.01.01.2.01.0003" 
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-800 uppercase mb-1">Target OH SK</label>
+                        <input type="number" id="targetOHSK" min="1" placeholder="Misal: 50" 
+                               class="w-full px-3 py-2 text-sm border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-900">
+                    </div>
+                </div>
+
+                <!-- 2. Nama Sub Kegiatan -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Sub Kegiatan</label>
+                    <input type="text" id="namaSK" required placeholder="Contoh: Koordinasi Penyelenggaraan Pemerintahan" 
+                           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <!-- 3. Kode Rekening Perdin -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-slate-700 uppercase">Kode Rekening Perdin</label>
+                        <span class="text-[10px] text-indigo-600 font-semibold cursor-pointer hover:underline" onclick="document.getElementById('kodeRekening').focus()">
+                            <i class="fa-solid fa-pen text-[9px] mr-0.5"></i> Edit
+                        </span>
+                    </div>
+                    <input type="text" id="kodeRekening" value="5.1.02.04.01.0001" required 
+                           class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none">
+                </div>
+
+                <!-- 4. Pelaksana Utama / Ketua Tim -->
+                <div class="p-3 bg-indigo-50/50 rounded-lg border border-indigo-100 space-y-2">
+                    <label class="block text-xs font-bold text-indigo-900 uppercase">Pelaksana Utama (Ketua Tim)</label>
+                    <select id="selectPelaksanaUtama" onchange="autoFillUtama()" required
+                            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                        <option value="">-- Pilih Pelaksana Utama --</option>
+                    </select>
+                    <div class="text-[11px] text-slate-600 font-medium">
+                        Jabatan: <span id="displayJabatanUtama" class="font-semibold text-slate-800">-</span> | 
+                        NIP: <span id="displayNIPUtama" class="font-mono text-slate-800">-</span>
+                    </div>
+                </div>
+
+                <!-- 5. FITUR PENGIKUT (ANGGOTA TIM) -->
+                <div class="p-3 bg-amber-50/50 rounded-lg border border-amber-200/60 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-amber-900 uppercase">Pengikut / Anggota Tim</label>
+                        <button type="button" onclick="addPengikutField()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold px-2 py-1 rounded transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Pengikut
+                        </button>
+                    </div>
+                    <div id="pengikutContainer" class="space-y-2"></div>
+                </div>
+
+                <!-- 6. Jumlah Hari & Desa -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Durasi (Hari)</label>
+                        <input type="number" id="jumlahHari" min="1" max="30" value="1" required 
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Desa Tujuan</label>
+                        <select id="selectDesa" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Banggawatu">Banggawatu</option>
+                            <option value="Tapil">Tapil</option>
+                            <option value="Tarimbang">Tarimbang</option>
+                            <option value="Kukitalu">Kukitalu</option>
+                            <option value="Karita">Karita</option>
+                            <option value="Waikanabu">Waikanabu</option>
+                            <option value="Billa">Billa</option>
+                            <option value="Wudipandak">Wudipandak</option>
+                            <option value="Praing Kareha">Praing Kareha</option>
+                            <option value="Pindu Hurani">Pindu Hurani</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> Simpan Penugasan Perdin Tim
+                </button>
+            </form>
+        </div>
+
+        <!-- Dashboard Rekapitulasi (Sisi Kanan) -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-indigo-600 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Total Akumulasi OH</p>
+                        <button onclick="editTargetAkumulasi()" class="text-[10px] text-indigo-600 font-bold hover:underline">
+                            <i class="fa-solid fa-gear"></i> Target Total
+                        </button>
+                    </div>
+                    <p id="statTotalOH" class="text-2xl font-black text-indigo-900">0 OH</p>
+                    <p class="text-[10px] text-slate-500">Target Total: <span id="displayTargetTotalOH" class="font-bold text-indigo-700">202</span> OH</p>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div id="progressBarTotalOH" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Jumlah Sub Kegiatan</p>
+                    <p id="statTotalSK" class="text-2xl font-black text-emerald-700">0 SK</p>
+                    <p id="displayRekeningActive" class="text-[10px] text-slate-500 font-mono truncate">Rek: 5.1.02.04.01.0001</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Total Trip Penugasan</p>
+                    <p id="statTotalTrip" class="text-2xl font-black text-amber-600">0 Perjalanan</p>
+                    <p class="text-[10px] text-slate-500">17 ASN Kecamatan Tabundung</p>
+                </div>
+            </div>
+
+            <!-- Rekapitulasi per SK -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                <h3 class="text-md font-bold text-slate-800 mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i> Rekap Perdin Per Sub Kegiatan (SK)</span>
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-indigo-50 text-indigo-900 border-b border-indigo-200">
+                                <th class="p-2.5 font-bold">Kode SK</th>
+                                <th class="p-2.5 font-bold">Nama Sub Kegiatan</th>
+                                <th class="p-2.5 font-bold text-center">Jumlah Trip</th>
+                                <th class="p-2.5 font-bold text-center">Realisasi / Target OH</th>
+                                <th class="p-2.5 font-bold text-right">Capaian (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableRekapSK" class="divide-y divide-slate-100">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada data Sub Kegiatan</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabel Log Transaksi -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-md font-bold text-slate-800">
+                        <i class="fa-solid fa-users text-indigo-600 mr-2"></i> Log Penugasan Perdin (Pelaksana & Pengikut)
+                    </h3>
+                    <button onclick="resetData()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Reset Data
+                    </button>
+                </div>
+                <div class="overflow-x-auto max-h-80">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="sticky top-0 bg-slate-100 text-slate-700">
+                            <tr>
+                                <th class="p-2 border-b">Pelaksana Utama & Pengikut</th>
+                                <th class="p-2 border-b">Kode SK / Rekening / Desa</th>
+                                <th class="p-2 border-b text-center">Durasi</th>
+                                <th class="p-2 border-b text-center">Total OH</th>
+                                <th class="p-2 border-b text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableLogData" class="divide-y divide-slate-100">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada riwayat transaksi perdin</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
     </main>
 
+    <!-- JavaScript Logika Aplikasi E-Perdin -->
     <script>
-        // Gunakan seluruh script JavaScript dari e-Perdin.txt
+        const asnMaster = [
+            { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008" },
+            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008" },
+            { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM, EVALUASI DAN PELAPORAN", nip: "197409121999031004" },
+            { nama: "NAOMI KAHUATU TAMARU, S.Akun", jabatan: "KASUBAG UMUM KEUANGAN DAN ASET", nip: "197101272000122002" },
+            { nama: "DANIEL KAMBARU WINDI", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197712312008011084" },
+            { nama: "YULIANUS P. MILAHAMU", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "198107222007011004" },
+            { nama: "MELKIANUS RIHIAMAH", jabatan: "KEPALA SEKSI KETENTRAMAN DAN KETERTIBAN", nip: "197602242002121008" },
+            { nama: "ANDIRIAS KULAAWANG, SP", jabatan: "KEPALA SEKSI PEMBERDAYAAN MASYARAKAT DAN DESA", nip: "197908302010011011" },
+            { nama: "NAEMA ANA HUTAR, ST", jabatan: "KEPALA SEKSI KESEJAHTERAAN SOSIAL DAN PENDIDIKAN", nip: "198211082009032010" },
+            { nama: "IMANUEL ANDY META YIWA, A.Md", jabatan: "KEPALA SEKSI EKONOMI", nip: "197804152005011013" },
+            { nama: "SEFRIANUS UMBU KAMBARU NGANDJA RATU, ST", jabatan: "KEPALA SEKSI PEMERINTAHAN", nip: "197809182009011007" },
+            { nama: "THOMAS WAHI TAMU", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "198304082009011012" },
+            { nama: "OMRI NDJURUMANA", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "199105082025211041" },
+            { nama: "APRIS UMBU DJAKAATA", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "199008182025211044" },
+            { nama: "RATU HERDIAN BALE, S.TP", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197710272024211002" },
+            { nama: "UMBU TEUL NAMUPRAING", jabatan: "OPERATOR LAYANAN OPERASIONAL", nip: "197612082025211028" },
+            { nama: "IGNASIUS ROY KALE", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197407112007011022" }
+        ];
+
+        let perdinLog = JSON.parse(localStorage.getItem('perdinData')) || [];
+        let targetTotalOHGlobal = parseInt(localStorage.getItem('targetTotalOHGlobal')) || 202;
+        let targetSKStore = JSON.parse(localStorage.getItem('targetSKStore')) || {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            populateSelectOptions(document.getElementById("selectPelaksanaUtama"));
+            updateUI();
+        });
+
+        function populateSelectOptions(selectElement) {
+            selectElement.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            asnMaster.forEach((asn) => {
+                let option = document.createElement("option");
+                option.value = asn.nama;
+                option.textContent = asn.nama;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function autoFillUtama() {
+            const selectedNama = document.getElementById("selectPelaksanaUtama").value;
+            const asn = asnMaster.find(item => item.nama === selectedNama);
+            document.getElementById("displayJabatanUtama").textContent = asn ? asn.jabatan : "-";
+            document.getElementById("displayNIPUtama").textContent = asn ? asn.nip : "-";
+        }
+
+        function addPengikutField() {
+            const container = document.getElementById("pengikutContainer");
+            const div = document.createElement("div");
+            div.className = "flex items-center space-x-2 pengikut-row";
+            
+            const select = document.createElement("select");
+            select.className = "w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white pengikut-select";
+            populateSelectOptions(select);
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "text-rose-500 hover:text-rose-700 text-xs px-1";
+            removeBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            removeBtn.onclick = () => div.remove();
+
+            div.appendChild(select);
+            div.appendChild(removeBtn);
+            container.appendChild(div);
+        }
+
+        function editTargetAkumulasi() {
+            const input = prompt("Masukkan Target Akumulasi OH Total (Seluruh SK):", targetTotalOHGlobal);
+            if (input !== null && !isNaN(input) && parseInt(input) > 0) {
+                targetTotalOHGlobal = parseInt(input);
+                localStorage.setItem('targetTotalOHGlobal', targetTotalOHGlobal);
+                updateUI();
+            }
+        }
+
+        document.getElementById("perdinForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            
+            const utamaNama = document.getElementById("selectPelaksanaUtama").value;
+            const utamaASN = asnMaster.find(item => item.nama === utamaNama);
+
+            if (!utamaASN) {
+                alert("Silakan pilih Pelaksana Utama!");
+                return;
+            }
+
+            const pengikutSelects = document.querySelectorAll(".pengikut-select");
+            const pengikutList = [];
+            pengikutSelects.forEach(select => {
+                if (select.value) {
+                    const asn = asnMaster.find(item => item.nama === select.value);
+                    if (asn && asn.nama !== utamaNama) {
+                        pengikutList.push(asn);
+                    }
+                }
+            });
+
+            const durasiHari = parseInt(document.getElementById("jumlahHari").value) || 1;
+            const jumlahPersonel = 1 + pengikutList.length;
+            const totalOHTrip = parseInt(jumlahPersonel * durasiHari);
+
+            const kodeSKVal = document.getElementById("kodeSK").value.trim();
+            const targetOHSKVal = parseInt(document.getElementById("targetOHSK").value);
+
+            if (!isNaN(targetOHSKVal) && targetOHSKVal > 0) {
+                targetSKStore[kodeSKVal] = targetOHSKVal;
+                localStorage.setItem('targetSKStore', JSON.stringify(targetSKStore));
+            }
+
+            const newPerdin = {
+                id: Date.now(),
+                kodeSK: kodeSKVal,
+                namaSK: document.getElementById("namaSK").value.trim(),
+                kodeRekening: document.getElementById("kodeRekening").value.trim(),
+                utama: utamaASN,
+                pengikut: pengikutList,
+                durasiHari: durasiHari,
+                totalOH: totalOHTrip,
+                desa: document.getElementById("selectDesa").value
+            };
+
+            perdinLog.push(newPerdin);
+            saveData();
+            updateUI();
+            
+            document.getElementById("selectPelaksanaUtama").value = "";
+            document.getElementById("pengikutContainer").innerHTML = "";
+            autoFillUtama();
+        });
+
+        function deleteItem(id) {
+            perdinLog = perdinLog.filter(item => item.id !== id);
+            saveData();
+            updateUI();
+        }
+
+        function resetData() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh log transaksi perjalanan dinas?")) {
+                perdinLog = [];
+                saveData();
+                updateUI();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('perdinData', JSON.stringify(perdinLog));
+        }
+
+        function updateUI() {
+            renderRekapSK();
+            renderLogData();
+            renderStats();
+        }
+
+        function renderRekapSK() {
+            const tbody = document.getElementById("tableRekapSK");
+            tbody.innerHTML = "";
+
+            if (perdinLog.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada data Sub Kegiatan</td></tr>';
+                return;
+            }
+
+            const rekapSK = {};
+            perdinLog.forEach(item => {
+                if (!rekapSK[item.kodeSK]) {
+                    rekapSK[item.kodeSK] = {
+                        namaSK: item.namaSK,
+                        count: 0,
+                        realisasiOH: 0
+                    };
+                }
+                rekapSK[item.kodeSK].count += 1;
+                rekapSK[item.kodeSK].realisasiOH += parseInt(item.totalOH || 0);
+            });
+
+            for (const [kodeSK, data] of Object.entries(rekapSK)) {
+                const targetSK = targetSKStore[kodeSK] || "-";
+                let persentase = "-";
+                if (targetSK !== "-") {
+                    persentase = Math.round((data.realisasiOH / targetSK) * 100) + "%";
+                }
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="p-2.5 font-mono font-bold text-indigo-700">${kodeSK}</td>
+                    <td class="p-2.5 font-medium text-slate-800">${data.namaSK}</td>
+                    <td class="p-2.5 text-center">${data.count} Trip Tim</td>
+                    <td class="p-2.5 text-center font-bold text-slate-900">${data.realisasiOH} / <span class="text-amber-700">${targetSK}</span> OH</td>
+                    <td class="p-2.5 text-right font-bold ${persentase !== '-' && parseInt(persentase) >= 100 ? 'text-emerald-600' : 'text-indigo-700'}">${persentase}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function renderLogData() {
+            const tbody = document.getElementById("tableLogData");
+            tbody.innerHTML = "";
+
+            if (perdinLog.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada riwayat transaksi perdin</td></tr>';
+                return;
+            }
+
+            perdinLog.slice().reverse().forEach(item => {
+                const pengikutHTML = item.pengikut && item.pengikut.length > 0 
+                    ? `<div class="mt-1 text-[10px] text-slate-500">
+                         <span class="font-bold text-amber-700">Pengikut (${item.pengikut.length}):</span> 
+                         ${item.pengikut.map(p => p.nama).join(", ")}
+                       </div>` 
+                    : '<div class="text-[10px] text-slate-400 italic">Tanpa pengikut</div>';
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="p-2">
+                        <p class="font-bold text-slate-800">${item.utama.nama} <span class="text-[10px] text-indigo-600 font-normal">(Ketua)</span></p>
+                        ${pengikutHTML}
+                    </td>
+                    <td class="p-2">
+                        <p class="font-mono text-indigo-700 font-semibold">${item.kodeSK}</p>
+                        <p class="text-[10px] text-slate-500 font-mono">${item.kodeRekening}</p>
+                        <p class="text-[10px] text-emerald-700 font-medium">Tujuan: ${item.desa}</p>
+                    </td>
+                    <td class="p-2 text-center font-medium">${item.durasiHari} Hari</td>
+                    <td class="p-2 text-center font-black text-indigo-900 text-sm bg-indigo-50/30">${item.totalOH} OH</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteItem(${item.id})" class="text-rose-500 hover:text-rose-700 text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderStats() {
+            const totalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+            const totalSK = new Set(perdinLog.map(item => item.kodeSK)).size;
+            const totalTrip = perdinLog.length;
+
+            document.getElementById("statTotalOH").textContent = `${totalOH} OH`;
+            document.getElementById("statTotalSK").textContent = `${totalSK} SK`;
+            document.getElementById("statTotalTrip").textContent = `${totalTrip} Perjalanan`;
+            document.getElementById("displayTargetTotalOH").textContent = targetTotalOHGlobal;
+
+            const percentProgress = Math.min(Math.round((totalOH / targetTotalOHGlobal) * 100), 100);
+            document.getElementById("progressBarTotalOH").style.width = `${percentProgress}%`;
+
+            if (perdinLog.length > 0) {
+                document.getElementById("displayRekeningActive").textContent = `Rek: ${perdinLog[perdinLog.length - 1].kodeRekening}`;
+            }
+        }
     </script>
 </body>
 </html>
