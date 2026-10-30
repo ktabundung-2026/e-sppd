@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Sistem Perjalanan Dinas - Kecamatan Tabundung</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="apple-touch-icon" href="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png">
+
+    <!-- Tailwind CSS & Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        gov: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gov-900 via-slate-900 to-indigo-950 font-sans text-slate-800 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+
+    <!-- Decorative Background Elements -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- MAIN PORTAL CARD CONTAINER (Desain Card Login / Authentication Hub) -->
+    <div class="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 overflow-hidden relative z-10 my-8">
+        
+        <!-- Header Branding & Logo -->
+        <div class="bg-gov-900 px-6 py-8 text-center text-white relative">
+            <div class="inline-block p-3 bg-white/10 rounded-2xl mb-3 backdrop-blur-sm border border-white/10 shadow-inner">
+                <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
+                     alt="Logo Sumba Timur" class="h-16 w-auto mx-auto object-contain drop-shadow-md">
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide uppercase">SISTEM PERJALANAN DINAS</h1>
+            <p class="text-xs text-sky-200 mt-1 font-medium">Kecamatan Tabundung - Kabupaten Sumba Timur</p>
+        </div>
+
+        <!-- Content Body / Form Selection Hub -->
+        <div class="p-6 sm:p-8 space-y-6">
+            
+            <div class="text-center space-y-1">
+                <h2 class="text-lg font-bold text-slate-900">Pilih Modul Layanan</h2>
+                <p class="text-xs text-slate-500">Silakan pilih alur kerja input data perjalanan dinas yang ingin Anda proses.</p>
+            </div>
+
+            <!-- Radio Option Cards -->
+            <div class="space-y-3" id="moduleOptionGroup">
+                
+                <!-- Opsi 1: Modul E-Perdin -->
+                <label for="optPerdin" class="relative flex items-start p-4 rounded-xl border-2 border-slate-200 bg-slate-50/50 hover:bg-indigo-50/50 hover:border-indigo-600 transition-all cursor-pointer group shadow-sm">
+                    <div class="flex items-center h-5 mt-0.5">
+                        <input id="optPerdin" name="module_choice" type="radio" value="perdin.html" checked
+                               class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                    </div>
+                    <div class="ml-3.5 flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-slate-900 group-hover:text-indigo-900 flex items-center gap-2">
+                                <i class="fa-solid fa-briefcase text-indigo-600"></i> Modul E-Perdin
+                            </span>
+                            <span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">Tim & SK</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Perencanaan penugasan tim, rekapitulasi Sub Kegiatan (SK), target Orang Hari (OH), dan log kolektif.
+                        </p>
+                    </div>
+                </label>
+
+                <!-- Opsi 2: Modul E-SPPD -->
+                <label for="optSppd" class="relative flex items-start p-4 rounded-xl border-2 border-slate-200 bg-slate-50/50 hover:bg-emerald-50/50 hover:border-emerald-600 transition-all cursor-pointer group shadow-sm">
+                    <div class="flex items-center h-5 mt-0.5">
+                        <input id="optSppd" name="module_choice" type="radio" value="sppd.html"
+                               class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                    </div>
+                    <div class="ml-3.5 flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-slate-900 group-hover:text-emerald-900 flex items-center gap-2">
+                                <i class="fa-solid fa-file-contract text-emerald-600"></i> Modul E-SPPD
+                            </span>
+                            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Cetak F4</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Input langsung & penerbitan dokumen resmi (Surat Tugas, SPPD Depan/Belakang, Laporan, Kwitansi F4).
+                        </p>
+                    </div>
+                </label>
+
+            </div>
+
+            <!-- Submit Action Button -->
+            <button type="button" onclick="navigateToSelectedModule()" 
+                    class="w-full py-3.5 px-4 bg-gov-800 hover:bg-gov-900 text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2 group">
+                <span>Masuk ke Modul</span>
+                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+            </button>
+
+            <!-- Footer Notes -->
+            <div class="pt-4 border-t border-slate-100 text-center">
+                <p class="text-[11px] text-slate-400">
+                    Pemerintah Kecamatan Tabundung &copy; 2026 | System Version 2.0 (Offline-First)
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Navigation Handling -->
+    <script>
+        function navigateToSelectedModule() {
+            const selectedOption = document.querySelector('input[name="module_choice"]:checked');
+            if (selectedOption) {
+                window.location.href = selectedOption.value;
+            } else {
+                alert("Silakan pilih salah satu modul terlebih dahulu!");
+            }
+        }
+
+        // Registrasi Service Worker untuk dukungan Offline-First PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('Service Worker Registered:', reg.scope))
+                    .catch((err) => console.error('Service Worker Registration Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
