@@ -38,11 +38,11 @@
 </head>
 <body class="bg-gradient-to-br from-gov-900 via-slate-900 to-indigo-950 font-sans text-slate-800 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
 
-    <!-- Decorative Background Elements -->
+    <!-- Background Elements -->
     <div class="absolute -top-32 -left-32 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- MAIN PORTAL CARD CONTAINER (Desain Card Login / Authentication Hub) -->
+    <!-- MAIN PORTAL CARD -->
     <div class="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 overflow-hidden relative z-10 my-8">
         
         <!-- Header Branding & Logo -->
@@ -53,9 +53,14 @@
             </div>
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide uppercase">SISTEM PERJALANAN DINAS</h1>
             <p class="text-xs text-sky-200 mt-1 font-medium">Kecamatan Tabundung - Kabupaten Sumba Timur</p>
+            
+            <!-- BADGE MODE OFFLINE/ONLINE PORTAL UTAMA -->
+            <div class="mt-3 flex justify-center">
+                <div id="portal-network-badge" class="px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-md"></div>
+            </div>
         </div>
 
-        <!-- Content Body / Form Selection Hub -->
+        <!-- Content Body / Selection Hub -->
         <div class="p-6 sm:p-8 space-y-6">
             
             <div class="text-center space-y-1">
@@ -113,18 +118,33 @@
                 <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
             </button>
 
-            <!-- Footer Notes -->
+            <!-- FOOTER COPYRIGHT -->
             <div class="pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">
-                    Pemerintah Kecamatan Tabundung &copy; 2026 | System Version 2.0 (Offline-First)
+                <p class="text-[11px] text-slate-500 font-medium">
+                    &copy; 2026 Kecamatan Tabundung - ArL
                 </p>
             </div>
 
         </div>
     </div>
 
-    <!-- JavaScript Navigation Handling -->
+    <!-- JavaScript Offline/Online Logic & Navigation -->
     <script>
+        function updatePortalNetworkBadge() {
+            const badge = document.getElementById('portal-network-badge');
+            if (navigator.onLine) {
+                badge.className = 'px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600/90 text-white border border-emerald-400/30 backdrop-blur-sm shadow-sm';
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Mode Online`;
+            } else {
+                badge.className = 'px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600/90 text-white border border-amber-400/30 backdrop-blur-sm shadow-sm';
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Mode Offline`;
+            }
+        }
+
+        window.addEventListener('online', updatePortalNetworkBadge);
+        window.addEventListener('offline', updatePortalNetworkBadge);
+        document.addEventListener('DOMContentLoaded', updatePortalNetworkBadge);
+
         function navigateToSelectedModule() {
             const selectedOption = document.querySelector('input[name="module_choice"]:checked');
             if (selectedOption) {
@@ -134,12 +154,11 @@
             }
         }
 
-        // Registrasi Service Worker untuk dukungan Offline-First PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker Registered:', reg.scope))
-                    .catch((err) => console.error('Service Worker Registration Failed:', err));
+                    .then((reg) => console.log('SW Registered:', reg.scope))
+                    .catch((err) => console.error('SW Fail:', err));
             });
         }
     </script>
