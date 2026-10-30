@@ -53,15 +53,26 @@
             </h2>
 
             <form id="perdinForm" class="space-y-4">
+                <!-- INPUT TARGET TOTAL OH GLOBAL (MANUAL DI ATAS DERETAN KODE SK) -->
+                <div class="p-3 bg-indigo-50/70 border border-indigo-200 rounded-lg">
+                    <label class="block text-xs font-bold text-indigo-950 uppercase mb-1">
+                        <i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Target Total OH Global (Seluruh SK)
+                    </label>
+                    <input type="number" id="inputTargetTotalOHGlobal" min="1" required placeholder="Contoh: 202" onchange="updateTargetTotalOHFromInput(this.value)"
+                           class="w-full px-3 py-2 text-sm border border-indigo-300 bg-white rounded-lg focus:ring-2 focus:ring-indigo-600 focus:outline-none font-bold text-indigo-900">
+                    <p class="text-[10px] text-slate-500 mt-1">Target kumulatif maksimum untuk seluruh perjalanan dinas kecamatan.</p>
+                </div>
+
+                <!-- DERETAN KODE SK DAN TARGET OH/SK -->
                 <div class="grid grid-cols-3 gap-2">
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
-                        <input type="text" id="kodeSK" required placeholder="Contoh: 7.01.01.2.01.0003" 
-                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <input type="text" id="kodeSK" required placeholder="Contoh: 7.01.01.2.01.0003" oninput="updateUI()"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-amber-800 uppercase mb-1">Target OH / SK</label>
-                        <input type="number" id="targetOHSK" min="1" placeholder="Misal: 50" 
+                        <input type="number" id="targetOHSK" min="1" placeholder="Misal: 50" oninput="updateUI()"
                                class="w-full px-3 py-2 text-sm border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-900">
                     </div>
                 </div>
@@ -79,7 +90,7 @@
                             <i class="fa-solid fa-pen text-[9px] mr-0.5"></i> Edit
                         </span>
                     </div>
-                    <input type="text" id="kodeRekening" value="5.1.02.04.001.0001" required 
+                    <input type="text" id="kodeRekening" value="5.1.02.04.01.0001" required 
                            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none">
                 </div>
 
@@ -141,12 +152,9 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-indigo-600 space-y-2">
                     <div class="flex justify-between items-center">
                         <p class="text-xs font-bold text-slate-400 uppercase">Total Akumulasi OH</p>
-                        <button onclick="editTargetAkumulasi()" class="text-[10px] text-indigo-600 font-bold hover:underline">
-                            <i class="fa-solid fa-gear"></i> Target Total
-                        </button>
                     </div>
                     <p id="statTotalOH" class="text-2xl font-black text-indigo-900">0 OH</p>
-                    <p class="text-[10px] text-slate-500">Target Total: <span id="displayTargetTotalOH" class="font-bold text-indigo-700">202</span> OH</p>
+                    <p class="text-[10px] text-slate-500">Target Total Global: <span id="displayTargetTotalOH" class="font-bold text-indigo-700">202</span> OH</p>
                     <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                         <div id="progressBarTotalOH" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
@@ -155,13 +163,13 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
                     <p class="text-xs font-bold text-slate-400 uppercase">Jumlah Sub Kegiatan</p>
                     <p id="statTotalSK" class="text-2xl font-black text-emerald-700">0 SK</p>
-                    <p id="displayRekeningActive" class="text-[10px] text-slate-500 font-mono truncate">Rek: 5.1.02.04.001.0001</p>
+                    <p id="displayRekeningActive" class="text-[10px] text-slate-500 font-mono truncate">Rek: 5.1.02.04.01.0001</p>
                 </div>
 
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
                     <p class="text-xs font-bold text-slate-400 uppercase">Total Trip Penugasan</p>
                     <p id="statTotalTrip" class="text-2xl font-black text-amber-600">0 Perjalanan</p>
-                    <p class="text-[10px] text-slate-500">ASN Kecamatan Tabundung</p>
+                    <p class="text-[10px] text-slate-500">17 ASN Kecamatan Tabundung</p>
                 </div>
             </div>
 
@@ -171,8 +179,13 @@
                     <span><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i> Rekap Perdin Per Sub Kegiatan (SK)</span>
                 </h3>
 
-                <!-- INFORMASI KETERSEDIAAN KUOTA TARGET OH (INFORMASI SISA KUOTA OPERATOR) -->
-                <div id="skStatusAlert" class="mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all"></div>
+                <!-- TAMPILAN GANDA INFORMASI KETERSEDIAAN KUOTA (TARGET OH PER SK & TARGET TOTAL OH) -->
+                <div class="space-y-2 mb-4">
+                    <!-- STATUS 1: TARGET OH PER SK -->
+                    <div id="skSpecificAlert" class="p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all"></div>
+                    <!-- STATUS 2: TARGET TOTAL OH GLOBAL -->
+                    <div id="skStatusAlert" class="p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all"></div>
+                </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left border-collapse">
@@ -272,6 +285,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             updatePerdinNetworkBadge();
             populateSelectOptions(document.getElementById("selectPelaksanaUtama"));
+            document.getElementById("inputTargetTotalOHGlobal").value = targetTotalOHGlobal;
             updateUI();
         });
 
@@ -312,10 +326,10 @@
             container.appendChild(div);
         }
 
-        function editTargetAkumulasi() {
-            const input = prompt("Masukkan Target Akumulasi OH Total (Seluruh SK):", targetTotalOHGlobal);
-            if (input !== null && !isNaN(input) && parseInt(input) > 0) {
-                targetTotalOHGlobal = parseInt(input);
+        function updateTargetTotalOHFromInput(val) {
+            const parsed = parseInt(val);
+            if (!isNaN(parsed) && parsed > 0) {
+                targetTotalOHGlobal = parsed;
                 localStorage.setItem('targetTotalOHGlobal', targetTotalOHGlobal);
                 updateUI();
             }
@@ -347,26 +361,45 @@
             const jumlahPersonel = 1 + pengikutList.length;
             const totalOHTrip = parseInt(jumlahPersonel * durasiHari);
 
-            // CUKUPKAN HITUNG KETENTUAN BATAS MAKIMAL KUOTA OH
-            const currentTotalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
-            const sisaOH = targetTotalOHGlobal - currentTotalOH;
-
-            if (currentTotalOH >= targetTotalOHGlobal) {
-                alert(`PENUGASAN DITOLAK!\n\nTarget Total OH (${targetTotalOHGlobal} OH) sudah habis/terpenuhi. Anda tidak dapat menambah trip penugasan baru.`);
-                return;
-            }
-
-            if (totalOHTrip > sisaOH) {
-                alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH (${jumlahPersonel} Personel x ${durasiHari} Hari), sedangkan sisa kuota OH yang tersedia hanya ${sisaOH} OH.\n\nSilakan kurangi jumlah pengikut atau durasi hari.`);
-                return;
-            }
-
             const kodeSKVal = document.getElementById("kodeSK").value.trim();
             const targetOHSKVal = parseInt(document.getElementById("targetOHSK").value);
 
             if (!isNaN(targetOHSKVal) && targetOHSKVal > 0) {
                 targetSKStore[kodeSKVal] = targetOHSKVal;
                 localStorage.setItem('targetSKStore', JSON.stringify(targetSKStore));
+            }
+
+            // VALIDASI 1: PENGECEKAN TARGET TOTAL OH GLOBAL
+            const currentTotalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+            const sisaOHGlobal = targetTotalOHGlobal - currentTotalOH;
+
+            if (currentTotalOH >= targetTotalOHGlobal) {
+                alert(`PENUGASAN DITOLAK!\n\nTarget Total OH Global (${targetTotalOHGlobal} OH) sudah habis. Anda tidak dapat menambah trip penugasan baru.`);
+                return;
+            }
+
+            if (totalOHTrip > sisaOHGlobal) {
+                alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sedangkan sisa Kuota Total OH Global hanya ${sisaOHGlobal} OH.`);
+                return;
+            }
+
+            // VALIDASI 2: PENGECEKAN TARGET OH PER SK
+            if (targetSKStore[kodeSKVal]) {
+                const targetSK = targetSKStore[kodeSKVal];
+                const realisasiSK = perdinLog
+                    .filter(item => item.kodeSK === kodeSKVal)
+                    .reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+                const sisaOHSK = targetSK - realisasiSK;
+
+                if (realisasiSK >= targetSK) {
+                    alert(`PENUGASAN DITOLAK!\n\nTarget OH untuk Sub Kegiatan (${kodeSKVal}) sudah terpenuhi (${targetSK} OH). Tidak dapat menambah trip untuk SK ini.`);
+                    return;
+                }
+
+                if (totalOHTrip > sisaOHSK) {
+                    alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sedangkan sisa kuota untuk SK [${kodeSKVal}] tinggal ${sisaOHSK} OH.`);
+                    return;
+                }
             }
 
             const newPerdin = {
@@ -499,7 +532,7 @@
             const totalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
             const totalSK = new Set(perdinLog.map(item => item.kodeSK)).size;
             const totalTrip = perdinLog.length;
-            const sisaOH = targetTotalOHGlobal - totalOH;
+            const sisaOHGlobal = targetTotalOHGlobal - totalOH;
 
             document.getElementById("statTotalOH").textContent = `${totalOH} OH`;
             document.getElementById("statTotalSK").textContent = `${totalSK} SK`;
@@ -513,26 +546,78 @@
                 document.getElementById("displayRekeningActive").textContent = `Rek: ${perdinLog[perdinLog.length - 1].kodeRekening}`;
             }
 
-            // RENDERING TAMPILAN ALERT KUOTA SISA OH OPERATOR
-            const alertBox = document.getElementById("skStatusAlert");
-            if (alertBox) {
-                if (sisaOH > 0) {
-                    alertBox.className = "mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border bg-emerald-50 text-emerald-900 border-emerald-200 shadow-sm";
-                    alertBox.innerHTML = `
+            // 1. ALERT STATUS TARGET OH PER SUB KEGIATAN (SK) YANG DITUNJUK/DILIHAT
+            const activeSK = document.getElementById("kodeSK").value.trim();
+            const skAlertBox = document.getElementById("skSpecificAlert");
+            
+            if (skAlertBox) {
+                if (!activeSK) {
+                    skAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-slate-50 text-slate-600 border-slate-200";
+                    skAlertBox.innerHTML = `
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                            <span>Kuota Target Total OH Masih Tersedia: <strong>${sisaOH} OH lagi</strong> (Realisasi: ${totalOH} dari ${targetTotalOHGlobal} OH).</span>
+                            <i class="fa-solid fa-info-circle text-slate-400"></i>
+                            <span>Status Target SK: Ketik Kode SK di formulir untuk memantau kuota per SK.</span>
                         </div>
-                        <span class="bg-emerald-200 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Bisa Tambah Trip</span>
                     `;
                 } else {
-                    alertBox.className = "mb-4 p-3 rounded-lg text-xs font-semibold flex items-center justify-between border bg-rose-50 text-rose-900 border-rose-200 shadow-sm";
-                    alertBox.innerHTML = `
+                    const targetSK = targetSKStore[activeSK] || parseInt(document.getElementById("targetOHSK").value) || 0;
+                    const realisasiSK = perdinLog
+                        .filter(item => item.kodeSK === activeSK)
+                        .reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
+
+                    if (targetSK === 0) {
+                        skAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-amber-50 text-amber-900 border-amber-200";
+                        skAlertBox.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-question text-amber-600"></i>
+                                <span>SK [<strong>${activeSK}</strong>]: Target OH per SK belum diisi pada formulir. (Realisasi saat ini: ${realisasiSK} OH).</span>
+                            </div>
+                        `;
+                    } else {
+                        const sisaSK = targetSK - realisasiSK;
+                        if (sisaSK > 0) {
+                            skAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-emerald-50 text-emerald-900 border-emerald-200";
+                            skAlertBox.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-layer-group text-emerald-600"></i>
+                                    <span>Status SK [<strong>${activeSK}</strong>]: Kuota SK Masih Tersedia <strong>${sisaSK} OH lagi</strong> (Realisasi: ${realisasiSK} / ${targetSK} OH).</span>
+                                </div>
+                                <span class="bg-emerald-200 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kapasitas SK OK</span>
+                            `;
+                        } else {
+                            skAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-rose-50 text-rose-900 border-rose-200";
+                            skAlertBox.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-ban text-rose-600"></i>
+                                    <span>Status SK [<strong>${activeSK}</strong>]: KUOTA TARGET SK HABIS! (Realisasi: ${realisasiSK} / ${targetSK} OH).</span>
+                                </div>
+                                <span class="bg-rose-200 text-rose-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">SK Penuh</span>
+                            `;
+                        }
+                    }
+                }
+            }
+
+            // 2. ALERT STATUS TARGET TOTAL OH GLOBAL
+            const globalAlertBox = document.getElementById("skStatusAlert");
+            if (globalAlertBox) {
+                if (sisaOHGlobal > 0) {
+                    globalAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-indigo-50 text-indigo-900 border-indigo-200";
+                    globalAlertBox.innerHTML = `
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
-                            <span>KUOTA OH HABIS! Realisasi telah mencapai target maksimal (<strong>${totalOH} / ${targetTotalOHGlobal} OH</strong>). Trip penugasan baru telah dikunci.</span>
+                            <i class="fa-solid fa-chart-line text-indigo-600"></i>
+                            <span>Status Target Global: Kuota Akumulasi Masih Tersedia <strong>${sisaOHGlobal} OH lagi</strong> (Total Realisasi: ${totalOH} dari ${targetTotalOHGlobal} OH).</span>
                         </div>
-                        <span class="bg-rose-200 text-rose-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kunci Tambah Trip</span>
+                        <span class="bg-indigo-200 text-indigo-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Global OK</span>
+                    `;
+                } else {
+                    globalAlertBox.className = "p-2.5 rounded-lg text-xs font-semibold flex items-center justify-between border bg-rose-50 text-rose-900 border-rose-200";
+                    globalAlertBox.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                            <span>Status Target Global: KUOTA GLOBAL HABIS! Realisasi mencapai target (<strong>${totalOH} / ${targetTotalOHGlobal} OH</strong>). Seluruh penugasan baru dikunci.</span>
+                        </div>
+                        <span class="bg-rose-200 text-rose-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kunci Global</span>
                     `;
                 }
             }
