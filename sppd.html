@@ -82,7 +82,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
     <datalist id="listAsnNama"></datalist>
 
@@ -91,8 +91,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
-                    <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
-                         alt="Logo Sumba Timur" class="h-10 sm:h-11 w-auto object-contain drop-shadow-md">
+                    <a href="index.html" title="Ke Portal Utama">
+                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
+                             alt="Logo Sumba Timur" class="h-10 sm:h-11 w-auto object-contain drop-shadow-md">
+                    </a>
                     <div>
                         <h1 class="font-bold text-base sm:text-xl leading-tight">e-SPPD Kec. Tabundung</h1>
                         <p class="text-xs text-gov-100">Kabupaten Sumba Timur</p>
@@ -100,18 +102,23 @@
                 </div>
 
                 <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- BADGE MODE OFFLINE/ONLINE DI SPPD.HTML -->
+                    <div id="header-network-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner"></div>
+
                     <a href="perdin.html" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center space-x-1.5 shadow-sm">
                         <i class="fa-solid fa-briefcase text-amber-300"></i>
                         <span class="hidden md:inline">Modul E-Perdin</span>
+                    </a>
+
+                    <a href="index.html" class="bg-gov-800 hover:bg-gov-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center space-x-1.5" title="Ke Portal Utama">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="hidden md:inline">Portal Utama</span>
                     </a>
 
                     <button onclick="switchTab('history')" class="px-3 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gov-800 transition-colors flex items-center space-x-1.5">
                         <i class="fa-solid fa-list-check"></i>
                         <span>Riwayat</span>
                     </button>
-
-                    <!-- BADGE ONLINE/OFFLINE -->
-                    <div id="header-network-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner"></div>
 
                     <button onclick="switchTab('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition-colors flex items-center space-x-1.5">
                         <i class="fa-solid fa-plus"></i>
@@ -304,7 +311,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-[10px] text-slate-500 mb-0.5">NIP Bendahara</label>
-                                        <input type="text" id="nipBendahara" required value="19771231 200801 1 084" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
+                                        <input type="text" id="nipBendahara" required value="197712312008011084" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300">
                                     </div>
                                 </div>
                             </div>
@@ -967,6 +974,11 @@
             </div>
         </div>
     </div>
+
+    <!-- FOOTER COPYRIGHT SPPD.HTML -->
+    <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs no-print mt-8">
+        <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
+    </footer>
 
     <!-- JAVASCRIPT LOGIKA APLIKASI LENGKAP -->
     <script>
