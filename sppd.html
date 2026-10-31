@@ -623,6 +623,7 @@
             }
         }
 
+        // MENAMPILKAN MODAL E-PERDIN
         function openEperdinModal() {
             const rawData = localStorage.getItem('perdinData');
             const container = document.getElementById('eperdinListContainer');
@@ -632,10 +633,14 @@
                 container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim yang dicatat di Modul E-Perdin.</div>`;
             } else {
                 const perdinLog = JSON.parse(rawData);
-                if (perdinLog.length === 0) {
+                if (!Array.isArray(perdinLog) || perdinLog.length === 0) {
                     container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim di E-Perdin.</div>`;
                 } else {
-                    perdinLog.slice().reverse().forEach(item => {
+                    perdinLog.slice().reverse().forEach((item, index) => {
+                        // Pastikan setiap item memiliki identifier unik
+                        const itemId = item.id || `perdin-${Date.now()}-${index}`;
+                        item.id = itemId;
+
                         const div = document.createElement('div');
                         div.className = 'p-3.5 border border-slate-200 rounded-lg hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/40 transition cursor-pointer flex justify-between items-center';
                         
@@ -647,7 +652,7 @@
                             <div>
                                 <p class="text-xs font-bold text-indigo-950">${item.utama.nama} <span class="text-slate-500 font-normal">(${item.utama.jabatan})</span></p>
                                 <p class="text-[11px] text-slate-600 mt-0.5">Tujuan: <strong>Desa ${item.desa}</strong> | Durasi: <strong>${item.durasiHari} Hari</strong></p>
-                                <p class="text-[10px] font-mono text-slate-500">SK: ${item.kodeSK} (${item.namaSK})</p>
+                                <p class="text-[10px] font-mono text-slate-500">SK: ${item.kodeSK} (${item.namaSK || '-'})</p>
                                 <p class="text-[10px] text-amber-700 font-semibold">Pengikut: ${pengikutText}</p>
                             </div>
                             <button type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded shadow-sm">
@@ -666,13 +671,17 @@
             document.getElementById('eperdinModal').classList.add('hidden');
         }
 
+        // FUNGSI IMPORT DATA SEKALIGUS MENGHAPUS DARI LOCALSTORAGE UNTUK MENCEGAH PENDOBELAN
         function importEperdinData(item) {
+            // 1. Isikan Data Pelaksana Utama
             document.getElementById('namaPelaksana').value = item.utama.nama;
             onNamaInputChanged('Pelaksana', item.utama.nama);
 
+            // 2. Isikan Tempat Tujuan & Durasi Hari
             document.getElementById('tempatTujuan').value = `Desa ${item.desa}`;
             document.getElementById('lamaHari').value = item.durasiHari;
 
+            // 3. Isikan Kode Sub Kegiatan & Rekening APBD
             document.getElementById('kodeSubKegiatan').value = item.kodeSK;
             if (item.kodeRekening) {
                 const parts = item.kodeRekening.split('.');
@@ -685,21 +694,49 @@
                 }
             }
 
+            // 4. Clean-up & Reset Kontainer Pengikut
             document.getElementById('pengikutContainer').innerHTML = '';
             pengikutCount = 0;
 
+            // 5. Isikan Data Pengikut
             if (item.pengikut && item.pengikut.length > 0) {
                 item.pengikut.forEach(p => {
                     addOfficerRow();
                     const row = document.getElementById(`pengikut-row-${pengikutCount}`);
-                    row.querySelector('.pengikut-nama').value = p.nama;
-                    autofillPengikutRow(pengikutCount, p.nama);
+                    if (row) {
+                        row.querySelector('.pengikut-nama').value = p.nama;
+                        autofillPengikutRow(pengikutCount, p.nama);
+                    }
                 });
             }
 
+            // 6. Hitung Ulang Anggaran
             calculateTotalBudget();
+
+            // 7. HAPUS DATA YANG SUDAH DIIMPOR DARI LOCALSTORAGE (MENCEGAH PENDOBELAN)
+            const rawData = localStorage.getItem('perdinData');
+            if (rawData) {
+                try {
+                    let perdinLog = JSON.parse(rawData);
+                    // Filter dan buang item yang memiliki kriteria sama / ID yang sama
+                    perdinLog = perdinLog.filter(logItem => {
+                        if (item.id && logItem.id) {
+                            return logItem.id !== item.id;
+                        }
+                        // Fallback pembanding kriteria utama
+                        return !(logItem.utama.nama === item.utama.nama && 
+                                 logItem.desa === item.desa && 
+                                 logItem.kodeSK === item.kodeSK);
+                    });
+                    localStorage.setItem('perdinData', JSON.stringify(perdinLog));
+                } catch (e) {
+                    console.error("Gagal memperbarui perdinData setelah impor:", e);
+                }
+            }
+
+            // 8. Tutup Modal & Berikan Notifikasi
             closeEperdinModal();
-            showNotification(`Data Penugasan [${item.utama.nama}] Berhasil Ditarik!`, 'success');
+            showNotification(`Data Penugasan [${item.utama.nama}] Berhasil Ditarik & Dihapus dari Antrean!`, 'success');
         }
 
         function populateSelectOptions() {
