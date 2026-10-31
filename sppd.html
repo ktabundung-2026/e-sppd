@@ -1118,14 +1118,32 @@
         }
 
         function exportDataJSON() {
-            if (travelRecords.length === 0) return alert("Belum ada riwayat data SPPD!");
+            if (travelRecords.length === 0) {
+                return alert("Belum ada riwayat data SPPD untuk di-backup!");
+            }
+
+            const fileName = `backup_sppd_tabundung_${new Date().toISOString().slice(0,10)}.json`;
+
+            // Tampilkan dialog informasi lokasi penyimpanan backup
+            const confirmExport = confirm(
+                `Aplikasi akan mengunduh berkas backup:\n` +
+                `📄 Nama File: ${fileName}\n\n` +
+                `📌 Tempat Penyimpanan:\n` +
+                `Berkas akan tersimpan secara otomatis di folder 'Downloads' (Unduhan) pada perangkat Anda, atau lokasi penyimpanan sesuai pengaturan peramban (browser) Anda.\n\n` +
+                `Lanjutkan pengunduhan backup?`
+            );
+
+            if (!confirmExport) return;
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(travelRecords, null, 2));
             const anchor = document.createElement('a');
             anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `backup_sppd_tabundung_${new Date().toISOString().slice(0,10)}.json`);
+            anchor.setAttribute("download", fileName);
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
+
+            showNotification(`Backup berhasil diunduh (${fileName})!`, 'success');
         }
 
         function importDataJSON(e) {
