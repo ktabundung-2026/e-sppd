@@ -453,7 +453,7 @@
                     </div>
                 </div>
 
-                <!-- JUDUL KWITANSI LEBIH DEKAT KE DETAIL TANGGAL -->
+                <!-- JUDUL KWITANSI DIBUAT LEBIH DEKAT KE DETAIL TANGGAL DENGAN mt-1 mb-3 -->
                 <div class="text-center font-bold text-base underline uppercase mt-1 mb-3">
                     KWITANSI
                 </div>
@@ -770,10 +770,9 @@
 
             const kwiRows = document.getElementById('kwiDynamicRows');
             
-            // Baris Pelaksana Utama (Diperlebar h-16 dan py-5)
             let rowsHTML = `
-                <tr class="border-b border-black align-middle h-16">
-                    <td class="border-r border-black p-1.5 whitespace-nowrap py-5">1. ${record.namaPelaksana}</td>
+                <tr class="border-b border-black align-middle h-12">
+                    <td class="border-r border-black p-1.5 whitespace-nowrap py-3.5">1. ${record.namaPelaksana}</td>
                     <td class="border-r border-black p-1 text-center whitespace-nowrap">1</td>
                     <td class="border-r border-black p-1 text-center whitespace-nowrap">OH</td>
                     <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
@@ -782,7 +781,6 @@
                 </tr>
             `;
 
-            // Baris Pengikut (Diperlebar h-16 dan py-5)
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, idx) => {
                     const no = idx + 2;
@@ -790,8 +788,8 @@
                     const ttdAlignClass = isEven ? 'text-right pr-2' : 'text-left pl-2';
 
                     rowsHTML += `
-                        <tr class="border-b border-black align-middle h-16">
-                            <td class="border-r border-black p-1.5 whitespace-nowrap py-5">${no}. ${p.nama}</td>
+                        <tr class="border-b border-black align-middle h-12">
+                            <td class="border-r border-black p-1.5 whitespace-nowrap py-3.5">${no}. ${p.nama}</td>
                             <td class="border-r border-black p-1 text-center whitespace-nowrap">1</td>
                             <td class="border-r border-black p-1 text-center whitespace-nowrap">OH</td>
                             <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
