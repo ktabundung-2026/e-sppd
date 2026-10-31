@@ -949,6 +949,7 @@
         }
 
         // LOGIKA CETAK REKAP PERDIN (DIPERBAIKI BERDASARKAN KELOMPOK KODE SUB KEGIATAN & TANGGAL BERSUSUN)
+      // LOGIKA CETAK REKAP PERDIN (DENGAN SUSUNAN PENGIKUT RAPI)
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
 
@@ -989,7 +990,7 @@
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
                             <th class="border border-black p-1.5 w-8">No.</th>
                             <th class="border border-black p-1.5 w-40">No. Surat / SPPD</th>
-                            <th class="border border-black p-1.5 whitespace-nowrap">Pelaksana Dinas</th>
+                            <th class="border border-black p-1.5">Pelaksana Dinas</th>
                             <th class="border border-black p-1.5 w-28">Tujuan</th>
                             <th class="border border-black p-1.5 w-24">Tanggal</th>
                             <th class="border border-black p-1.5 w-32">Total Biaya (Rp)</th>
@@ -1001,11 +1002,21 @@
                 groupItems.forEach((item) => {
                     const itemTotal = item.totalBiaya || 0;
                     groupTotal += itemTotal;
-                    grandTotalBiaya += itemTotal;
 
-                    let personilStr = item.namaPelaksana;
-                    if(item.pengikut && item.pengikut.length > 0) {
-                        personilStr += `<br><span class="text-[10px] italic text-slate-700">Pengikut: ` + item.pengikut.map(p => p.nama).join(', ') + `</span>`;
+                    // Susun Nama Pelaksana Utama & Pengikut ke Bawah agar Rapi
+                    let personilHTML = `
+                        <div class="font-bold whitespace-nowrap">1. ${item.namaPelaksana}</div>
+                    `;
+
+                    if (item.pengikut && item.pengikut.length > 0) {
+                        personilHTML += `
+                            <div class="mt-1 pt-1 border-t border-slate-300 text-[10px] text-slate-700">
+                                <span class="italic font-semibold">Pengikut:</span>
+                                <ol class="list-decimal list-inside space-y-0.5 mt-0.5">
+                                    ${item.pengikut.map((p, idx) => `<li class="whitespace-nowrap">${p.nama}</li>`).join('')}
+                                </ol>
+                            </div>
+                        `;
                     }
 
                     rowsHTML += `
@@ -1015,7 +1026,7 @@
                                 <strong>${item.noSuratTugas}</strong><br>
                                 <span class="text-[10px] text-slate-600">${item.noSPPD}</span>
                             </td>
-                            <td class="border border-black p-1.5 align-top whitespace-nowrap font-bold">${personilStr}</td>
+                            <td class="border border-black p-1.5 align-top">${personilHTML}</td>
                             <td class="border border-black p-1.5 align-top">${item.tempatTujuan}</td>
                             <td class="border border-black p-1.5 text-center align-top whitespace-nowrap">
                                 <div>${item.tglMulai}</div>
