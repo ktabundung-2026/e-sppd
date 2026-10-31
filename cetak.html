@@ -99,6 +99,7 @@
                     <label for="toggleBlangko" class="text-xs font-semibold text-amber-200 cursor-pointer select-none">Cetak Blangko Kosong</label>
                 </div>
 
+                <!-- TOMBOL KEMBALI DIUBAH MENJADI "Modul E-SPPD" & DIPINDAHKAN SEBELUM TOMBOL CETAK -->
                 <button onclick="goBackToForm()" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
                     <i class="fa-solid fa-arrow-left"></i> Modul E-SPPD
                 </button>
@@ -468,16 +469,16 @@
                 <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[125px] text-center whitespace-nowrap">Kode Rekening</th>
+                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[130px] text-center whitespace-nowrap">Kode Rekening</th>
                             <th rowspan="2" class="border-r border-black p-1 align-middle w-[250px] text-center">Uraian</th>
                             <th colspan="3" class="border-r border-black p-0.5">Rincian Perhitungan</th>
-                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[85px]">Jumlah (Rp)</th>
-                            <th rowspan="2" class="p-1 align-middle w-[110px]">Tanda Tangan</th>
+                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[80px]">Jumlah (Rp)</th>
+                            <th rowspan="2" class="p-1 align-middle w-[100px]">Tanda Tangan</th>
                         </tr>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th class="border-r border-black p-0.5 w-[35px] text-[11px] whitespace-nowrap">Vol</th>
-                            <th class="border-r border-black p-0.5 w-[45px] text-[11px] whitespace-nowrap">Sat</th>
-                            <th class="border-r border-black p-0.5 w-[80px] text-[11px] leading-tight">Harga<br>Satuan</th>
+                            <th class="border-r border-black p-0.5 w-[60px] text-[12px] whitespace-nowrap">Vol</th>
+                            <th class="border-r border-black p-0.5 w-[60px] text-[12px] whitespace-nowrap">Sat</th>
+                            <th class="border-r border-black p-0.5 w-[80px] text-[12px] leading-tight">Harga<br>Satuan</th>
                         </tr>
                         <tr class="border-b border-black text-center bg-slate-50 italic">
                             <td class="border-r border-black p-0.5">1</td>
@@ -509,18 +510,15 @@
                             <td class="p-1"></td>
                         </tr>
                         <tr class="border-b border-black font-bold">
-                            <!-- KODE REKENING LENGKAP DIPASANG ROWSPAN DENGAN TAMPILAN TANPA GARIS HORIZONTAL DI SISI BAHAWNYA -->
-                            <td class="border-r border-black p-1 text-left font-mono align-top whitespace-nowrap" id="kwiRek4Cell">5.1.02.04.001.00001</td>
+                            <td class="border-r border-black p-1 text-left font-mono align-top whitespace-nowrap" rowspan="2" id="kwiRek4">5.1.02.04.001.00001</td>
                             <td class="border-r border-black p-1 text-left font-bold whitespace-nowrap" colspan="5">Belanja Perjalanan Dinas Biasa</td>
-                            <td class="p-1"></td>
+                            <td class="p-1" rowspan="2"></td>
                         </tr>
                         <tr class="border-b border-black">
                             <td class="border-r border-black p-1 text-left font-normal" colspan="5">
                                 Bayar Biaya Perjalanan Dinas Dalam Daerah <span id="kwiMaksud">-</span>
                             </td>
-                            <td class="p-1"></td>
                         </tr>
-                        <!-- TBODY DINAMIS KHUSUS RINCIAN PERHITUNGAN DAN NAMA PELAKSANA PERDIN -->
                         <tbody id="kwiDynamicRows"></tbody>
                         <tr class="font-bold bg-slate-50 border-b border-black">
                             <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
@@ -571,6 +569,7 @@
         function loadPrintData() {
             let record = null;
             
+            // 1. Cek parameter URL (misal: cetak.html?id=123456789)
             const urlParams = new URLSearchParams(window.location.search);
             const recordId = urlParams.get('id');
 
@@ -584,6 +583,7 @@
                 }
             }
 
+            // 2. Jika tidak ada di URL, cek sessionStorage (untuk data pratinjau langsung setelah submit form)
             if (!record) {
                 const sessionData = sessionStorage.getItem('sppd_print_current');
                 if (sessionData) {
@@ -744,10 +744,7 @@
             document.getElementById('kwiRek1').innerText = `${seg1}.${seg2}`;
             document.getElementById('kwiRek2').innerText = `${seg1}.${seg2}.${seg3}`;
             document.getElementById('kwiRek3').innerText = `${seg1}.${seg2}.${seg3}.${seg4}`;
-            
-            const fullKodeRek = `${seg1}.${seg2}.${seg3}.${seg4}.${seg5}`;
-            const rek4Cell = document.getElementById('kwiRek4Cell');
-            if (rek4Cell) rek4Cell.innerText = fullKodeRek;
+            document.getElementById('kwiRek4').innerText = `${seg1}.${seg2}.${seg3}.${seg4}.${seg5}`;
 
             const total = record.totalBiaya || 0;
             const biayaPerOrang = record.biayaPerOrang || 0;
@@ -764,41 +761,30 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara || '-';
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara || '-';
 
-            // Hitung total orang untuk penentuan Rowspan Kode Rekening agar gabung tanpa garis horizontal
-            const totalOrang = 1 + (record.pengikut ? record.pengikut.length : 0);
-            if (rek4Cell) {
-                rek4Cell.setAttribute('rowspan', totalOrang + 2);
-            }
-
             const kwiRows = document.getElementById('kwiDynamicRows');
-            
-            // Baris Pelaksana Utama (Kolom 2: Nama, Kolom 3: Vol, Kolom 4: Sat, Kolom 5: Harga Satuan, Kolom 6: Jumlah Rp, Kolom 7: Nomor TTD Ganjil)
             let rowsHTML = `
-                <tr class="border-b border-black align-middle h-12">
-                    <td class="border-r border-black p-1.5 whitespace-nowrap py-3.5">1. ${record.namaPelaksana}</td>
-                    <td class="border-r border-black p-1 text-center whitespace-nowrap">1</td>
-                    <td class="border-r border-black p-1 text-center whitespace-nowrap">OH</td>
-                    <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-left whitespace-nowrap font-medium pl-2">1. ....................</td>
+                <tr class="border-b border-black align-top">
+                    <td class="border-r border-black p-0.5 font-mono"></td>
+                    <td class="border-r border-black p-1 whitespace-nowrap">1. ${record.namaPelaksana}</td>
+                    <td class="border-r border-black p-0.5 text-center whitespace-nowrap">1</td>
+                    <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
+                    <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
+                    <td class="p-0.5 text-left whitespace-nowrap">1. ..........</td>
                 </tr>
             `;
-
-            // Baris Pengikut (Nomor 2, 3, dst)
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, idx) => {
                     const no = idx + 2;
-                    const isEven = (no % 2 === 0);
-                    const ttdAlignClass = isEven ? 'text-right pr-2' : 'text-left pl-2';
-
                     rowsHTML += `
-                        <tr class="border-b border-black align-middle h-12">
-                            <td class="border-r border-black p-1.5 whitespace-nowrap py-3.5">${no}. ${p.nama}</td>
-                            <td class="border-r border-black p-1 text-center whitespace-nowrap">1</td>
-                            <td class="border-r border-black p-1 text-center whitespace-nowrap">OH</td>
-                            <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="border-r border-black p-1 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
-                            <td class="p-1 ${ttdAlignClass} whitespace-nowrap font-medium">${no}. ....................</td>
+                        <tr class="border-b border-black align-top">
+                            <td class="border-r border-black p-0.5 font-mono"></td>
+                            <td class="border-r border-black p-1 whitespace-nowrap">${no}. ${p.nama}</td>
+                            <td class="border-r border-black p-0.5 text-center whitespace-nowrap">1</td>
+                            <td class="border-r border-black p-0.5 text-center whitespace-nowrap">OH</td>
+                            <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-0.5 text-right whitespace-nowrap">${biayaPerOrang.toLocaleString('id-ID')}</td>
+                            <td class="p-0.5 text-left whitespace-nowrap">${no}. ..........</td>
                         </tr>
                     `;
                 });
