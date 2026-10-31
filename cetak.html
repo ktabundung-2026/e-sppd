@@ -468,16 +468,16 @@
                 <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[130px] text-center whitespace-nowrap">Kode Rekening</th>
+                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[125px] text-center whitespace-nowrap">Kode Rekening</th>
                             <th rowspan="2" class="border-r border-black p-1 align-middle w-[250px] text-center">Uraian</th>
                             <th colspan="3" class="border-r border-black p-0.5">Rincian Perhitungan</th>
-                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[80px]">Jumlah (Rp)</th>
+                            <th rowspan="2" class="border-r border-black p-1 align-middle w-[85px]">Jumlah (Rp)</th>
                             <th rowspan="2" class="p-1 align-middle w-[110px]">Tanda Tangan</th>
                         </tr>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th class="border-r border-black p-0.5 w-[60px] text-[12px] whitespace-nowrap">Vol</th>
-                            <th class="border-r border-black p-0.5 w-[60px] text-[12px] whitespace-nowrap">Sat</th>
-                            <th class="border-r border-black p-0.5 w-[80px] text-[12px] leading-tight">Harga<br>Satuan</th>
+                            <th class="border-r border-black p-0.5 w-[35px] text-[11px] whitespace-nowrap">Vol</th>
+                            <th class="border-r border-black p-0.5 w-[45px] text-[11px] whitespace-nowrap">Sat</th>
+                            <th class="border-r border-black p-0.5 w-[80px] text-[11px] leading-tight">Harga<br>Satuan</th>
                         </tr>
                         <tr class="border-b border-black text-center bg-slate-50 italic">
                             <td class="border-r border-black p-0.5">1</td>
@@ -509,8 +509,8 @@
                             <td class="p-1"></td>
                         </tr>
                         <tr class="border-b border-black font-bold">
-                            <!-- KODE REKENING LENGKAP DIPASANG ROWSPAN SUPAYA TANPA GARIS HORIZONTAL -->
-                            <td class="border-r border-black p-1 text-left font-mono align-top whitespace-nowrap" id="kwiRek4Cell" id="kwiRek4">5.1.02.04.001.00001</td>
+                            <!-- KODE REKENING LENGKAP DIPASANG ROWSPAN DENGAN TAMPILAN TANPA GARIS HORIZONTAL DI SISI BAHAWNYA -->
+                            <td class="border-r border-black p-1 text-left font-mono align-top whitespace-nowrap" id="kwiRek4Cell">5.1.02.04.001.00001</td>
                             <td class="border-r border-black p-1 text-left font-bold whitespace-nowrap" colspan="5">Belanja Perjalanan Dinas Biasa</td>
                             <td class="p-1"></td>
                         </tr>
@@ -520,7 +520,7 @@
                             </td>
                             <td class="p-1"></td>
                         </tr>
-                        <!-- BARIS DINAMIS PELAKSANA DAN PENGIKU T -->
+                        <!-- TBODY DINAMIS KHUSUS RINCIAN PERHITUNGAN DAN NAMA PELAKSANA PERDIN -->
                         <tbody id="kwiDynamicRows"></tbody>
                         <tr class="font-bold bg-slate-50 border-b border-black">
                             <td colspan="5" class="border-r border-black p-1.5 text-right">JUMLAH TERIMA</td>
@@ -764,16 +764,15 @@
             document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara || '-';
             document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara || '-';
 
-            // Hitung Jumlah Total Orang (Pelaksana Utama + Pengikut) untuk ROWSPAN kolom Kode Rekening
+            // Hitung total orang untuk penentuan Rowspan Kode Rekening agar gabung tanpa garis horizontal
             const totalOrang = 1 + (record.pengikut ? record.pengikut.length : 0);
             if (rek4Cell) {
-                // +2 untuk memperhitungkan baris "Belanja Perjalanan Dinas Biasa" dan "Bayar Biaya..."
                 rek4Cell.setAttribute('rowspan', totalOrang + 2);
             }
 
             const kwiRows = document.getElementById('kwiDynamicRows');
             
-            // Baris Pelaksana Utama (Nomor 1 - Ganjil -> Rata Kiri)
+            // Baris Pelaksana Utama (Kolom 2: Nama, Kolom 3: Vol, Kolom 4: Sat, Kolom 5: Harga Satuan, Kolom 6: Jumlah Rp, Kolom 7: Nomor TTD Ganjil)
             let rowsHTML = `
                 <tr class="border-b border-black align-middle h-12">
                     <td class="border-r border-black p-1.5 whitespace-nowrap py-3.5">1. ${record.namaPelaksana}</td>
@@ -785,7 +784,7 @@
                 </tr>
             `;
 
-            // Baris Pengikut (Nomor 2, 3, dst - Silang: Genap Rata Kanan, Ganjil Rata Kiri)
+            // Baris Pengikut (Nomor 2, 3, dst)
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, idx) => {
                     const no = idx + 2;
