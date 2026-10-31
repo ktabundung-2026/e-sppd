@@ -380,8 +380,9 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
+                        <!-- NAMA TOMBOL DIUBAH MENJADI "Cetak Rekap Perdin" -->
                         <button onclick="printHistoryTable()" class="text-xs bg-gov-700 hover:bg-gov-800 text-white font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-                            <i class="fa-solid fa-print"></i> Cetak Rekap PDF
+                            <i class="fa-solid fa-print"></i> Cetak Rekap Perdin
                         </button>
                         <button onclick="exportDataJSON()" title="Backup JSON" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-lg border border-slate-300 flex items-center gap-1 transition-colors">
                             <i class="fa-solid fa-download text-gov-700"></i> Backup
@@ -419,28 +420,14 @@
 
     </main>
 
-    <!-- SECTION KHUSUS UNTUK CETAK REKAP RIWAYAT -->
+    <!-- SECTION KHUSUS UNTUK CETAK REKAP RIWAYAT (DIPERBAIKI STRUKTUR DENGAN KELOMPOK KODE SK) -->
     <div id="rekapPrintSection" class="hidden">
         <div class="text-center mb-6">
             <h2 class="text-xl font-bold uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h2>
             <h1 class="text-2xl font-bold uppercase font-official">KECAMATAN TABUNDUNG</h1>
             <p class="text-sm font-semibold mt-1">REKAPITULASI REALISASI PERJALANAN DINAS (SPPD)</p>
         </div>
-        <table class="w-full text-xs font-official border-collapse border border-black">
-            <thead>
-                <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                    <th class="border border-black p-2">No.</th>
-                    <th class="border border-black p-2">No. Surat / SPPD</th>
-                    <th class="border border-black p-2">Kode Sub Kegiatan</th>
-                    <th class="border border-black p-2">Pelaksana Dinas</th>
-                    <th class="border border-black p-2">Tujuan</th>
-                    <th class="border border-black p-2">Tanggal</th>
-                    <th class="border border-black p-2">Total Biaya (Rp)</th>
-                </tr>
-            </thead>
-            <tbody id="rekapPrintTableBody"></tbody>
-            <tfoot id="rekapPrintTableFooter" class="font-bold"></tfoot>
-        </table>
+        <div id="rekapPrintContainer"></div>
     </div>
 
     <!-- MODAL PENARIKAN DATA OTOMATIS E-PERDIN -->
@@ -961,40 +948,107 @@
             `;
         }
 
+        // LOGIKA CETAK REKAP PERDIN (DIPERBAIKI BERDASARKAN KELOMPOK KODE SUB KEGIATAN & TANGGAL BERSUSUN)
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
 
             const rekapSection = document.getElementById('rekapPrintSection');
-            const rekapBody = document.getElementById('rekapPrintTableBody');
-            const rekapFooter = document.getElementById('rekapPrintTableFooter');
-            let totalBiaya = 0;
+            const container = document.getElementById('rekapPrintContainer');
+            container.innerHTML = '';
 
-            rekapBody.innerHTML = travelRecords.map((item, idx) => {
-                totalBiaya += (item.totalBiaya || 0);
-                let personilStr = item.namaPelaksana;
-                if(item.pengikut && item.pengikut.length > 0) {
-                    personilStr += `, ` + item.pengikut.map(p => p.nama).join(', ');
+            // Grouping berdasarkan Kode Sub Kegiatan
+            const groupedRecords = {};
+            travelRecords.forEach(item => {
+                const sk = item.kodeSubKegiatan || 'Lain-lain / Tanpa Kode SK';
+                if (!groupedRecords[sk]) {
+                    groupedRecords[sk] = [];
                 }
+                groupedRecords[sk].push(item);
+            });
 
-                return `
-                    <tr>
-                        <td class="border border-black p-2 text-center">${idx + 1}</td>
-                        <td class="border border-black p-2">${item.noSuratTugas}<br><span class="text-[10px] text-slate-600">${item.noSPPD}</span></td>
-                        <td class="border border-black p-2 font-mono text-center">${item.kodeSubKegiatan || '-'}</td>
-                        <td class="border border-black p-2">${personilStr}</td>
-                        <td class="border border-black p-2">${item.tempatTujuan}</td>
-                        <td class="border border-black p-2 text-center whitespace-nowrap">${item.tglMulai} s/d ${item.tglSelesai}</td>
-                        <td class="border border-black p-2 text-right font-bold">Rp ${(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
-                    </tr>
+            let grandTotalBiaya = 0;
+            let globalNo = 1;
+
+            Object.keys(groupedRecords).forEach(kodeSK => {
+                const groupItems = groupedRecords[kodeSK];
+                let groupTotal = 0;
+
+                const skWrapper = document.createElement('div');
+                skWrapper.className = 'mb-6';
+
+                const skTitle = document.createElement('div');
+                skTitle.className = 'text-xs font-bold font-official bg-slate-100 p-2 border border-black mb-1';
+                skTitle.innerHTML = `KODE SUB KEGIATAN : <span class="font-mono text-sm">${kodeSK}</span>`;
+                skWrapper.appendChild(skTitle);
+
+                const table = document.createElement('table');
+                table.className = 'w-full text-xs font-official border-collapse border border-black mb-2';
+
+                let rowsHTML = `
+                    <thead>
+                        <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                            <th class="border border-black p-1.5 w-8">No.</th>
+                            <th class="border border-black p-1.5 w-40">No. Surat / SPPD</th>
+                            <th class="border border-black p-1.5 whitespace-nowrap">Pelaksana Dinas</th>
+                            <th class="border border-black p-1.5 w-28">Tujuan</th>
+                            <th class="border border-black p-1.5 w-24">Tanggal</th>
+                            <th class="border border-black p-1.5 w-32">Total Biaya (Rp)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                 `;
-            }).join('');
 
-            rekapFooter.innerHTML = `
-                <tr class="bg-slate-50">
-                    <td colspan="6" class="border border-black p-2 text-right uppercase">Total Keseluruhan Realisasi:</td>
-                    <td class="border border-black p-2 text-right text-emerald-800 font-extrabold">Rp ${totalBiaya.toLocaleString('id-ID')}</td>
-                </tr>
+                groupItems.forEach((item) => {
+                    const itemTotal = item.totalBiaya || 0;
+                    groupTotal += itemTotal;
+                    grandTotalBiaya += itemTotal;
+
+                    let personilStr = item.namaPelaksana;
+                    if(item.pengikut && item.pengikut.length > 0) {
+                        personilStr += `<br><span class="text-[10px] italic text-slate-700">Pengikut: ` + item.pengikut.map(p => p.nama).join(', ') + `</span>`;
+                    }
+
+                    rowsHTML += `
+                        <tr>
+                            <td class="border border-black p-1.5 text-center align-top">${globalNo++}</td>
+                            <td class="border border-black p-1.5 align-top">
+                                <strong>${item.noSuratTugas}</strong><br>
+                                <span class="text-[10px] text-slate-600">${item.noSPPD}</span>
+                            </td>
+                            <td class="border border-black p-1.5 align-top whitespace-nowrap font-bold">${personilStr}</td>
+                            <td class="border border-black p-1.5 align-top">${item.tempatTujuan}</td>
+                            <td class="border border-black p-1.5 text-center align-top whitespace-nowrap">
+                                <div>${item.tglMulai}</div>
+                                <div class="text-[10px] text-slate-600">s/d ${item.tglSelesai}</div>
+                            </td>
+                            <td class="border border-black p-1.5 text-right align-top font-bold whitespace-nowrap">Rp ${itemTotal.toLocaleString('id-ID')}</td>
+                        </tr>
+                    `;
+                });
+
+                rowsHTML += `
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-slate-50 font-bold border-t border-black">
+                            <td colspan="5" class="border border-black p-1.5 text-right uppercase">Sub Total (${kodeSK}):</td>
+                            <td class="border border-black p-1.5 text-right text-emerald-900 font-extrabold whitespace-nowrap">Rp ${groupTotal.toLocaleString('id-ID')}</td>
+                        </tr>
+                    </tfoot>
+                `;
+
+                table.innerHTML = rowsHTML;
+                skWrapper.appendChild(table);
+                container.appendChild(skWrapper);
+            });
+
+            // Grand Total Footer
+            const grandTotalDiv = document.createElement('div');
+            grandTotalDiv.className = 'mt-4 border-2 border-black p-2.5 text-right font-official font-bold text-sm bg-slate-100 flex justify-between items-center';
+            grandTotalDiv.innerHTML = `
+                <span class="uppercase">GRAND TOTAL REKAPITULASI REALISASI:</span>
+                <span class="text-base text-emerald-900 font-black">Rp ${grandTotalBiaya.toLocaleString('id-ID')}</span>
             `;
+            container.appendChild(grandTotalDiv);
 
             rekapSection.classList.remove('hidden');
             document.body.classList.add('printing-rekap');
