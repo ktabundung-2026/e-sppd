@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    kwi
+    
     <script>
         tailwind.config = {
             theme: {
@@ -90,7 +90,7 @@
                 <button onclick="switchDocView('sppd-depan')" id="btnDocSppdDepan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Depan</button>
                 <button onclick="switchDocView('sppd-belakang')" id="btnDocSppdBelakang" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Belakang</button>
                 <button onclick="switchDocView('laporan')" id="btnDocLaporan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Laporan</button>
-                <button onclick="switchDocView('tansi')" id="btnDoctansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">tansi</button>
+                <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi</button>
             </div>
             
             <div class="flex items-center gap-2 sm:gap-3">
@@ -99,7 +99,6 @@
                     <label for="toggleBlangko" class="text-xs font-semibold text-amber-200 cursor-pointer select-none">Cetak Blangko Kosong</label>
                 </div>
 
-                <!-- TOMBOL KEMBALI DIUBAH MENJADI "Modul E-SPPD" & DIPINDAHKAN SEBELUM TOMBOL CETAK -->
                 <button onclick="goBackToForm()" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
                     <i class="fa-solid fa-arrow-left"></i> Modul E-SPPD
                 </button>
@@ -432,7 +431,7 @@
                 </div>
             </div>
 
-            <!-- 5. DOKUMEN TANSI -->
+            <!-- 5. DOKUMEN KWITANSI -->
             <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                 <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                     <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo Pemda Sumba Timur" class="w-20 h-24 object-contain mr-3">
@@ -569,7 +568,6 @@
         function loadPrintData() {
             let record = null;
             
-            // 1. Cek parameter URL (misal: cetak.html?id=123456789)
             const urlParams = new URLSearchParams(window.location.search);
             const recordId = urlParams.get('id');
 
@@ -583,7 +581,6 @@
                 }
             }
 
-            // 2. Jika tidak ada di URL, cek sessionStorage (untuk data pratinjau langsung setelah submit form)
             if (!record) {
                 const sessionData = sessionStorage.getItem('sppd_print_current');
                 if (sessionData) {
@@ -798,9 +795,12 @@
 
         function switchDocView(docType) {
             ['st', 'sppd-depan', 'sppd-belakang', 'laporan', 'kwitansi'].forEach(d => {
-                document.getElementById(`doc-${d}`).classList.add('hidden');
+                const el = document.getElementById(`doc-${d}`);
+                if (el) el.classList.add('hidden');
             });
-            document.getElementById(`doc-${docType}`).classList.remove('hidden');
+
+            const activeDoc = document.getElementById(`doc-${docType}`);
+            if (activeDoc) activeDoc.classList.remove('hidden');
 
             const toggleWrapper = document.getElementById('toggleBlangkoWrapper');
             if (docType === 'sppd-belakang') {
