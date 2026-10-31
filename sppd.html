@@ -948,8 +948,7 @@
             `;
         }
 
-        // LOGIKA CETAK REKAP PERDIN (DIPERBAIKI BERDASARKAN KELOMPOK KODE SUB KEGIATAN & TANGGAL BERSUSUN)
-      // LOGIKA CETAK REKAP PERDIN (DENGAN SUSUNAN PENGIKUT RAPI)
+      // LOGIKA CETAK REKAP PERDIN 
         function printHistoryTable() {
             if (travelRecords.length === 0) return alert("Belum ada riwayat SPPD untuk dicetak!");
 
@@ -967,12 +966,12 @@
                 groupedRecords[sk].push(item);
             });
 
-            let grandTotalBiaya = 0;
+            let grandTotalBiaya = 0; // Menampung hasil penjumlahan seluruh sub total
             let globalNo = 1;
 
             Object.keys(groupedRecords).forEach(kodeSK => {
                 const groupItems = groupedRecords[kodeSK];
-                let groupTotal = 0;
+                let groupTotal = 0; // Menampung sub total per Kode SK
 
                 const skWrapper = document.createElement('div');
                 skWrapper.className = 'mb-6';
@@ -1000,10 +999,10 @@
                 `;
 
                 groupItems.forEach((item) => {
-                    const itemTotal = item.totalBiaya || 0;
-                    groupTotal += itemTotal;
+                    const itemTotal = Number(item.totalBiaya) || 0;
+                    groupTotal += itemTotal; // Hitung Sub Total per Kelompok
 
-                    // Susun Nama Pelaksana Utama & Pengikut ke Bawah agar Rapi
+                    // Susun Nama Pelaksana Utama & Pengikut
                     let personilHTML = `
                         <div class="font-bold whitespace-nowrap">1. ${item.namaPelaksana}</div>
                     `;
@@ -1013,7 +1012,7 @@
                             <div class="mt-1 pt-1 border-t border-slate-300 text-[10px] text-slate-700">
                                 <span class="italic font-semibold">Pengikut:</span>
                                 <ol class="list-decimal list-inside space-y-0.5 mt-0.5">
-                                    ${item.pengikut.map((p, idx) => `<li class="whitespace-nowrap">${p.nama}</li>`).join('')}
+                                    ${item.pengikut.map((p) => `<li class="whitespace-nowrap">${p.nama}</li>`).join('')}
                                 </ol>
                             </div>
                         `;
@@ -1037,6 +1036,9 @@
                     `;
                 });
 
+                // Akumulasikan Sub Total kelompok ini ke Grand Total Keseluruhan
+                grandTotalBiaya += groupTotal;
+
                 rowsHTML += `
                     </tbody>
                     <tfoot>
@@ -1052,11 +1054,11 @@
                 container.appendChild(skWrapper);
             });
 
-            // Grand Total Footer
+            // Tampilkan Baris Grand Total (Hasil penjumlahan dari seluruh Sub Total)
             const grandTotalDiv = document.createElement('div');
             grandTotalDiv.className = 'mt-4 border-2 border-black p-2.5 text-right font-official font-bold text-sm bg-slate-100 flex justify-between items-center';
             grandTotalDiv.innerHTML = `
-                <span class="uppercase">GRAND TOTAL REKAPITULASI REALISASI:</span>
+                <span class="uppercase">GRAND TOTAL REKAPITULASI REALISASI (TOTAL SELURUH SUB TOTAL):</span>
                 <span class="text-base text-emerald-900 font-black">Rp ${grandTotalBiaya.toLocaleString('id-ID')}</span>
             `;
             container.appendChild(grandTotalDiv);
