@@ -11,6 +11,9 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Library Dexie.js (IndexedDB Wrapper) -->
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -23,13 +26,23 @@
                 </a>
                 <div>
                     <h1 class="text-xl font-bold tracking-wide">E-PERDIN TABUNDUNG</h1>
-                    <p class="text-xs text-indigo-200">Aplikasi Perencanaan & Rekapitulasi Perjalanan Dinas Tim</p>
+                    <p class="text-xs text-indigo-200">Aplikasi Perencanaan & Rekapitulasi Perjalanan Dinas Tim (IndexedDB Ready)</p>
                 </div>
             </div>
             
             <div class="flex items-center space-x-2 sm:space-x-3">
-                <!-- BADGE MODE OFFLINE/ONLINE DI PERDIN.HTML -->
+                <!-- BADGE MODE OFFLINE/ONLINE -->
                 <div id="perdin-network-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner"></div>
+
+                <button onclick="exportDatabaseToJson()" class="bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow" title="Ekspor / Backup JSON">
+                    <i class="fa-solid fa-file-export"></i>
+                    <span class="hidden sm:inline">Backup JSON</span>
+                </button>
+
+                <button onclick="openImportModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow" title="Impor / Tarik Data">
+                    <i class="fa-solid fa-file-import"></i>
+                    <span class="hidden sm:inline">Impor Data</span>
+                </button>
 
                 <a href="index.html" class="bg-indigo-800 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5" title="Ke Portal Utama">
                     <i class="fa-solid fa-house"></i>
@@ -53,7 +66,7 @@
             </h2>
 
             <form id="perdinForm" class="space-y-4">
-                <!-- INPUT TARGET TOTAL OH GLOBAL (MANUAL DI ATAS DERETAN KODE SK) -->
+                <!-- INPUT TARGET TOTAL OH GLOBAL -->
                 <div class="p-3 bg-indigo-50/70 border border-indigo-200 rounded-lg">
                     <label class="block text-xs font-bold text-indigo-950 uppercase mb-1">
                         <i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Target Total OH Global (Seluruh SK)
@@ -63,7 +76,7 @@
                     <p class="text-[10px] text-slate-500 mt-1">Target kumulatif maksimum untuk seluruh perjalanan dinas kecamatan.</p>
                 </div>
 
-                <!-- DERETAN KODE SK DAN TARGET OH/SK -->
+                <!-- KODE SK DAN TARGET OH/SK -->
                 <div class="grid grid-cols-3 gap-2">
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
@@ -180,11 +193,9 @@
                     <span><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i> Rekap Perdin Per Sub Kegiatan (SK)</span>
                 </h3>
 
-                <!-- TAMPILAN GANDA INFORMASI KETERSEDIAAN KUOTA (TARGET OH PER SK & TARGET TOTAL OH) -->
+                <!-- INFORMASI STATUS KUOTA -->
                 <div class="space-y-2 mb-4">
-                    <!-- STATUS 1: TARGET OH PER SK -->
                     <div id="skSpecificAlert" class="p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all"></div>
-                    <!-- STATUS 2: TARGET TOTAL OH GLOBAL -->
                     <div id="skStatusAlert" class="p-3 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all"></div>
                 </div>
 
@@ -206,14 +217,20 @@
                 </div>
             </div>
 
+            <!-- Log Penugasan Perdin -->
             <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-md font-bold text-slate-800">
-                        <i class="fa-solid fa-users text-indigo-600 mr-2"></i> Log Penugasan Perdin (Pelaksana & Pengikut)
+                        <i class="fa-solid fa-users text-indigo-600 mr-2"></i> Log Penugasan Perdin (IndexedDB Active)
                     </h3>
-                    <button onclick="resetData()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Reset Data
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="exportDatabaseToJson()" class="text-xs text-sky-700 hover:text-sky-900 font-semibold flex items-center bg-sky-50 px-2.5 py-1 rounded border border-sky-200">
+                            <i class="fa-solid fa-download mr-1"></i> Unduh Backup JSON
+                        </button>
+                        <button onclick="resetData()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center px-2 py-1">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Reset Data
+                        </button>
+                    </div>
                 </div>
                 <div class="overflow-x-auto max-h-80">
                     <table class="w-full text-xs text-left border-collapse">
@@ -236,28 +253,85 @@
         </div>
     </main>
 
-    <!-- FOOTER COPYRIGHT PERDIN.HTML -->
+    <!-- MODAL IMPOR DATA PERDIN -->
+    <div id="importModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-2xl w-full mx-4 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-import text-amber-400"></i> Impor Data Penugasan (Merge via IndexedDB)
+                </h3>
+                <button onclick="closeImportModal()" class="text-indigo-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+                <p class="text-slate-600">
+                    Tempelkan data JSON di bawah atau unggah file `.json` hasil backup offline. Data baru akan digabungkan ke database IndexedDB tanpa menghapus log penugasan yang tersimpan sebelumnya.
+                </p>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1 uppercase">Unggah File Backup JSON</label>
+                    <input type="file" id="fileImportInput" accept=".json" onchange="handleFileUpload(event)"
+                           class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-300 rounded-lg bg-white p-1 mb-2">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1 uppercase">Atau Tempelkan Format JSON Data Impor</label>
+                    <textarea id="importJsonInput" rows="6" placeholder='[{"id":1700000000000, "kodeSK":"7.01.01.2.01.0003", "namaSK":"Koordinasi Pemerintahan", "kodeRekening":"5.1.02.04.001.0001", "utama":{"nama":"RUDOLF UMBU RESI LOLY, ST"}, "pengikut":[], "durasiHari":1, "totalOH":1, "desa":"Billa"}]' 
+                              class="w-full p-3 font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50"></textarea>
+                </div>
+
+                <div id="importPreviewContainer" class="hidden space-y-2">
+                    <p class="font-bold text-slate-700 uppercase">Pratinjau Data yang Hendak Diimpor:</p>
+                    <div class="max-h-36 overflow-y-auto border border-slate-200 rounded-lg bg-amber-50/30 p-2">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[11px] text-amber-900 border-b border-amber-200">
+                                    <th class="p-1 font-bold">Pelaksana Utama</th>
+                                    <th class="p-1 font-bold">Kode SK</th>
+                                    <th class="p-1 font-bold">Desa</th>
+                                    <th class="p-1 font-bold text-center">OH</th>
+                                    <th class="p-1 font-bold text-center">Status IndexedDB</th>
+                                </tr>
+                            </thead>
+                            <tbody id="importPreviewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-between items-center">
+                <button onclick="previewImportData()" class="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-magnifying-glass mr-1"></i> Cek Data Modal
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeImportModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg transition">
+                        Batal
+                    </button>
+                    <button onclick="executeImportData()" class="bg-indigo-700 hover:bg-indigo-800 text-white font-bold px-4 py-2 rounded-lg shadow transition flex items-center">
+                        <i class="fa-solid fa-cloud-arrow-down mr-1.5"></i> Simpan ke IndexedDB
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER COPYRIGHT -->
     <footer class="bg-indigo-950 text-indigo-200 text-center py-3 border-t border-indigo-800 text-xs mt-8">
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
     <!-- JavaScript Application Logic -->
     <script>
-        function updatePerdinNetworkBadge() {
-            const badge = document.getElementById('perdin-network-badge');
-            if (badge) {
-                if (navigator.onLine) {
-                    badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600 text-white shadow-sm';
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Online`;
-                } else {
-                    badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600 text-white shadow-sm';
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Offline`;
-                }
-            }
-        }
-
-        window.addEventListener('online', updatePerdinNetworkBadge);
-        window.addEventListener('offline', updatePerdinNetworkBadge);
+        // ==========================================
+        // INISIALISASI DEXIE.JS (INDEXEDDB)
+        // ==========================================
+        const db = new Dexie('PerdinTabundungDB');
+        db.version(1).stores({
+            perdinData: 'id, kodeSK, totalOH, desa',
+            settings: 'key, value'
+        });
 
         const asnMaster = [
             { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008" },
@@ -280,16 +354,53 @@
             { nama: "IGNASIUS ROY KALE", jabatan: "PENGADMINISTRASI PERKANTORAN", nip: "197407112007011022" }
         ];
 
-        let perdinLog = JSON.parse(localStorage.getItem('perdinData')) || [];
-        let targetTotalOHGlobal = parseInt(localStorage.getItem('targetTotalOHGlobal')) || 202;
-        let targetSKStore = JSON.parse(localStorage.getItem('targetSKStore')) || {};
+        let perdinLog = [];
+        let targetTotalOHGlobal = 202;
+        let targetSKStore = {};
+        let parsedModalImportData = [];
 
-        document.addEventListener("DOMContentLoaded", () => {
+        function updatePerdinNetworkBadge() {
+            const badge = document.getElementById('perdin-network-badge');
+            if (badge) {
+                if (navigator.onLine) {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600 text-white shadow-sm';
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Online`;
+                } else {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600 text-white shadow-sm';
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Offline (IndexedDB Active)`;
+                }
+            }
+        }
+
+        window.addEventListener('online', updatePerdinNetworkBadge);
+        window.addEventListener('offline', updatePerdinNetworkBadge);
+
+        document.addEventListener("DOMContentLoaded", async () => {
             updatePerdinNetworkBadge();
             populateSelectOptions(document.getElementById("selectPelaksanaUtama"));
-            document.getElementById("inputTargetTotalOHGlobal").value = targetTotalOHGlobal;
-            updateUI();
+            await loadSettingsFromDB();
+            await loadDataFromDB();
         });
+
+        async function loadSettingsFromDB() {
+            const globalTargetRecord = await db.settings.get('targetTotalOHGlobal');
+            if (globalTargetRecord) {
+                targetTotalOHGlobal = globalTargetRecord.value;
+            } else {
+                await db.settings.put({ key: 'targetTotalOHGlobal', value: 202 });
+            }
+            document.getElementById("inputTargetTotalOHGlobal").value = targetTotalOHGlobal;
+
+            const skStoreRecord = await db.settings.get('targetSKStore');
+            if (skStoreRecord) {
+                targetSKStore = skStoreRecord.value || {};
+            }
+        }
+
+        async function loadDataFromDB() {
+            perdinLog = await db.perdinData.toArray();
+            updateUI();
+        }
 
         function populateSelectOptions(selectElement) {
             selectElement.innerHTML = '<option value="">-- Pilih Nama --</option>';
@@ -328,16 +439,16 @@
             container.appendChild(div);
         }
 
-        function updateTargetTotalOHFromInput(val) {
+        async function updateTargetTotalOHFromInput(val) {
             const parsed = parseInt(val);
             if (!isNaN(parsed) && parsed > 0) {
                 targetTotalOHGlobal = parsed;
-                localStorage.setItem('targetTotalOHGlobal', targetTotalOHGlobal);
+                await db.settings.put({ key: 'targetTotalOHGlobal', value: targetTotalOHGlobal });
                 updateUI();
             }
         }
 
-        document.getElementById("perdinForm").addEventListener("submit", (e) => {
+        document.getElementById("perdinForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             
             const utamaNama = document.getElementById("selectPelaksanaUtama").value;
@@ -368,24 +479,24 @@
 
             if (!isNaN(targetOHSKVal) && targetOHSKVal > 0) {
                 targetSKStore[kodeSKVal] = targetOHSKVal;
-                localStorage.setItem('targetSKStore', JSON.stringify(targetSKStore));
+                await db.settings.put({ key: 'targetSKStore', value: targetSKStore });
             }
 
-            // VALIDASI 1: PENGECEKAN TARGET TOTAL OH GLOBAL
+            // VALIDASI 1: KUOTA TOTAL OH GLOBAL
             const currentTotalOH = perdinLog.reduce((sum, item) => sum + parseInt(item.totalOH || 0), 0);
             const sisaOHGlobal = targetTotalOHGlobal - currentTotalOH;
 
             if (currentTotalOH >= targetTotalOHGlobal) {
-                alert(`PENUGASAN DITOLAK!\n\nTarget Total OH Global (${targetTotalOHGlobal} OH) sudah habis. Anda tidak dapat menambah trip penugasan baru.`);
+                alert(`PENUGASAN DITOLAK!\n\nTarget Total OH Global (${targetTotalOHGlobal} OH) sudah habis.`);
                 return;
             }
 
             if (totalOHTrip > sisaOHGlobal) {
-                alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sedangkan sisa Kuota Total OH Global hanya ${sisaOHGlobal} OH.`);
+                alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sisa Kuota Global tinggal ${sisaOHGlobal} OH.`);
                 return;
             }
 
-            // VALIDASI 2: PENGECEKAN TARGET OH PER SK
+            // VALIDASI 2: KUOTA TARGET OH PER SK
             if (targetSKStore[kodeSKVal]) {
                 const targetSK = targetSKStore[kodeSKVal];
                 const realisasiSK = perdinLog
@@ -394,12 +505,12 @@
                 const sisaOHSK = targetSK - realisasiSK;
 
                 if (realisasiSK >= targetSK) {
-                    alert(`PENUGASAN DITOLAK!\n\nTarget OH untuk Sub Kegiatan (${kodeSKVal}) sudah terpenuhi (${targetSK} OH). Tidak dapat menambah trip untuk SK ini.`);
+                    alert(`PENUGASAN DITOLAK!\n\nTarget OH untuk Sub Kegiatan (${kodeSKVal}) sudah terpenuhi.`);
                     return;
                 }
 
                 if (totalOHTrip > sisaOHSK) {
-                    alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sedangkan sisa kuota untuk SK [${kodeSKVal}] tinggal ${sisaOHSK} OH.`);
+                    alert(`PENUGASAN DITOLAK!\n\nPenugasan ini membutuhkan ${totalOHTrip} OH, sisa kuota untuk SK [${kodeSKVal}] tinggal ${sisaOHSK} OH.`);
                     return;
                 }
             }
@@ -416,31 +527,24 @@
                 desa: document.getElementById("selectDesa").value
             };
 
-            perdinLog.push(newPerdin);
-            saveData();
-            updateUI();
+            await db.perdinData.put(newPerdin);
+            await loadDataFromDB();
             
             document.getElementById("selectPelaksanaUtama").value = "";
             document.getElementById("pengikutContainer").innerHTML = "";
             autoFillUtama();
         });
 
-        function deleteItem(id) {
-            perdinLog = perdinLog.filter(item => item.id !== id);
-            saveData();
-            updateUI();
+        async function deleteItem(id) {
+            await db.perdinData.delete(id);
+            await loadDataFromDB();
         }
 
-        function resetData() {
-            if (confirm("Apakah Anda yakin ingin menghapus seluruh log transaksi perjalanan dinas?")) {
-                perdinLog = [];
-                saveData();
-                updateUI();
+        async function resetData() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh log transaksi dari IndexedDB?")) {
+                await db.perdinData.clear();
+                await loadDataFromDB();
             }
-        }
-
-        function saveData() {
-            localStorage.setItem('perdinData', JSON.stringify(perdinLog));
         }
 
         function updateUI() {
@@ -510,7 +614,7 @@
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td class="p-2">
-                        <p class="font-bold text-slate-800">${item.utama.nama} <span class="text-[10px] text-indigo-600 font-normal">(Ketua)</span></p>
+                        <p class="font-bold text-slate-800">${item.utama ? item.utama.nama : "-"} <span class="text-[10px] text-indigo-600 font-normal">(Ketua)</span></p>
                         ${pengikutHTML}
                     </td>
                     <td class="p-2">
@@ -548,7 +652,6 @@
                 document.getElementById("displayRekeningActive").textContent = `Rek: ${perdinLog[perdinLog.length - 1].kodeRekening}`;
             }
 
-            // 1. ALERT STATUS TARGET OH PER SUB KEGIATAN (SK) YANG DITUNJUK/DILIHAT
             const activeSK = document.getElementById("kodeSK").value.trim();
             const skAlertBox = document.getElementById("skSpecificAlert");
             
@@ -572,7 +675,7 @@
                         skAlertBox.innerHTML = `
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-circle-question text-amber-600"></i>
-                                <span>SK [<strong>${activeSK}</strong>]: Target OH per SK belum diisi pada formulir. (Realisasi saat ini: ${realisasiSK} OH).</span>
+                                <span>SK [<strong>${activeSK}</strong>]: Target OH per SK belum diisi pada formulir. (Realisasi: ${realisasiSK} OH).</span>
                             </div>
                         `;
                     } else {
@@ -582,7 +685,7 @@
                             skAlertBox.innerHTML = `
                                 <div class="flex items-center gap-2">
                                     <i class="fa-solid fa-layer-group text-emerald-600"></i>
-                                    <span>Status SK [<strong>${activeSK}</strong>]: Kuota SK Masih Tersedia <strong>${sisaSK} OH lagi</strong> (Realisasi: ${realisasiSK} / ${targetSK} OH).</span>
+                                    <span>Status SK [<strong>${activeSK}</strong>]: Kuota SK Tersedia <strong>${sisaSK} OH lagi</strong> (Realisasi: ${realisasiSK} / ${targetSK} OH).</span>
                                 </div>
                                 <span class="bg-emerald-200 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kuota Trip OK</span>
                             `;
@@ -600,7 +703,6 @@
                 }
             }
 
-            // 2. ALERT STATUS TARGET TOTAL OH GLOBAL
             const globalAlertBox = document.getElementById("skStatusAlert");
             if (globalAlertBox) {
                 if (sisaOHGlobal > 0) {
@@ -608,7 +710,7 @@
                     globalAlertBox.innerHTML = `
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-indigo-600"></i>
-                            <span>Status Target Global: Kuota Akumulasi Masih Tersedia <strong>${sisaOHGlobal} OH lagi</strong> (Total Realisasi: ${totalOH} dari ${targetTotalOHGlobal} OH).</span>
+                            <span>Status Target Global: Kuota Tersedia <strong>${sisaOHGlobal} OH lagi</strong> (Total Realisasi: ${totalOH} dari ${targetTotalOHGlobal} OH).</span>
                         </div>
                         <span class="bg-indigo-200 text-indigo-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Global OK</span>
                     `;
@@ -617,11 +719,181 @@
                     globalAlertBox.innerHTML = `
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
-                            <span>Status Target Global: KUOTA GLOBAL HABIS! Realisasi mencapai target (<strong>${totalOH} / ${targetTotalOHGlobal} OH</strong>). Seluruh penugasan baru dikunci.</span>
+                            <span>Status Target Global: KUOTA GLOBAL HABIS! (<strong>${totalOH} / ${targetTotalOHGlobal} OH</strong>).</span>
                         </div>
                         <span class="bg-rose-200 text-rose-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Kunci Global</span>
                     `;
                 }
+            }
+        }
+
+        // ==========================================
+        // MODUL EKSPOR BACKUP INDEXEDDB KE FILE JSON
+        // ==========================================
+        async function exportDatabaseToJson() {
+            try {
+                const logs = await db.perdinData.toArray();
+                const settings = await db.settings.toArray();
+
+                if (logs.length === 0) {
+                    if (!confirm("Log penugasan di IndexedDB masih kosong. Tetap ekspor struktur backup?")) {
+                        return;
+                    }
+                }
+
+                const backupData = {
+                    app: "E-Perdin Kecamatan Tabundung",
+                    version: "1.0",
+                    exportedAt: new Date().toISOString(),
+                    targetTotalOHGlobal: targetTotalOHGlobal,
+                    targetSKStore: targetSKStore,
+                    perdinLog: logs
+                };
+
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+                const downloadAnchor = document.createElement('a');
+                
+                const today = new Date().toISOString().split('T')[0];
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `Backup_EPERDIN_Tabundung_${today}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+            } catch (err) {
+                alert("Gagal melakukan ekspor backup database: " + err.message);
+            }
+        }
+
+        // ==========================================
+        // MODUL IMPOR DATA (FILE UPLOAD & MERGE)
+        // ==========================================
+        function openImportModal() {
+            document.getElementById("importModal").classList.remove("hidden");
+        }
+
+        function closeImportModal() {
+            document.getElementById("importModal").classList.add("hidden");
+            document.getElementById("importPreviewContainer").classList.add("hidden");
+            document.getElementById("importJsonInput").value = "";
+            document.getElementById("fileImportInput").value = "";
+            parsedModalImportData = [];
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("importJsonInput").value = e.target.result;
+                previewImportData();
+            };
+            reader.readAsText(file);
+        }
+
+        async function previewImportData() {
+            const jsonText = document.getElementById("importJsonInput").value.trim();
+            const previewContainer = document.getElementById("importPreviewContainer");
+            const previewBody = document.getElementById("importPreviewBody");
+
+            if (!jsonText) {
+                alert("Silakan pilih file backup atau tempelkan data JSON terlebih dahulu.");
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonText);
+                
+                // Mendukung file backup utuh (objek dengan properti perdinLog) atau array transaksi langsung
+                if (data.perdinLog && Array.isArray(data.perdinLog)) {
+                    parsedModalImportData = data.perdinLog;
+                } else if (Array.isArray(data)) {
+                    parsedModalImportData = data;
+                } else {
+                    parsedModalImportData = [data];
+                }
+
+                if (parsedModalImportData.length === 0) {
+                    alert("Data JSON kosong.");
+                    return;
+                }
+
+                previewBody.innerHTML = "";
+                for (const item of parsedModalImportData) {
+                    const existing = item.id ? await db.perdinData.get(item.id) : null;
+                    const tr = document.createElement("tr");
+                    tr.className = "border-b border-amber-100 text-[11px]";
+                    tr.innerHTML = `
+                        <td class="p-1 font-semibold text-slate-800">${item.utama ? item.utama.nama : '-'}</td>
+                        <td class="p-1 font-mono text-indigo-700">${item.kodeSK || '-'}</td>
+                        <td class="p-1 font-medium text-emerald-700">${item.desa || '-'}</td>
+                        <td class="p-1 text-center font-bold text-slate-900">${item.totalOH || 0} OH</td>
+                        <td class="p-1 text-center">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${existing ? 'bg-amber-200 text-amber-900' : 'bg-emerald-200 text-emerald-900'}">
+                                ${existing ? 'Perbarui IndexedDB' : 'Tambah Baru'}
+                            </span>
+                        </td>
+                    `;
+                    previewBody.appendChild(tr);
+                }
+
+                previewContainer.classList.remove("hidden");
+            } catch (err) {
+                alert("Format JSON tidak valid!\n\nError: " + err.message);
+            }
+        }
+
+        async function executeImportData() {
+            const jsonText = document.getElementById("importJsonInput").value.trim();
+            if (!jsonText) {
+                alert("Silakan masukkan data JSON sebelum melakukan penggabungan.");
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonText);
+                let listToImport = [];
+
+                if (data.perdinLog && Array.isArray(data.perdinLog)) {
+                    listToImport = data.perdinLog;
+                    if (data.targetTotalOHGlobal) {
+                        targetTotalOHGlobal = data.targetTotalOHGlobal;
+                        await db.settings.put({ key: 'targetTotalOHGlobal', value: targetTotalOHGlobal });
+                    }
+                    if (data.targetSKStore) {
+                        targetSKStore = { ...targetSKStore, ...data.targetSKStore };
+                        await db.settings.put({ key: 'targetSKStore', value: targetSKStore });
+                    }
+                } else if (Array.isArray(data)) {
+                    listToImport = data;
+                } else {
+                    listToImport = [data];
+                }
+
+                let insertedCount = 0;
+                let updatedCount = 0;
+
+                await db.transaction('rw', db.perdinData, async () => {
+                    for (const itemBaru of listToImport) {
+                        if (!itemBaru.id) {
+                            itemBaru.id = Date.now() + Math.floor(Math.random() * 1000);
+                        }
+                        const existing = await db.perdinData.get(itemBaru.id);
+                        if (existing) {
+                            updatedCount++;
+                        } else {
+                            insertedCount++;
+                        }
+                        await db.perdinData.put(itemBaru);
+                    }
+                });
+
+                await loadSettingsFromDB();
+                await loadDataFromDB();
+                alert(`SIMPAN INDEXEDDB BERHASIL!\n\n- ${insertedCount} penugasan baru ditambahkan.\n- ${updatedCount} penugasan diperbarui.\n\nFile backup berhasil digabungkan.`);
+                closeImportModal();
+            } catch (err) {
+                alert("Gagal melakukan impor ke IndexedDB! " + err.message);
             }
         }
     </script>
