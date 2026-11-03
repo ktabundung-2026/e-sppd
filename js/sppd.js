@@ -99,7 +99,6 @@ window.onNamaInputChanged = async function(role, namaVal) {
     }
 };
 
-// FUNGSI TAMBAH BARIS PENGIKUT
 window.addOfficerRow = function() {
     pengikutCount++;
     const container = document.getElementById('pengikutContainer');
@@ -137,7 +136,6 @@ window.addOfficerRow = function() {
     calculateTotalBudget();
 };
 
-// FUNGSI HAPUS BARIS PENGIKUT
 window.removeOfficerRow = function(id) {
     const row = document.getElementById(`pengikut-row-${id}`);
     if (row) {
@@ -146,7 +144,6 @@ window.removeOfficerRow = function(id) {
     }
 };
 
-// AUTOFILL NIP PENGIKUT
 window.autofillPengikutRow = function(id, namaVal) {
     const match = cachedAsnList.find(a => a.nama === namaVal);
     const row = document.getElementById(`pengikut-row-${id}`);
@@ -170,23 +167,46 @@ window.calculateTotalBudget = function() {
     return total;
 };
 
-async function handleFormSubmit(e) {
+window.handleFormSubmit = async function(e) {
     e.preventDefault();
     const record = {
         noSuratTugas: document.getElementById('noSuratTugas').value,
         noSPPD: document.getElementById('noSPPD').value,
         maksudTujuan: document.getElementById('maksudTujuan').value,
         namaPelaksana: document.getElementById('namaPelaksana').value,
+        nipPelaksana: document.getElementById('nipPelaksana').value,
         kodeSubKegiatan: document.getElementById('step1_kodeSK').value,
+        desaTujuan: document.getElementById('step1_selectDesa').value,
         totalBiaya: calculateTotalBudget(),
         createdAt: new Date().toISOString()
     };
 
-    await db.records.add(record);
-    alert('SPPD Berhasil Disimpan!');
-    loadLocalRecords();
-    switchStep(3);
-}
+    const id = await db.records.add(record);
+    sessionStorage.setItem('sppd_print_current', JSON.stringify({ ...record, id }));
+    alert('SPPD Berhasil Disimpan! Membuka Halaman Cetak...');
+    
+    await loadLocalRecords();
+    openCetakPage(id);
+};
+
+// FUNGSI BUKA HALAMAN CETAK DOKUMEN INDIVIDUAL
+window.openCetakPage = async function(id) {
+    const record = await db.records.get(id);
+    if (record) {
+        sessionStorage.setItem('sppd_print_current', JSON.stringify(record));
+        window.location.href = `cetak.html?id=${id}`;
+    } else {
+        alert("Data SPPD tidak ditemukan!");
+    }
+};
+
+// FUNGSI HAPUS REKORD SPPD
+window.deleteRecord = async function(id) {
+    if (confirm("Apakah Anda yakin ingin menghapus data SPPD ini?")) {
+        await db.records.delete(id);
+        await loadLocalRecords();
+    }
+};
 
 async function loadLocalRecords() {
     const records = await db.records.reverse().toArray();
@@ -200,17 +220,86 @@ async function loadLocalRecords() {
 
     tbody.innerHTML = records.map(r => `
         <tr class="hover:bg-slate-50 border-b">
-            <td class="p-3 font-medium">${r.noSuratTugas}</td>
+            <td class="p-3 font-medium">
+                ${r.noSuratTugas}<br>
+                <span class="text-[11px] text-slate-500">${r.noSPPD || '-'}</span>
+            </td>
             <td class="p-3 font-mono font-bold text-sky-800">${r.kodeSubKegiatan}</td>
             <td class="p-3 font-bold">${r.namaPelaksana}</td>
-            <td class="p-3">${r.maksudTujuan}</td>
+            <td class="p-3">${r.desaTujuan || r.maksudTujuan}</td>
             <td class="p-3 font-semibold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
             <td class="p-3 text-center">
-                <button onclick="alert('Membuka Cetak...')" class="bg-gov-700 text-white px-2.5 py-1 rounded text-xs">Cetak</button>
+                <button onclick="openCetakPage(${r.id})" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition mr-1">
+                    <i class="fa-solid fa-print"></i> Cetak
+                </button>
+                <button onclick="deleteRecord(${r.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </td>
         </tr>
     `).join('');
 }
+
+// FUNGSI CETAK REKAPITULASI SELURUH SPPD
+window.printHistoryTable = async function() {
+    const records = await db.records.toArray();
+    if (records.length === 0) return alert("Belum ada data riwayat SPPD untuk dicetak!");
+
+    const rekapSection = document.getElementById('rekapPrintSection');
+    const container = document.getElementById('rekapPrintContainer');
+    container.innerHTML = '';
+
+    let grandTotal = 0;
+    let tableRows = '';
+
+    records.forEach((r, idx) => {
+        const total = r.totalBiaya || 0;
+        grandTotal += total;
+        tableRows += `
+            <tr>
+                <td class="border border-black p-1.5 text-center">${idx + 1}</td>
+                <td class="border border-black p-1.5">${r.noSuratTugas}<br><span class="text-[10px] text-slate-600">${r.noSPPD || '-'}</span></td>
+                <td class="border border-black p-1.5 font-bold">${r.namaPelaksana}</td>
+                <td class="border border-black p-1.5">${r.desaTujuan || r.maksudTujuan}</td>
+                <td class="border border-black p-1.5 font-mono text-center">${r.kodeSubKegiatan}</td>
+                <td class="border border-black p-1.5 text-right font-bold">Rp ${total.toLocaleString('id-ID')}</td>
+            </tr>
+        `;
+    });
+
+    container.innerHTML = `
+        <table class="w-full text-xs font-official border-collapse border border-black">
+            <thead>
+                <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                    <th class="border border-black p-1.5 w-8">No.</th>
+                    <th class="border border-black p-1.5">No. Surat / SPPD</th>
+                    <th class="border border-black p-1.5">Pelaksana Utama</th>
+                    <th class="border border-black p-1.5">Tujuan / Maksud</th>
+                    <th class="border border-black p-1.5">Kode SK</th>
+                    <th class="border border-black p-1.5">Total Biaya (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+            <tfoot>
+                <tr class="bg-slate-100 font-bold border-t border-black">
+                    <td colspan="5" class="border border-black p-1.5 text-right uppercase">Grand Total Realisasi SPPD:</td>
+                    <td class="border border-black p-1.5 text-right font-extrabold whitespace-nowrap">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                </tr>
+            </tfoot>
+        </table>
+    `;
+
+    rekapSection.classList.remove('hidden');
+    document.body.classList.add('printing-rekap');
+
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing-rekap');
+        rekapSection.classList.add('hidden');
+    }, 150);
+};
 
 // MANAGEMENT MODAL MASTER ASN
 window.openAsnMasterModal = function() { document.getElementById('asnMasterModal').classList.remove('hidden'); renderAsnList(); };
