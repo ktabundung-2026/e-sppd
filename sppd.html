@@ -636,7 +636,7 @@
         }
 
         // ==========================================
-        // PERBAIKAN FUNGSI MENAMPILKAN MODAL E-PERDIN (BACA DARI INDEXEDDB)
+        // FUNGSI MENAMPILKAN MODAL E-PERDIN (DARI INDEXEDDB)
         // ==========================================
         async function openEperdinModal() {
             const container = document.getElementById('eperdinListContainer');
@@ -645,7 +645,6 @@
             document.getElementById('eperdinModal').classList.remove('hidden');
 
             try {
-                // Membaca data langsung dari IndexedDB (tabel perdinData)
                 let perdinLog = await perdinDB.perdinData.toArray();
 
                 container.innerHTML = '';
@@ -691,9 +690,9 @@
         }
 
         // ==========================================
-        // PERBAIKAN FUNGSI IMPORT DATA & HAPUS DARI INDEXEDDB
+        // FUNGSI IMPORT DATA (TANPA MENGHAPUS DATA E-PERDIN)
         // ==========================================
-        async function importEperdinData(item) {
+        function importEperdinData(item) {
             if (!item || !item.utama) return;
 
             // 1. Isikan Data Pelaksana Utama
@@ -736,16 +735,12 @@
             // 6. Hitung Ulang Anggaran
             calculateTotalBudget();
 
-            // 7. HAPUS DATA YANG SUDAH DIIMPOR DARI INDEXEDDB (MENCEGAH PENDOBELAN)
-            try {
-                await perdinDB.perdinData.delete(item.id);
-            } catch (e) {
-                console.error("Gagal memperbarui perdinData di IndexedDB setelah impor:", e);
-            }
+            // 7. DATA DIBIARKAN TETAP ADA DI INDEXEDDB (TIDAK ADA PROSES DELETE)
+            // Data E-Perdin tetap tersimpan sehingga perencanaan & kuota OH tetap terjaga.
 
             // 8. Tutup Modal & Berikan Notifikasi
             closeEperdinModal();
-            showNotification(`Data Penugasan [${item.utama.nama}] Berhasil Ditarik & Dihapus dari Antrean!`, 'success');
+            showNotification(`Data Penugasan [${item.utama.nama}] Berhasil Ditarik ke SPPD!`, 'success');
         }
 
         function populateSelectOptions() {
