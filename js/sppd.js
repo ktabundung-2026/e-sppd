@@ -112,8 +112,7 @@ async function seedAsnMaster() {
         if (count === 0) {
             await db.asnMaster.bulkPut([
                 { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
-                { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" },
-                { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM", nip: "197409121999031004", pangkat: "Penata" }
+                { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" }
             ]);
         }
     } catch(e) { console.error(e); }
@@ -435,8 +434,8 @@ window.handleFormSubmit = async function(e) {
         jabatanCamat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
 
         // Data Bendahara Pengeluaran Default
-        namaBendahara: 'RAUF UMAR',
-        nipBendahara: '197409121999031004',
+        namaBendahara: 'DANIEL KAMBARU WINDI',
+        nipBendahara: '197712312008011084',
 
         // Data Pejabat Penandatangan di Tempat Tujuan (Kades)
         namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
