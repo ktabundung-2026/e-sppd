@@ -103,8 +103,7 @@ async function seedAsnMaster() {
     if (count === 0) {
         await db.asnMaster.bulkPut([
             { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
-            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" },
-            { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM", nip: "197409121999031004", pangkat: "Penata" }
+            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" }
         ]);
     }
 }
@@ -410,9 +409,9 @@ window.handleFormSubmit = async function(e) {
         jabatanCamat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
 
         // Data Bendahara Pengeluaran (Bisa disesuaikan atau ditarik dari Master ASN)
-        namaBendahara: 'RAUF UMAR', // Ganti dengan nama bendahara default atau inputan
-        nipBendahara: '197409121999031004',
-        pangkatBendahara: 'Penata',
+        namaBendahara: 'DANIEL KAMBARU WINDI', // Ganti dengan nama bendahara default atau inputan
+        nipBendahara: '197712312008011084',
+        pangkatBendahara: 'Penata Muda / III.a',
         
         // ... (data lainnya seperti tempatTujuan, tglMulai, dll)
     };
@@ -625,8 +624,7 @@ window.downloadCsvTemplate = function() {
     const csvContent = "data:text/csv;charset=utf-8," 
         + "nama,nip,pangkat,jabatan\n"
         + "RUDOLF UMBU RESI LOLY ST,197205212006041008,Pembina,CAMAT TABUNDUNG\n"
-        + "KORNELIS KOPA RIHI SE,197811262010011008,Penata Tk. I,SEKRETARIS CAMAT\n"
-        + "RAUF UMAR,197409121999031004,Penata,KASUBAG PROGRAM";
+        + "KORNELIS KOPA RIHI SE,197811262010011008,Penata Tk. I,SEKRETARIS CAMAT";
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
