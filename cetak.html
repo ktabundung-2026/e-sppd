@@ -630,9 +630,9 @@
             document.getElementById('stDasar').innerText = record.dasarPelaksanaan || '-';
             document.getElementById('stUntuk').innerText = record.maksudTujuan || '-';
             document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat);
-            document.getElementById('stNamaCamat').innerText = record.namaCamat || '-';
-            document.getElementById('stPangkatCamat').innerText = record.pangkatCamat || '-';
-            document.getElementById('stNipCamat').innerText = record.nipCamat || '-';
+            document.getElementById('stNamaCamat').innerText = defaultCamatNama;
+            document.getElementById('stPangkatCamat').innerText = defaultCamatPangkat;
+            document.getElementById('stNipCamat').innerText = defaultCamatNip;
 
             const stDaftar = document.getElementById('stDaftarPersonil');
             let personilHTML = `
@@ -678,9 +678,9 @@
             document.getElementById('sppdTglSelesai').innerText = formatDate(record.tglSelesai);
             document.getElementById('sppdMak').innerText = record.mataAnggaran || '-';
             document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat);
-            document.getElementById('sppdCamatNama').innerText = record.namaCamat || '-';
-            document.getElementById('sppdCamatPangkat').innerText = record.pangkatCamat || '-';
-            document.getElementById('sppdCamatNip').innerText = record.nipCamat || '-';
+            document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
+            document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
+            document.getElementById('sppdCamatNip').innerText = defaultCamatNip;
 
             const sppdPengikutContainer = document.getElementById('sppdPengikutTabel');
             if (record.pengikut && record.pengikut.length > 0) {
@@ -776,7 +776,13 @@ document.getElementById('bktCamatNip').innerText = record.nipCamat || '-';
 
             const total = record.totalBiaya || 0;
             const biayaPerOrang = record.biayaPerOrang || 0;
-
+            // Pengaman Data Pejabat (Fallback otomatis jika kosong)
+            const defaultCamatNama = record.namaCamat || record.namaPejabat || 'RUDOLF UMBU RESI LOLY, ST';
+            const defaultCamatNip = record.nipCamat || record.nipPejabat || '197205212006041008';
+            const defaultCamatPangkat = record.pangkatCamat || 'Pembina';
+            const defaultBendaharaNama = record.namaBendahara || 'DANIEL KAMBARU WINDI';
+            const defaultBendaharaNip = record.nipBendahara || '197712312008011084';
+            
             document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
             document.getElementById('kwiMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('kwiBelanjaLangsungVal').innerText = total.toLocaleString('id-ID');
@@ -784,10 +790,10 @@ document.getElementById('bktCamatNip').innerText = record.nipCamat || '-';
             document.getElementById('kwiBelanjaPerjalananVal').innerText = total.toLocaleString('id-ID');
             document.getElementById('kwiJumlahTerima').innerText = total.toLocaleString('id-ID');
             document.getElementById('kwiTglKwitansi').innerText = formatDate(record.tglSurat);
-            document.getElementById('kwiCamatNama').innerText = record.namaCamat || '-';
-            document.getElementById('kwiCamatNip').innerText = record.nipCamat || '-';
-            document.getElementById('kwiBendaharaNama').innerText = record.namaBendahara || '-';
-            document.getElementById('kwiBendaharaNip').innerText = record.nipBendahara || '-';
+            document.getElementById('kwiCamatNama').innerText = defaultCamatNama || '-';
+            document.getElementById('kwiCamatNip').innerText = defaultCamatNip || '-';
+            document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama || '-';
+            document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip || '-';
 
             const kwiRows = document.getElementById('kwiDynamicRows');
             let rowsHTML = `
