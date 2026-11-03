@@ -50,8 +50,13 @@ function initDefaultDates() {
 
 window.syncTujuanPerdin = function(val) {
     const tempatTujuan = document.getElementById('tempatTujuan');
+    const jabatanTujuan = document.getElementById('jabatanPejabatTujuan');
     if (tempatTujuan) {
         tempatTujuan.value = val || '';
+    }
+    // Otomatis menyesuaikan jabatan default pejabat tujuan (misal KEPALA DESA BILLA)
+    if (jabatanTujuan && val) {
+        jabatanTujuan.value = `KEPALA ${val.toUpperCase()}`;
     }
 };
 
@@ -98,7 +103,8 @@ async function seedAsnMaster() {
     if (count === 0) {
         await db.asnMaster.bulkPut([
             { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
-            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" }
+            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" },
+            { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM", nip: "197409121999031004", pangkat: "Penata" }
         ]);
     }
 }
@@ -107,17 +113,34 @@ async function loadAsnCache() {
     cachedAsnList = await db.asnMaster.toArray();
 }
 
-// DROPDOWN POPULATE SECARA SINKRON DAN PRESISI
 function populateSelectOptions() {
     const selectPelaksana = document.getElementById('namaPelaksana');
-    const selectedVal = selectPelaksana ? selectPelaksana.value : '';
+    const selectPejabat = document.getElementById('namaPejabat');
+    
+    const selectedPelaksanaVal = selectPelaksana ? selectPelaksana.value : '';
+    const selectedPejabatVal = selectPejabat ? selectPejabat.value : '';
 
     if (selectPelaksana) {
         selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>';
         cachedAsnList.forEach(asn => {
             selectPelaksana.innerHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
         });
-        if (selectedVal) selectPelaksana.value = selectedVal;
+        if (selectedPelaksanaVal) selectPelaksana.value = selectedPelaksanaVal;
+    }
+
+    if (selectPejabat) {
+        selectPejabat.innerHTML = '<option value="">-- Pilih Pejabat Penandatangan --</option>';
+        cachedAsnList.forEach(asn => {
+            selectPejabat.innerHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
+        });
+
+        const camat = cachedAsnList.find(a => a.jabatan && a.jabatan.toUpperCase().includes("CAMAT"));
+        if (selectedPejabatVal) {
+            selectPejabat.value = selectedPejabatVal;
+        } else if (camat) {
+            selectPejabat.value = camat.nama;
+            onPejabatSelected(camat.nama);
+        }
     }
 
     document.querySelectorAll('.pengikut-nama').forEach(selectElem => {
@@ -130,7 +153,17 @@ function populateSelectOptions() {
     });
 }
 
-// AMAN KHUSUS KARAKTER KHUSUS SINTAKS HTML
+window.onPejabatSelected = function(namaVal) {
+    if (!namaVal) return;
+    const match = cachedAsnList.find(a => a.nama === namaVal);
+    if (match) {
+        const nipInput = document.getElementById('nipPejabat');
+        const jabatanInput = document.getElementById('jabatanPejabat');
+        if (nipInput) nipInput.value = match.nip || '';
+        if (jabatanInput) jabatanInput.value = match.jabatan || 'CAMAT TABUNDUNG';
+    }
+};
+
 function escapeHtml(text) {
     if (!text) return '';
     return text
@@ -368,6 +401,17 @@ window.handleFormSubmit = async function(e) {
         noSPPD: document.getElementById('noSPPD').value,
         kodeSubKegiatan: document.getElementById('step1_kodeSK').value,
         sumberDana: document.getElementById('step1_sumberDana')?.value || 'DAU',
+        
+        // PEJABAT PENANDATANGAN PENGUTUS (KECAMATAN)
+        namaPejabat: document.getElementById('namaPejabat')?.value || '',
+        nipPejabat: document.getElementById('nipPejabat')?.value || '',
+        jabatanPejabat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
+
+        // PEJABAT PENANDATANGAN DI TEMPAT TUJUAN (LEMBAR BELAKANG SPPD)
+        namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
+        nipPejabatTujuan: document.getElementById('nipPejabatTujuan')?.value || '-',
+        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
+
         tempatBerangkat: document.getElementById('tempatBerangkat').value,
         tempatTujuan: document.getElementById('tempatTujuan').value,
         alatAngkutan: document.getElementById('alatAngkutan').value,
