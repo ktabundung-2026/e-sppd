@@ -42,7 +42,7 @@
             body.printing-rekap #rekapPrintSection * { visibility: visible !important; }
             body.printing-rekap #rekapPrintSection {
                 position: absolute !important; left: 0 !important; top: 0 !important;
-                width: 100% !important; padding: 15mm !important; background: white !important;
+                width: 100% !important; padding: 10mm !important; background: white !important;
                 color: black !important; display: block !important;
             }
         }
@@ -157,7 +157,6 @@
                         </div>
                     </div>
 
-                    <!-- CONTAINER PENGIKUT -->
                     <div id="pengikutContainer" class="space-y-3 pt-2"></div>
 
                     <button type="button" onclick="addOfficerRow()" class="mt-2 text-xs bg-gov-700 hover:bg-gov-800 text-white font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
@@ -254,6 +253,16 @@
         </section>
 
     </main>
+
+    <!-- SECTION KHUSUS CETAK REKAPITULASI (Hanya Muncul Saat Print) -->
+    <div id="rekapPrintSection" class="hidden">
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h2>
+            <h1 class="text-2xl font-bold uppercase font-official">KECAMATAN TABUNDUNG</h1>
+            <p class="text-sm font-semibold mt-1">REKAPITULASI REALISASI PERJALANAN DINAS (SPPD)</p>
+        </div>
+        <div id="rekapPrintContainer"></div>
+    </div>
 
     <!-- MODAL MASTER DATA ASN -->
     <div id="asnMasterModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4">
