@@ -429,7 +429,7 @@
                     </div>
                 </div>
 
-                <!-- JUDUL & INFORMASI BKU (KIKAN ATAS) -->
+                <!-- JUDUL & INFORMASI BKU (KANAN ATAS) -->
                 <div class="flex justify-between items-start sppd-table-fixed mb-2">
                     <div></div>
                     <div class="text-right text-xs font-official leading-tight">
@@ -456,13 +456,16 @@
                 <table class="sppd-table-fixed border-collapse border border-black text-[9pt] font-official mb-3">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th class="border-r border-black p-1 w-24" rowspan="2">Kode Rekening</th>
+                            <th class="border-r border-black p-1 w-28" rowspan="2">Kode Rekening</th>
                             <th class="border-r border-black p-1" rowspan="2">Uraian / Rincian Perhitungan</th>
-                            <th class="border-r border-black p-1 w-10" rowspan="2">Vol</th>
-                            <th class="border-r border-black p-1 w-16" rowspan="2">Harga Satuan (Rp)</th>
-                            <th class="border-r border-black p-1 w-10" rowspan="2">Sat</th>
+                            <th class="border-r border-black p-1" colspan="3">Rincian Perhitungan</th>
                             <th class="border-r border-black p-1 w-20" rowspan="2">Jumlah (Rp)</th>
                             <th class="p-1 w-12" rowspan="2">Tanda Tangan</th>
+                        </tr>
+                        <tr class="bg-slate-100 border-b border-black text-center font-bold text-[8.5pt]">
+                            <th class="border-r border-black p-1 w-10">Vol</th>
+                            <th class="border-r border-black p-1 w-16">Harga Satuan (Rp)</th>
+                            <th class="border-r border-black p-1 w-10">Sat</th>
                         </tr>
                     </thead>
                     <tbody id="kwiTabelRincian">
@@ -692,7 +695,7 @@
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04.001.0001</td>
+                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04.01.0001</td>
                     <td class="border-r border-black p-1">
                         <b>Belanja Perjalanan Dinas Dalam Daerah</b><br>
                         Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
@@ -707,7 +710,7 @@
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1 font-mono text-left"></td>
                     <td class="border-r border-black p-1">
                         1. ${record.namaPelaksana || '-'}
                     </td>
@@ -723,7 +726,7 @@
                 record.pengikut.forEach((p, index) => {
                     rincianHTML += `
                         <tr class="border-b border-black align-top">
-                            <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1 font-mono text-left"></td>
                             <td class="border-r border-black p-1">
                                 ${index + 2}. ${p.nama || '-'}
                             </td>
