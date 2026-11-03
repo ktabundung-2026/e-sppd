@@ -14,12 +14,15 @@ const DAFTAR_DESA_TABUNDUNG = [
 
 let currentStep = 1;
 let pengikutCount = 0;
+let cachedAsnList = [];
 
 window.onload = async function() {
     setupNetworkBadge();
     await seedAsnMaster();
+    await loadAsnCache();
     populateSelectOptions();
     loadLocalRecords();
+    calculateTotalBudget();
 };
 
 function setupNetworkBadge() {
@@ -31,7 +34,7 @@ function setupNetworkBadge() {
     badge.innerText = navigator.onLine ? 'Online' : 'Offline';
 }
 
-function switchStep(stepNum) {
+window.switchStep = function(stepNum) {
     currentStep = stepNum;
     document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`step-content-${stepNum}`).classList.remove('hidden');
@@ -47,13 +50,13 @@ function switchStep(stepNum) {
             label.className = 'step-label text-xs font-medium text-slate-500 mt-1';
         }
     });
-}
+};
 
-function proceedToStep2() {
+window.proceedToStep2 = function() {
     const namaPelaksana = document.getElementById('namaPelaksana').value;
     if (!namaPelaksana) return alert("Pilih Pelaksana Utama terlebih dahulu!");
     switchStep(2);
-}
+};
 
 async function seedAsnMaster() {
     const count = await db.asnMaster.count();
@@ -66,12 +69,15 @@ async function seedAsnMaster() {
     }
 }
 
-async function populateSelectOptions() {
-    const asnList = await db.asnMaster.toArray();
+async function loadAsnCache() {
+    cachedAsnList = await db.asnMaster.toArray();
+}
+
+function populateSelectOptions() {
     const selectPelaksana = document.getElementById('namaPelaksana');
     if (selectPelaksana) {
         selectPelaksana.innerHTML = '<option value="">-- Pilih ASN Pelaksana --</option>';
-        asnList.forEach(asn => {
+        cachedAsnList.forEach(asn => {
             selectPelaksana.innerHTML += `<option value="${asn.nama}">${asn.nama}</option>`;
         });
     }
@@ -85,20 +91,84 @@ async function populateSelectOptions() {
     }
 }
 
-async function onNamaInputChanged(role, namaVal) {
+window.onNamaInputChanged = async function(role, namaVal) {
     if (!namaVal) return;
-    const match = await db.asnMaster.get({ nama: namaVal });
+    const match = cachedAsnList.find(a => a.nama === namaVal);
     if (match && role === 'Pelaksana') {
         document.getElementById('nipPelaksana').value = match.nip;
     }
-}
+};
 
-function calculateTotalBudget() {
+// FUNGSI TAMBAH BARIS PENGIKUT
+window.addOfficerRow = function() {
+    pengikutCount++;
+    const container = document.getElementById('pengikutContainer');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.id = `pengikut-row-${pengikutCount}`;
+    div.className = 'bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm';
+
+    let optionsHTML = '<option value="">-- Pilih Anggota Pengikut --</option>';
+    cachedAsnList.forEach(asn => {
+        optionsHTML += `<option value="${asn.nama}">${asn.nama}</option>`;
+    });
+
+    div.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700">Anggota Pengikut ${pengikutCount}</span>
+            <button type="button" onclick="removeOfficerRow(${pengikutCount})" class="text-rose-600 hover:text-rose-800 text-xs font-bold flex items-center gap-1">
+                <i class="fa-solid fa-trash"></i> Hapus
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+                <select class="pengikut-nama w-full p-2 text-xs rounded border border-slate-300 font-semibold" onchange="autofillPengikutRow(${pengikutCount}, this.value)">
+                    ${optionsHTML}
+                </select>
+            </div>
+            <div>
+                <input type="text" placeholder="NIP Pengikut" readonly class="pengikut-nip w-full p-2 text-xs rounded border border-slate-200 bg-slate-100 font-mono">
+            </div>
+        </div>
+    `;
+
+    container.appendChild(div);
+    calculateTotalBudget();
+};
+
+// FUNGSI HAPUS BARIS PENGIKUT
+window.removeOfficerRow = function(id) {
+    const row = document.getElementById(`pengikut-row-${id}`);
+    if (row) {
+        row.remove();
+        calculateTotalBudget();
+    }
+};
+
+// AUTOFILL NIP PENGIKUT
+window.autofillPengikutRow = function(id, namaVal) {
+    const match = cachedAsnList.find(a => a.nama === namaVal);
+    const row = document.getElementById(`pengikut-row-${id}`);
+    if (row) {
+        const nipInput = row.querySelector('.pengikut-nip');
+        if (nipInput) {
+            nipInput.value = match ? match.nip : '';
+        }
+    }
+};
+
+window.calculateTotalBudget = function() {
     const satuan = parseFloat(document.getElementById('biayaPerOrang').value) || 0;
-    const total = satuan * (1 + pengikutCount);
-    document.getElementById('totalBiayaFormatted').value = 'Rp ' + total.toLocaleString('id-ID');
+    const totalPengikut = document.querySelectorAll('#pengikutContainer > div').length;
+    const total = satuan * (1 + totalPengikut);
+    
+    const formatted = document.getElementById('totalBiayaFormatted');
+    if (formatted) {
+        formatted.value = 'Rp ' + total.toLocaleString('id-ID');
+    }
     return total;
-}
+};
 
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -143,8 +213,8 @@ async function loadLocalRecords() {
 }
 
 // MANAGEMENT MODAL MASTER ASN
-function openAsnMasterModal() { document.getElementById('asnMasterModal').classList.remove('hidden'); renderAsnList(); }
-function closeAsnMasterModal() { document.getElementById('asnMasterModal').classList.add('hidden'); }
+window.openAsnMasterModal = function() { document.getElementById('asnMasterModal').classList.remove('hidden'); renderAsnList(); };
+window.closeAsnMasterModal = function() { document.getElementById('asnMasterModal').classList.add('hidden'); };
 
 async function renderAsnList() {
     const list = await db.asnMaster.toArray();
@@ -159,7 +229,7 @@ async function renderAsnList() {
     `).join('');
 }
 
-async function saveAsnMaster(e) {
+window.saveAsnMaster = async function(e) {
     e.preventDefault();
     await db.asnMaster.put({
         nama: document.getElementById('asnNama').value,
@@ -168,10 +238,16 @@ async function saveAsnMaster(e) {
         jabatan: document.getElementById('asnJabatan').value
     });
     document.getElementById('asnForm').reset();
+    await loadAsnCache();
     renderAsnList();
     populateSelectOptions();
-}
+};
 
-async function deleteAsn(nip) {
-    if(confirm('Hapus ASN ini?')) { await db.asnMaster.delete(nip); renderAsnList(); populateSelectOptions(); }
-}
+window.deleteAsn = async function(nip) {
+    if(confirm('Hapus ASN ini?')) { 
+        await db.asnMaster.delete(nip); 
+        await loadAsnCache();
+        renderAsnList(); 
+        populateSelectOptions(); 
+    }
+};
