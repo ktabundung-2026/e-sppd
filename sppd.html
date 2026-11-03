@@ -127,51 +127,88 @@
         </div>
 
         <!-- STEP 1: PERENCANAAN TIM & CEK KUOTA OH -->
-        <section id="step-content-1" class="step-content space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
-                    <span><i class="fa-solid fa-users-viewfinder text-gov-700 mr-2"></i> Langkah 1: Penugasan Tim & Cek Kuota OH</span>
-                </h2>
+<section id="step-content-1" class="step-content space-y-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
+            <span><i class="fa-solid fa-users-viewfinder text-gov-700 mr-2"></i> Langkah 1: Penugasan Tim & Cek Kuota OH</span>
+        </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Sub Kegiatan (SK)</label>
-                        <input type="text" id="step1_kodeSK" value="7.01.01.2.01.0003" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Desa Tujuan</label>
-                        <select id="step1_selectDesa" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold"></select>
-                    </div>
+        <!-- Input SK & Desa Tujuan -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Sub Kegiatan (SK)</label>
+                <input type="text" id="step1_kodeSK" value="7.01.01.2.01.0003" onchange="updateSKQuotaInfo()" oninput="updateSKQuotaInfo()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono font-bold">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Desa Tujuan</label>
+                <select id="step1_selectDesa" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold"></select>
+            </div>
+        </div>
+
+        <!-- WIDGET INDIKATOR KUOTA OH PER SK -->
+        <div id="skQuotaBadge" class="p-4 rounded-xl border bg-slate-50 border-slate-200 transition-all duration-200 mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-extrabold uppercase tracking-wide text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-pie text-gov-600"></i> Status Kuota Perdin (SK: <span id="lblCurrentSK" class="font-mono text-gov-800">7.01.01.2.01.0003</span>)
+                </span>
+                <span id="badgeStatusQuota" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Tersedia</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center my-3">
+                <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <span class="block text-[10px] text-slate-500 font-medium">Batas Maksimal Kuota</span>
+                    <span id="valTotalQuota" class="text-sm font-extrabold text-slate-800">50 OH</span>
                 </div>
-
-                <div class="mt-4 bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-                    <h3 class="text-xs font-bold text-gov-800 uppercase">Pelaksana Utama & Anggota Tim</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] text-slate-600 mb-0.5">Pelaksana Utama</label>
-                            <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold"></select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-600 mb-0.5">NIP Utama</label>
-                            <input type="text" id="nipPelaksana" readonly class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 bg-slate-100 font-mono">
-                        </div>
-                    </div>
-
-                    <div id="pengikutContainer" class="space-y-3 pt-2"></div>
-
-                    <button type="button" onclick="addOfficerRow()" class="mt-2 text-xs bg-gov-700 hover:bg-gov-800 text-white font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-plus"></i> + Tambah Anggota Pengikut
-                    </button>
+                <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <span class="block text-[10px] text-slate-500 font-medium">Telah Ditugaskan</span>
+                    <span id="valUsedQuota" class="text-sm font-extrabold text-sky-700">0 OH</span>
                 </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="button" onclick="proceedToStep2()" class="px-6 py-2.5 bg-gov-700 hover:bg-gov-800 text-white font-bold text-xs sm:text-sm rounded-lg shadow transition flex items-center gap-2">
-                        <span>Lanjut ke Dokumen SPPD (Step 2)</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+                <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <span class="block text-[10px] text-slate-500 font-medium">Sisa Kuota Tersedia</span>
+                    <span id="valRemainingQuota" class="text-sm font-extrabold text-emerald-600">50 OH</span>
                 </div>
             </div>
-        </section>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                <div id="progressBarQuota" class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Section Anggota Tim -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-gov-800 uppercase">Pelaksana Utama & Anggota Tim</h3>
+                <span class="text-xs font-bold text-slate-600">Dibutuhkan: <span id="lblPenugasanOH" class="text-gov-800 font-extrabold">1 OH</span></span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] text-slate-600 mb-0.5">Pelaksana Utama</label>
+                    <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold"></select>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-600 mb-0.5">NIP Utama</label>
+                    <input type="text" id="nipPelaksana" readonly class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 bg-slate-100 font-mono">
+                </div>
+            </div>
+
+            <!-- CONTAINER PENGIKUT -->
+            <div id="pengikutContainer" class="space-y-3 pt-2"></div>
+
+            <button type="button" onclick="addOfficerRow()" class="mt-2 text-xs bg-gov-700 hover:bg-gov-800 text-white font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                <i class="fa-solid fa-user-plus"></i> + Tambah Anggota Pengikut
+            </button>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+            <button type="button" onclick="proceedToStep2()" class="px-6 py-2.5 bg-gov-700 hover:bg-gov-800 text-white font-bold text-xs sm:text-sm rounded-lg shadow transition flex items-center gap-2">
+                <span>Lanjut ke Dokumen SPPD (Step 2)</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
 
         <!-- STEP 2: LENGKAPI DOKUMEN SPPD & BIAYA -->
         <section id="step-content-2" class="step-content hidden space-y-6">
