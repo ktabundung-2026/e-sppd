@@ -418,7 +418,7 @@
                 </div>
             </div>
 
-            <!-- 5. KWITANSI & RINCIAN (SESUAI FORMAT PDF) -->
+            <!-- 5. KWITANSI & RINCIAN (SESUAI FORMAT BARU) -->
             <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                 <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
                     <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo" class="w-16 h-20 object-contain mr-3">
@@ -426,6 +426,18 @@
                         <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
                         <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
                         <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
+                    </div>
+                </div>
+
+                <!-- JUDUL & INFORMASI BKU (KIKAN ATAS) -->
+                <div class="flex justify-between items-start sppd-table-fixed mb-2">
+                    <div></div>
+                    <div class="text-right text-xs font-official leading-tight">
+                        <table class="ml-auto">
+                            <tr><td class="text-left pr-2">No. BKU</td><td>: <span id="kwiNoBku">-</span></td></tr>
+                            <tr><td class="text-left pr-2">Tahun Anggaran</td><td>: 2026</td></tr>
+                            <tr><td class="text-left pr-2">Tanggal</td><td>: <span id="kwiTglKwitansiSub">-</span></td></tr>
+                        </table>
                     </div>
                 </div>
 
@@ -440,7 +452,7 @@
 
                 <div class="text-center font-bold text-xs uppercase mb-2">Dengan Rincian sebagai berikut:</div>
 
-                <!-- TABEL RINCIAN SESUAI PDF -->
+                <!-- TABEL RINCIAN -->
                 <table class="sppd-table-fixed border-collapse border border-black text-[9pt] font-official mb-3">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -458,25 +470,21 @@
                     </tbody>
                 </table>
 
+                <!-- TANDA TANGAN SEJAJAR DI BAWAH TABEL -->
                 <div class="flex justify-between items-start text-xs font-official sppd-table-fixed mt-4">
-                    <div class="w-1/2">
-                        <table class="w-full text-xs">
-                            <tr><td class="w-20">No. BKU</td><td>:</td></tr>
-                            <tr><td>T.A.</td><td>: 2026</td></tr>
-                            <tr><td>Tanggal</td><td>: <span id="kwiTglKwitansiSub">-</span></td></tr>
-                        </table>
-                    </div>
-                    <div class="w-1/2 text-center">
-                        <p>Mengetahui,</p>
+                    <div class="w-1/2 text-center pr-4">
+                        <p class="font-bold">Mengetahui / Menyetujui,</p>
                         <p class="font-bold">Pengguna Anggaran,</p>
-                        <div class="h-12"></div>
+                        <div class="h-14"></div>
                         <p class="font-bold underline uppercase" id="kwiCamatNama">-</p>
                         <p>NIP. <span id="kwiCamatNip">-</span></p>
-                        <div class="h-2"></div>
+                    </div>
+                    <div class="w-1/2 text-center pl-4">
+                        <p>&nbsp;</p>
                         <p class="font-bold">Bendahara Pengeluaran,</p>
-                        <div class="h-12"></div>
+                        <div class="h-14"></div>
                         <p class="font-bold underline uppercase" id="kwiBendaharaNama">-</p>
-                        <p>Nip. <span id="kwiBendaharaNip">-</span></p>
+                        <p>NIP. <span id="kwiBendaharaNip">-</span></p>
                     </div>
                 </div>
             </div>
@@ -641,11 +649,12 @@
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
-            // 5. Kwitansi / Rincian Biaya (Format Persis Sesuai PDF)
+            // 5. Kwitansi / Rincian Biaya
             const total = record.totalBiaya || 850000;
             const jumlahOrang = 1 + (record.pengikut?.length || 0);
             const satuanBiaya = record.biayaPerOrang || (total / jumlahOrang);
 
+            document.getElementById('kwiNoBku').innerText = record.noBku || '-';
             document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
             document.getElementById('kwiTerbilangNominal').innerText = 'Rp ' + total.toLocaleString('id-ID');
             document.getElementById('kwiTglKwitansiSub').innerText = formatDate(record.tglSelesai || record.tglSurat);
