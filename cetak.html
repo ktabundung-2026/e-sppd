@@ -669,43 +669,31 @@
             let rincianHTML = `
                 <tr class="border-b border-black align-top">
                     <td class="border-r border-black p-1 font-mono text-left">5.1</td>
-                    <td class="border-r border-black p-1 font-bold colspan="3">BELANJA LANGSUNG</td>
-                    <td class="border-r border-black p-1"></td>
-                    <td class="border-r border-black p-1 text-right"></td>
-                    <td class="border-r border-black p-1 text-center"></td>
+                    <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA LANGSUNG</td>
                     <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
                     <td class="border-r border-black p-1 font-mono text-left">5.1.02</td>
-                    <td class="border-r border-black p-1 font-bold colspan="3">BELANJA PEGAWAI</td>
-                    <td class="border-r border-black p-1"></td>
-                    <td class="border-r border-black p-1 text-right"></td>
-                    <td class="border-r border-black p-1 text-center"></td>
+                    <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA PEGAWAI</td>
                     <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
                     <td class="border-r border-black p-1 font-mono text-left">5.1.02.04</td>
-                    <td class="border-r border-black p-1 font-bold colspan="3">Belanja Perjalanan Dinas</td>
-                    <td class="border-r border-black p-1"></td>
-                    <td class="border-r border-black p-1 text-right"></td>
-                    <td class="border-r border-black p-1 text-center"></td>
+                    <td class="border-r border-black p-1 font-bold" colspan="4">Belanja Perjalanan Dinas</td>
                     <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04.001.0001</td>
-                    <td class="border-r border-black p-1">
+                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04.01.0001</td>
+                    <td class="border-r border-black p-1" colspan="4">
                         <b>Belanja Perjalanan Dinas Dalam Daerah</b><br>
                         Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
                         Dalam rangka ${record.maksudTujuan || '-'}<br>
                         Di ${record.tempatTujuan || '-'} Selama ${record.lamaHari || 1} (Satu) Hari<br>
                         Pada Tanggal, ${formatDate(record.tglMulai)}
                     </td>
-                    <td class="border-r border-black p-1 text-center"></td>
-                    <td class="border-r border-black p-1 text-right"></td>
-                    <td class="border-r border-black p-1 text-center"></td>
                     <td class="border-r border-black p-1 text-right"></td>
                     <td class="p-1 text-center"></td>
                 </tr>
