@@ -1,27 +1,35 @@
-// INISIALISASI INDEXEDDB
-const db = new Dexie('eSPPD_Tabundung_DB');
-db.version(1).stores({
-    records: '++id, noSuratTugas, kodeSubKegiatan, namaPelaksana, tglMulai',
-    asnMaster: 'nip, nama, jabatan, pangkat',
-    settings: 'key, value'
-});
+// INISIALISASI INDEXEDDB DENGAN PENGAMANAN TRY-CATCH
+let db;
+try {
+    db = new Dexie('eSPPD_Tabundung_DB');
+    db.version(1).stores({
+        records: '++id, noSuratTugas, kodeSubKegiatan, namaPelaksana, tglMulai',
+        asnMaster: 'nip, nama, jabatan, pangkat',
+        settings: 'key, value'
+    });
+} catch(e) {
+    console.error("Gagal menginisialisasi Dexie DB:", e);
+}
 
 const DEFAULT_MAX_KUOTA_OH = 50;
 let currentStep = 1;
 let pengikutCount = 0;
 let cachedAsnList = [];
 
-// AMAN DARI RACE-CONDITION LOADING
 window.addEventListener('DOMContentLoaded', async function() {
     try {
         setupNetworkBadge();
-        await seedAsnMaster();
-        await loadAsnCache();
+        if (db) {
+            await seedAsnMaster();
+            await loadAsnCache();
+        }
         populateSelectOptions();
         initDefaultDates();
         syncTujuanPerdin(document.getElementById('step1_selectDesa')?.value);
-        await window.updateSKQuotaInfo();
-        await loadLocalRecords();
+        if (db) {
+            await window.updateSKQuotaInfo();
+            await loadLocalRecords();
+        }
         calculateTotalBudget();
     } catch (err) {
         console.error("Gagal Menginisialisasi Aplikasi e-SPPD:", err);
@@ -54,7 +62,6 @@ window.syncTujuanPerdin = function(val) {
     if (tempatTujuan) {
         tempatTujuan.value = val || '';
     }
-    // Otomatis menyesuaikan jabatan default pejabat tujuan (misal KEPALA DESA BILLA)
     if (jabatanTujuan && val) {
         jabatanTujuan.value = `KEPALA ${val.toUpperCase()}`;
     }
@@ -83,33 +90,39 @@ window.calculateLamaPerdin = function() {
 window.switchStep = function(stepNum) {
     currentStep = stepNum;
     document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
-    document.getElementById(`step-content-${stepNum}`).classList.remove('hidden');
+    const targetContent = document.getElementById(`step-content-${stepNum}`);
+    if (targetContent) targetContent.classList.remove('hidden');
 
     document.querySelectorAll('.step-btn').forEach((btn, idx) => {
         const icon = btn.querySelector('.step-icon');
         const label = btn.querySelector('.step-label');
         if (idx + 1 === stepNum) {
-            icon.className = 'step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md';
-            label.className = 'step-label text-xs font-bold text-gov-800 mt-1';
+            if (icon) icon.className = 'step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md';
+            if (label) label.className = 'step-label text-xs font-bold text-gov-800 mt-1';
         } else {
-            icon.className = 'step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600';
-            label.className = 'step-label text-xs font-medium text-slate-500 mt-1';
+            if (icon) icon.className = 'step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600';
+            if (label) label.className = 'step-label text-xs font-medium text-slate-500 mt-1';
         }
     });
 };
 
 async function seedAsnMaster() {
-    const count = await db.asnMaster.count();
-    if (count === 0) {
-        await db.asnMaster.bulkPut([
-            { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
-            { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" }
-        ]);
-    }
+    try {
+        const count = await db.asnMaster.count();
+        if (count === 0) {
+            await db.asnMaster.bulkPut([
+                { nama: "RUDOLF UMBU RESI LOLY, ST", jabatan: "CAMAT TABUNDUNG", nip: "197205212006041008", pangkat: "Pembina" },
+                { nama: "KORNELIS KOPA RIHI, SE", jabatan: "SEKRETARIS CAMAT", nip: "197811262010011008", pangkat: "Penata Tk. I" },
+                { nama: "RAUF UMAR", jabatan: "KASUBAG PROGRAM", nip: "197409121999031004", pangkat: "Penata" }
+            ]);
+        }
+    } catch(e) { console.error(e); }
 }
 
 async function loadAsnCache() {
-    cachedAsnList = await db.asnMaster.toArray();
+    try {
+        cachedAsnList = await db.asnMaster.toArray();
+    } catch(e) { cachedAsnList = []; }
 }
 
 function populateSelectOptions() {
@@ -122,7 +135,7 @@ function populateSelectOptions() {
     if (selectPelaksana) {
         selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>';
         cachedAsnList.forEach(asn => {
-            selectPelaksana.innerHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
+            selectPelaksana.innerHTML += `<option value="${escapeHtml(asn.nama)}">${escapeHtml(asn.nama)}</option>`;
         });
         if (selectedPelaksanaVal) selectPelaksana.value = selectedPelaksanaVal;
     }
@@ -130,7 +143,7 @@ function populateSelectOptions() {
     if (selectPejabat) {
         selectPejabat.innerHTML = '<option value="">-- Pilih Pejabat Penandatangan --</option>';
         cachedAsnList.forEach(asn => {
-            selectPejabat.innerHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
+            selectPejabat.innerHTML += `<option value="${escapeHtml(asn.nama)}">${escapeHtml(asn.nama)}</option>`;
         });
 
         const camat = cachedAsnList.find(a => a.jabatan && a.jabatan.toUpperCase().includes("CAMAT"));
@@ -146,7 +159,7 @@ function populateSelectOptions() {
         const currentPengikutVal = selectElem.value;
         selectElem.innerHTML = '<option value="">-- Pilih Anggota Pengikut --</option>';
         cachedAsnList.forEach(asn => {
-            selectElem.innerHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
+            selectElem.innerHTML += `<option value="${escapeHtml(asn.nama)}">${escapeHtml(asn.nama)}</option>`;
         });
         if (currentPengikutVal) selectElem.value = currentPengikutVal;
     });
@@ -173,83 +186,97 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
-window.onNamaInputChanged = async function(role, namaVal) {
+window.onNamaInputChanged = function(role, namaVal) {
     if (!namaVal) {
-        document.getElementById('nipPelaksana').value = '';
-        document.getElementById('jabatanPelaksana').value = '';
+        const nInput = document.getElementById('nipPelaksana');
+        const jInput = document.getElementById('jabatanPelaksana');
+        if(nInput) nInput.value = '';
+        if(jInput) jInput.value = '';
         return;
     }
     const match = cachedAsnList.find(a => a.nama === namaVal);
     if (match && role === 'Pelaksana') {
-        document.getElementById('nipPelaksana').value = match.nip || '';
-        document.getElementById('jabatanPelaksana').value = match.jabatan || '';
+        const nInput = document.getElementById('nipPelaksana');
+        const jInput = document.getElementById('jabatanPelaksana');
+        if(nInput) nInput.value = match.nip || '';
+        if(jInput) jInput.value = match.jabatan || '';
     }
 };
 
 window.saveCustomSKQuota = async function(val) {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value.trim() || '7.01.01.2.01.0003';
-    const newMax = parseInt(val) || DEFAULT_MAX_KUOTA_OH;
-    
-    await db.settings.put({ key: `quota_${kodeSK}`, value: newMax });
-    await window.updateSKQuotaInfo();
+    try {
+        const kodeSK = document.getElementById('step1_kodeSK')?.value.trim() || '7.01.01.2.01.0003';
+        const newMax = parseInt(val) || DEFAULT_MAX_KUOTA_OH;
+        
+        await db.settings.put({ key: `quota_${kodeSK}`, value: newMax });
+        await window.updateSKQuotaInfo();
+    } catch(e) { console.error(e); }
 };
 
 window.updateSKQuotaInfo = async function() {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value.trim() || '7.01.01.2.01.0003';
-    const lblSK = document.getElementById('lblCurrentSK');
-    if (lblSK) lblSK.innerText = kodeSK;
+    try {
+        const kodeSK = document.getElementById('step1_kodeSK')?.value.trim() || '7.01.01.2.01.0003';
+        const lblSK = document.getElementById('lblCurrentSK');
+        if (lblSK) lblSK.innerText = kodeSK;
 
-    const records = await db.records.filter(r => r.kodeSubKegiatan === kodeSK).toArray();
-    let usedOH = 0;
-    records.forEach(r => {
-        const countPengikut = Array.isArray(r.pengikut) ? r.pengikut.length : 0;
-        const lamaHari = r.lamaHari || 1;
-        usedOH += (1 + countPengikut) * lamaHari;
-    });
+        const records = await db.records.filter(r => r.kodeSubKegiatan === kodeSK).toArray();
+        let usedOH = 0;
+        records.forEach(r => {
+            const countPengikut = Array.isArray(r.pengikut) ? r.pengikut.length : 0;
+            const lamaHari = r.lamaHari || 1;
+            usedOH += (1 + countPengikut) * lamaHari;
+        });
 
-    const quotaSetting = await db.settings.get(`quota_${kodeSK}`);
-    const maxQuota = quotaSetting ? parseInt(quotaSetting.value) : DEFAULT_MAX_KUOTA_OH;
+        const quotaSetting = await db.settings.get(`quota_${kodeSK}`);
+        const maxQuota = quotaSetting ? parseInt(quotaSetting.value) : DEFAULT_MAX_KUOTA_OH;
 
-    const inputMax = document.getElementById('inputMaxQuota');
-    if (inputMax && document.activeElement !== inputMax) {
-        inputMax.value = maxQuota;
-    }
-
-    const remainingOH = Math.max(0, maxQuota - usedOH);
-    const percentage = Math.min(100, Math.round((usedOH / maxQuota) * 100));
-
-    document.getElementById('valUsedQuota').innerText = `${usedOH} OH`;
-    document.getElementById('valRemainingQuota').innerText = `${remainingOH} OH`;
-
-    const pBar = document.getElementById('progressBarQuota');
-    const badgeStatus = document.getElementById('badgeStatusQuota');
-
-    if (pBar) {
-        pBar.style.width = `${percentage}%`;
-        pBar.className = percentage >= 90 ? 'bg-rose-600 h-2 rounded-full transition-all duration-300' :
-                         percentage >= 75 ? 'bg-amber-500 h-2 rounded-full transition-all duration-300' :
-                         'bg-gov-700 h-2 rounded-full transition-all duration-300';
-    }
-
-    if (badgeStatus) {
-        if (remainingOH <= 0) {
-            badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
-            badgeStatus.innerText = 'Kuota Habis';
-        } else if (remainingOH <= 5) {
-            badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
-            badgeStatus.innerText = 'Kuota Menipis';
-        } else {
-            badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
-            badgeStatus.innerText = 'Tersedia';
+        const inputMax = document.getElementById('inputMaxQuota');
+        if (inputMax && document.activeElement !== inputMax) {
+            inputMax.value = maxQuota;
         }
+
+        const remainingOH = Math.max(0, maxQuota - usedOH);
+        const percentage = Math.min(100, Math.round((usedOH / maxQuota) * 100));
+
+        const valUsed = document.getElementById('valUsedQuota');
+        const valRem = document.getElementById('valRemainingQuota');
+        if(valUsed) valUsed.innerText = `${usedOH} OH`;
+        if(valRem) valRem.innerText = `${remainingOH} OH`;
+
+        const pBar = document.getElementById('progressBarQuota');
+        const badgeStatus = document.getElementById('badgeStatusQuota');
+
+        if (pBar) {
+            pBar.style.width = `${percentage}%`;
+            pBar.className = percentage >= 90 ? 'bg-rose-600 h-2 rounded-full transition-all duration-300' :
+                             percentage >= 75 ? 'bg-amber-500 h-2 rounded-full transition-all duration-300' :
+                             'bg-gov-700 h-2 rounded-full transition-all duration-300';
+        }
+
+        if (badgeStatus) {
+            if (remainingOH <= 0) {
+                badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
+                badgeStatus.innerText = 'Kuota Habis';
+            } else if (remainingOH <= 5) {
+                badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
+                badgeStatus.innerText = 'Kuota Menipis';
+            } else {
+                badgeStatus.className = 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+                badgeStatus.innerText = 'Tersedia';
+            }
+        }
+
+        const currentPengikutCount = document.querySelectorAll('#pengikutContainer > div').length;
+        const durasiHari = calculateLamaPerdin();
+        const requiredOH = (1 + currentPengikutCount) * durasiHari;
+        const lblPenugasan = document.getElementById('lblPenugasanOH');
+        if(lblPenugasan) lblPenugasan.innerText = `${requiredOH} OH`;
+
+        return { maxQuota, usedOH, remainingOH, requiredOH };
+    } catch(e) {
+        console.error(e);
+        return { maxQuota: 50, usedOH: 0, remainingOH: 50, requiredOH: 1 };
     }
-
-    const currentPengikutCount = document.querySelectorAll('#pengikutContainer > div').length;
-    const durasiHari = calculateLamaPerdin();
-    const requiredOH = (1 + currentPengikutCount) * durasiHari;
-    document.getElementById('lblPenugasanOH').innerText = `${requiredOH} OH`;
-
-    return { maxQuota, usedOH, remainingOH, requiredOH };
 };
 
 window.addOfficerRow = function() {
@@ -263,7 +290,7 @@ window.addOfficerRow = function() {
 
     let optionsHTML = '<option value="">-- Pilih Anggota Pengikut --</option>';
     cachedAsnList.forEach(asn => {
-        optionsHTML += `<option value="${escapeHtml(asn.nama)}">${asn.nama}</option>`;
+        optionsHTML += `<option value="${escapeHtml(asn.nama)}">${escapeHtml(asn.nama)}</option>`;
     });
 
     div.innerHTML = `
@@ -396,32 +423,22 @@ window.handleFormSubmit = async function(e) {
     });
 
     const record = {
-        const record = {
         noSuratTugas: document.getElementById('noSuratTugas').value,
         noSPPD: document.getElementById('noSPPD').value,
         kodeSubKegiatan: document.getElementById('step1_kodeSK').value,
         sumberDana: document.getElementById('step1_sumberDana')?.value || 'DAU',
         
-        // Data Pejabat Penandatangan / Pengguna Anggaran (Camat)
+        // Data Pejabat Pengutus (Camat / Pengguna Anggaran)
         namaCamat: document.getElementById('namaPejabat')?.value || 'RUDOLF UMBU RESI LOLY, ST',
         nipCamat: document.getElementById('nipPejabat')?.value || '197205212006041008',
-        pangkatCamat: 'Pembina', // atau ambil dari Master ASN jika tersedia
+        pangkatCamat: 'Pembina',
         jabatanCamat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
 
-        // Data Bendahara Pengeluaran (Bisa disesuaikan atau ditarik dari Master ASN)
-        namaBendahara: 'DANIEL KAMBARU WINDI', // Ganti dengan nama bendahara default atau inputan
-        nipBendahara: '197712312008011084',
-        pangkatBendahara: 'Penata Muda / III.a',
-        
-        // ... (data lainnya seperti tempatTujuan, tglMulai, dll)
-    };
-        
-        // PEJABAT PENANDATANGAN PENGUTUS (KECAMATAN)
-        namaPejabat: document.getElementById('namaPejabat')?.value || '',
-        nipPejabat: document.getElementById('nipPejabat')?.value || '',
-        jabatanPejabat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
+        // Data Bendahara Pengeluaran Default
+        namaBendahara: 'RAUF UMAR',
+        nipBendahara: '197409121999031004',
 
-        // PEJABAT PENANDATANGAN DI TEMPAT TUJUAN (LEMBAR BELAKANG SPPD)
+        // Data Pejabat Penandatangan di Tempat Tujuan (Kades)
         namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
         nipPejabatTujuan: document.getElementById('nipPejabatTujuan')?.value || '-',
         jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
@@ -443,21 +460,30 @@ window.handleFormSubmit = async function(e) {
         createdAt: new Date().toISOString()
     };
 
-    const id = await db.records.add(record);
-    sessionStorage.setItem('sppd_print_current', JSON.stringify({ ...record, id }));
-    alert('SPPD Berhasil Disimpan! Membuka Halaman Cetak...');
-    
-    await loadLocalRecords();
-    openCetakPage(id);
+    try {
+        const id = await db.records.add(record);
+        sessionStorage.setItem('sppd_print_current', JSON.stringify({ ...record, id }));
+        alert('SPPD Berhasil Disimpan! Membuka Halaman Cetak...');
+        
+        await loadLocalRecords();
+        openCetakPage(id);
+    } catch(err) {
+        console.error("Gagal menyimpan ke DB:", err);
+        alert("Gagal menyimpan data SPPD!");
+    }
 };
 
 window.openCetakPage = async function(id) {
-    const record = await db.records.get(id);
-    if (record) {
-        sessionStorage.setItem('sppd_print_current', JSON.stringify(record));
-        window.location.href = `cetak.html?id=${id}`;
-    } else {
-        alert("Data SPPD tidak ditemukan!");
+    try {
+        const record = await db.records.get(id);
+        if (record) {
+            sessionStorage.setItem('sppd_print_current', JSON.stringify(record));
+            window.location.href = `cetak.html?id=${id}`;
+        } else {
+            alert("Data SPPD tidak ditemukan!");
+        }
+    } catch(e) {
+        alert("Gagal membuka halaman cetak!");
     }
 };
 
@@ -470,38 +496,40 @@ window.deleteRecord = async function(id) {
 };
 
 async function loadLocalRecords() {
-    const records = await db.records.reverse().toArray();
-    const tbody = document.getElementById('historyTableBody');
-    if (!tbody) return;
+    try {
+        const records = await db.records.reverse().toArray();
+        const tbody = document.getElementById('historyTableBody');
+        if (!tbody) return;
 
-    if (records.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada riwayat SPPD.</td></tr>`;
-        return;
-    }
+        if (records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada riwayat SPPD.</td></tr>`;
+            return;
+        }
 
-    tbody.innerHTML = records.map(r => `
-        <tr class="hover:bg-slate-50 border-b">
-            <td class="p-3 font-medium">
-                ${escapeHtml(r.noSuratTugas)}<br>
-                <span class="text-[11px] text-slate-500">${escapeHtml(r.noSPPD) || '-'}</span>
-            </td>
-            <td class="p-3 font-mono">
-                <span class="font-bold text-sky-800">${escapeHtml(r.kodeSubKegiatan)}</span><br>
-                <span class="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-sans font-semibold uppercase">${escapeHtml(r.sumberDana) || 'DAU'}</span>
-            </td>
-            <td class="p-3 font-bold">${escapeHtml(r.namaPelaksana)}</td>
-            <td class="p-3">${escapeHtml(r.tempatTujuan || r.maksudTujuan)}</td>
-            <td class="p-3 font-semibold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
-            <td class="p-3 text-center">
-                <button onclick="openCetakPage(${r.id})" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition mr-1 cursor-pointer">
-                    <i class="fa-solid fa-print"></i> Cetak
-                </button>
-                <button onclick="deleteRecord(${r.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs cursor-pointer">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+        tbody.innerHTML = records.map(r => `
+            <tr class="hover:bg-slate-50 border-b">
+                <td class="p-3 font-medium">
+                    ${escapeHtml(r.noSuratTugas)}<br>
+                    <span class="text-[11px] text-slate-500">${escapeHtml(r.noSPPD) || '-'}</span>
+                </td>
+                <td class="p-3 font-mono">
+                    <span class="font-bold text-sky-800">${escapeHtml(r.kodeSubKegiatan)}</span><br>
+                    <span class="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-sans font-semibold uppercase">${escapeHtml(r.sumberDana) || 'DAU'}</span>
+                </td>
+                <td class="p-3 font-bold">${escapeHtml(r.namaPelaksana)}</td>
+                <td class="p-3">${escapeHtml(r.tempatTujuan || r.maksudTujuan)}</td>
+                <td class="p-3 font-semibold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                <td class="p-3 text-center">
+                    <button onclick="openCetakPage(${r.id})" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs transition mr-1 cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Cetak
+                    </button>
+                    <button onclick="deleteRecord(${r.id})" class="text-rose-600 hover:text-rose-800 p-1 text-xs cursor-pointer">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) { console.error(e); }
 }
 
 // MANAGEMENT MODAL MASTER ASN
@@ -579,52 +607,55 @@ window.deleteAsn = async function(nip) {
 };
 
 async function renderAsnList() {
-    const list = await db.asnMaster.toArray();
-    const records = await db.records.reverse().toArray();
-    const container = document.getElementById('asnListContainer');
-    if (!container) return;
+    try {
+        const list = await db.asnMaster.toArray();
+        const records = await db.records.reverse().toArray();
+        const container = document.getElementById('asnListContainer');
+        if (!container) return;
 
-    if (list.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">Belum ada data ASN.</p>`;
-        return;
-    }
+        if (list.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">Belum ada data ASN.</p>`;
+            return;
+        }
 
-    container.innerHTML = list.map(a => {
-        const lastRecord = records.find(r => r.namaPelaksana === a.nama || (r.pengikut && r.pengikut.some(p => p.nama === a.nama)));
-        const docInfo = lastRecord 
-            ? `<div class="mt-1.5 text-[11px] bg-slate-100 p-2 rounded border border-slate-200">
-                <p class="font-bold text-gov-800 mb-0.5"><i class="fa-solid fa-file-lines mr-1"></i> Penugasan Terakhir:</p>
-                <p class="text-slate-700">No. ST: <span class="font-mono font-bold">${escapeHtml(lastRecord.noSuratTugas)}</span></p>
-                <p class="text-slate-700">No. SPPD: <span class="font-mono font-bold">${escapeHtml(lastRecord.noSPPD) || '-'}</span></p>
-               </div>` 
-            : `<p class="text-[10px] text-slate-400 italic mt-0.5">Belum ada riwayat penugasan</p>`;
+        container.innerHTML = list.map(a => {
+            const lastRecord = records.find(r => r.namaPelaksana === a.nama || (r.pengikut && r.pengikut.some(p => p.nama === a.nama)));
+            const docInfo = lastRecord 
+                ? `<div class="mt-1.5 text-[11px] bg-slate-100 p-2 rounded border border-slate-200">
+                    <p class="font-bold text-gov-800 mb-0.5"><i class="fa-solid fa-file-lines mr-1"></i> Penugasan Terakhir:</p>
+                    <p class="text-slate-700">No. ST: <span class="font-mono font-bold">${escapeHtml(lastRecord.noSuratTugas)}</span></p>
+                    <p class="text-slate-700">No. SPPD: <span class="font-mono font-bold">${escapeHtml(lastRecord.noSPPD) || '-'}</span></p>
+                   </div>` 
+                : `<p class="text-[10px] text-slate-400 italic mt-0.5">Belum ada riwayat penugasan</p>`;
 
-        return `
-            <div class="py-3 flex justify-between items-start text-xs border-b border-slate-100">
-                <div class="flex-1 pr-2">
-                    <p class="font-bold text-slate-800 text-sm">${escapeHtml(a.nama)}</p>
-                    <p class="text-slate-600 font-mono">NIP. ${escapeHtml(a.nip)}</p>
-                    <p class="text-slate-500 font-semibold">${escapeHtml(a.jabatan)} ${a.pangkat ? '('+escapeHtml(a.pangkat)+')' : ''}</p>
-                    ${docInfo}
+            return `
+                <div class="py-3 flex justify-between items-start text-xs border-b border-slate-100">
+                    <div class="flex-1 pr-2">
+                        <p class="font-bold text-slate-800 text-sm">${escapeHtml(a.nama)}</p>
+                        <p class="text-slate-600 font-mono">NIP. ${escapeHtml(a.nip)}</p>
+                        <p class="text-slate-500 font-semibold">${escapeHtml(a.jabatan)} ${a.pangkat ? '('+escapeHtml(a.pangkat)+')' : ''}</p>
+                        ${docInfo}
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="editAsn('${escapeHtml(a.nip)}')" class="text-amber-600 hover:text-amber-800 font-bold text-xs p-1 cursor-pointer">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button type="button" onclick="deleteAsn('${escapeHtml(a.nip)}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs p-1 cursor-pointer">
+                            <i class="fa-solid fa-trash"></i> Hapus
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <button type="button" onclick="editAsn('${escapeHtml(a.nip)}')" class="text-amber-600 hover:text-amber-800 font-bold text-xs p-1 cursor-pointer">
-                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                    </button>
-                    <button type="button" onclick="deleteAsn('${escapeHtml(a.nip)}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs p-1 cursor-pointer">
-                        <i class="fa-solid fa-trash"></i> Hapus
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+    } catch(e) { console.error(e); }
 }
 
 window.downloadCsvTemplate = function() {
     const csvContent = "data:text/csv;charset=utf-8," 
         + "nama,nip,pangkat,jabatan\n"
         + "RUDOLF UMBU RESI LOLY ST,197205212006041008,Pembina,CAMAT TABUNDUNG\n"
-        + "KORNELIS KOPA RIHI SE,197811262010011008,Penata Tk. I,SEKRETARIS CAMAT";
+        + "KORNELIS KOPA RIHI SE,197811262010011008,Penata Tk. I,SEKRETARIS CAMAT\n"
+        + "RAUF UMAR,197409121999031004,Penata,KASUBAG PROGRAM";
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -645,57 +676,62 @@ window.importAsnFromCsv = function() {
 
     const reader = new FileReader();
     reader.onload = async function(e) {
-        const text = e.target.result;
-        const lines = text.split(/\r\n|\n/);
-        
-        if (lines.length < 2) {
-            return alert("Berkas CSV kosong atau tidak memiliki baris data!");
-        }
-
-        const headerLine = lines[0].toLowerCase();
-        const delimiter = headerLine.includes(';') ? ';' : ',';
-        const headers = headerLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
-
-        const idxNama = headers.indexOf('nama');
-        const idxNip = headers.indexOf('nip');
-        const idxPangkat = headers.indexOf('pangkat');
-        const idxJabatan = headers.indexOf('jabatan');
-
-        if (idxNama === -1 || idxNip === -1) {
-            return alert("Format header CSV salah! Header wajib memiliki minimal kolom 'nama' dan 'nip'.");
-        }
-
-        let addedCount = 0;
-        let updatedCount = 0;
-        const asnBatch = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            const cols = line.split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''));
-            const nama = cols[idxNama] || '';
-            const nip = cols[idxNip] || '';
-            const pangkat = idxPangkat !== -1 ? (cols[idxPangkat] || '') : '';
-            const jabatan = idxJabatan !== -1 ? (cols[idxJabatan] || '') : '';
-
-            if (nama && nip) {
-                const existing = await db.asnMaster.get(nip);
-                if (existing) updatedCount++; else addedCount++;
-                asnBatch.push({ nip, nama, pangkat, jabatan });
+        try {
+            const text = e.target.result;
+            const lines = text.split(/\r\n|\n/);
+            
+            if (lines.length < 2) {
+                return alert("Berkas CSV kosong atau tidak memiliki baris data!");
             }
-        }
 
-        if (asnBatch.length > 0) {
-            await db.asnMaster.bulkPut(asnBatch);
-            await loadAsnCache();
-            await renderAsnList();
-            populateSelectOptions();
+            const headerLine = lines[0].toLowerCase();
+            const delimiter = headerLine.includes(';') ? ';' : ',';
+            const headers = headerLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
 
-            fileInput.value = '';
-            alert(`Berhasil Mengimport Data ASN!\n\n• Data Baru: ${addedCount}\n• Data Diperbarui: ${updatedCount}`);
-        } else {
-            alert("Tidak ada data ASN valid yang dapat di-import.");
+            const idxNama = headers.indexOf('nama');
+            const idxNip = headers.indexOf('nip');
+            const idxPangkat = headers.indexOf('pangkat');
+            const idxJabatan = headers.indexOf('jabatan');
+
+            if (idxNama === -1 || idxNip === -1) {
+                return alert("Format header CSV salah! Header wajib memiliki minimal kolom 'nama' dan 'nip'.");
+            }
+
+            let addedCount = 0;
+            let updatedCount = 0;
+            const asnBatch = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const cols = line.split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''));
+                const nama = cols[idxNama] || '';
+                const nip = cols[idxNip] || '';
+                const pangkat = idxPangkat !== -1 ? (cols[idxPangkat] || '') : '';
+                const jabatan = idxJabatan !== -1 ? (cols[idxJabatan] || '') : '';
+
+                if (nama && nip) {
+                    const existing = await db.asnMaster.get(nip);
+                    if (existing) updatedCount++; else addedCount++;
+                    asnBatch.push({ nip, nama, pangkat, jabatan });
+                }
+            }
+
+            if (asnBatch.length > 0) {
+                await db.asnMaster.bulkPut(asnBatch);
+                await loadAsnCache();
+                await renderAsnList();
+                populateSelectOptions();
+
+                fileInput.value = '';
+                alert(`Berhasil Mengimport Data ASN!\n\n• Data Baru: ${addedCount}\n• Data Diperbarui: ${updatedCount}`);
+            } else {
+                alert("Tidak ada data ASN valid yang dapat di-import.");
+            }
+        } catch(err) {
+            console.error("Gagal import CSV:", err);
+            alert("Terjadi kesalahan saat memproses berkas CSV.");
         }
     };
 
@@ -703,63 +739,67 @@ window.importAsnFromCsv = function() {
 };
 
 window.printHistoryTable = async function() {
-    const records = await db.records.toArray();
-    if (records.length === 0) return alert("Belum ada data riwayat SPPD untuk dicetak!");
+    try {
+        const records = await db.records.toArray();
+        if (records.length === 0) return alert("Belum ada data riwayat SPPD untuk dicetak!");
 
-    const rekapSection = document.getElementById('rekapPrintSection');
-    const container = document.getElementById('rekapPrintContainer');
-    container.innerHTML = '';
+        const rekapSection = document.getElementById('rekapPrintSection');
+        const container = document.getElementById('rekapPrintContainer');
+        container.innerHTML = '';
 
-    let grandTotal = 0;
-    let tableRows = '';
+        let grandTotal = 0;
+        let tableRows = '';
 
-    records.forEach((r, idx) => {
-        const total = r.totalBiaya || 0;
-        grandTotal += total;
-        tableRows += `
-            <tr>
-                <td class="border border-black p-1.5 text-center">${idx + 1}</td>
-                <td class="border border-black p-1.5">${escapeHtml(r.noSuratTugas)}<br><span class="text-[10px] text-slate-600">${escapeHtml(r.noSPPD) || '-'}</span></td>
-                <td class="border border-black p-1.5 font-bold">${escapeHtml(r.namaPelaksana)}</td>
-                <td class="border border-black p-1.5">${escapeHtml(r.tempatTujuan || r.maksudTujuan)}</td>
-                <td class="border border-black p-1.5 font-mono text-center">${escapeHtml(r.kodeSubKegiatan)} (${escapeHtml(r.sumberDana) || 'DAU'})</td>
-                <td class="border border-black p-1.5 text-right font-bold">Rp ${total.toLocaleString('id-ID')}</td>
-            </tr>
+        records.forEach((r, idx) => {
+            const total = r.totalBiaya || 0;
+            grandTotal += total;
+            tableRows += `
+                <tr>
+                    <td class="border border-black p-1.5 text-center">${idx + 1}</td>
+                    <td class="border border-black p-1.5">${escapeHtml(r.noSuratTugas)}<br><span class="text-[10px] text-slate-600">${escapeHtml(r.noSPPD) || '-'}</span></td>
+                    <td class="border border-black p-1.5 font-bold">${escapeHtml(r.namaPelaksana)}</td>
+                    <td class="border border-black p-1.5">${escapeHtml(r.tempatTujuan || r.maksudTujuan)}</td>
+                    <td class="border border-black p-1.5 font-mono text-center">${escapeHtml(r.kodeSubKegiatan)} (${escapeHtml(r.sumberDana) || 'DAU'})</td>
+                    <td class="border border-black p-1.5 text-right font-bold">Rp ${total.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        });
+
+        container.innerHTML = `
+            <table class="w-full text-xs font-official border-collapse border border-black">
+                <thead>
+                    <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                        <th class="border border-black p-1.5 w-8">No.</th>
+                        <th class="border border-black p-1.5">No. Surat / SPPD</th>
+                        <th class="border border-black p-1.5">Pelaksana Utama</th>
+                        <th class="border border-black p-1.5">Tujuan / Maksud</th>
+                        <th class="border border-black p-1.5">Kode SK & Sumber Dana</th>
+                        <th class="border border-black p-1.5">Total Biaya (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+                <tfoot>
+                    <tr class="bg-slate-100 font-bold border-t border-black">
+                        <td colspan="5" class="border border-black p-1.5 text-right uppercase">Grand Total Realisasi SPPD:</td>
+                        <td class="border border-black p-1.5 text-right font-extrabold whitespace-nowrap">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                    </tr>
+                </tfoot>
+            </table>
         `;
-    });
 
-    container.innerHTML = `
-        <table class="w-full text-xs font-official border-collapse border border-black">
-            <thead>
-                <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                    <th class="border border-black p-1.5 w-8">No.</th>
-                    <th class="border border-black p-1.5">No. Surat / SPPD</th>
-                    <th class="border border-black p-1.5">Pelaksana Utama</th>
-                    <th class="border border-black p-1.5">Tujuan / Maksud</th>
-                    <th class="border border-black p-1.5">Kode SK & Sumber Dana</th>
-                    <th class="border border-black p-1.5">Total Biaya (Rp)</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableRows}
-            </tbody>
-            <tfoot>
-                <tr class="bg-slate-100 font-bold border-t border-black">
-                    <td colspan="5" class="border border-black p-1.5 text-right uppercase">Grand Total Realisasi SPPD:</td>
-                    <td class="border border-black p-1.5 text-right font-extrabold whitespace-nowrap">Rp ${grandTotal.toLocaleString('id-ID')}</td>
-                </tr>
-            </tfoot>
-        </table>
-    `;
+        rekapSection.classList.remove('hidden');
+        document.body.classList.add('printing-rekap');
 
-    rekapSection.classList.remove('hidden');
-    document.body.classList.add('printing-rekap');
-
-    setTimeout(() => {
-        window.print();
-        document.body.classList.remove('printing-rekap');
-        rekapSection.classList.add('hidden');
-    }, 150);
+        setTimeout(() => {
+            window.print();
+            document.body.classList.remove('printing-rekap');
+            rekapSection.classList.add('hidden');
+        }, 150);
+    } catch(e) {
+        alert("Gagal mencetak rekapitulasi!");
+    }
 };
 
 function numberToWords(amount) {
