@@ -15,8 +15,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
 
-    <!-- CSS Eksternal -->
-    <link rel="stylesheet" href="css/sppd.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        official: ['Tinos', 'Georgia', 'serif'],
+                    },
+                    colors: {
+                        gov: {
+                            50: '#f0f7ff', 100: '#e0effe', 600: '#0284c7',
+                            700: '#0369a1', 800: '#075985', 900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- CSS Internal -->
+    <style>
+        @media print {
+            body * { visibility: hidden !important; }
+            body.printing-rekap #rekapPrintSection, 
+            body.printing-rekap #rekapPrintSection * { visibility: visible !important; }
+            body.printing-rekap #rekapPrintSection {
+                position: absolute !important; left: 0 !important; top: 0 !important;
+                width: 100% !important; padding: 15mm !important; background: white !important;
+                color: black !important; display: block !important;
+            }
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .step-btn.active .step-icon {
+            background-color: #075985;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-btn.active .step-label {
+            color: #075985;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
@@ -54,13 +99,12 @@
         </div>
     </header>
 
-    <!-- CONTAINER UTAMA (STEPPER ALUR BERTAHAP) -->
+    <!-- CONTAINER UTAMA -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
 
         <!-- STEPPER BAR NAVIGASI ALUR -->
         <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center max-w-3xl mx-auto">
-                
                 <button type="button" onclick="switchStep(1)" id="step-btn-1" class="step-btn flex-1 flex flex-col items-center group focus:outline-none">
                     <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md">1</div>
                     <span class="step-label text-xs font-bold text-gov-800 mt-1">Perencanaan Tim</span>
@@ -79,7 +123,6 @@
                     <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600">3</div>
                     <span class="step-label text-xs font-medium text-slate-500 mt-1">Riwayat & Rekap</span>
                 </button>
-
             </div>
         </div>
 
@@ -88,9 +131,6 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
                     <span><i class="fa-solid fa-users-viewfinder text-gov-700 mr-2"></i> Langkah 1: Penugasan Tim & Cek Kuota OH</span>
-                    <button type="button" onclick="openEperdinImportModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
-                        <i class="fa-solid fa-file-import"></i> Ambil Draft Penugasan
-                    </button>
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,7 +280,7 @@
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
-    <!-- Script JS Eksternal -->
+    <!-- Script JS Eksternal Terpisah -->
     <script src="js/sppd.js"></script>
 </body>
 </html>
