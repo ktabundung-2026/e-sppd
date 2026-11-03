@@ -397,10 +397,25 @@ window.handleFormSubmit = async function(e) {
     });
 
     const record = {
+        const record = {
         noSuratTugas: document.getElementById('noSuratTugas').value,
         noSPPD: document.getElementById('noSPPD').value,
         kodeSubKegiatan: document.getElementById('step1_kodeSK').value,
         sumberDana: document.getElementById('step1_sumberDana')?.value || 'DAU',
+        
+        // Data Pejabat Penandatangan / Pengguna Anggaran (Camat)
+        namaCamat: document.getElementById('namaPejabat')?.value || 'RUDOLF UMBU RESI LOLY, ST',
+        nipCamat: document.getElementById('nipPejabat')?.value || '197205212006041008',
+        pangkatCamat: 'Pembina', // atau ambil dari Master ASN jika tersedia
+        jabatanCamat: document.getElementById('jabatanPejabat')?.value || 'CAMAT TABUNDUNG',
+
+        // Data Bendahara Pengeluaran (Bisa disesuaikan atau ditarik dari Master ASN)
+        namaBendahara: 'RAUF UMAR', // Ganti dengan nama bendahara default atau inputan
+        nipBendahara: '197409121999031004',
+        pangkatBendahara: 'Penata',
+        
+        // ... (data lainnya seperti tempatTujuan, tglMulai, dll)
+    };
         
         // PEJABAT PENANDATANGAN PENGUTUS (KECAMATAN)
         namaPejabat: document.getElementById('namaPejabat')?.value || '',
