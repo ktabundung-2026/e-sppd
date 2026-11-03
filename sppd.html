@@ -45,21 +45,11 @@
                 color: black !important; display: block !important;
             }
         }
-        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .step-btn.active .step-icon {
-            background-color: #075985;
-            color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .step-btn.active .step-label {
-            color: #075985;
-            font-weight: 700;
-        }
+        .step-btn.active .step-icon { background-color: #075985; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .step-btn.active .step-label { color: #075985; font-weight: 700; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between">
@@ -82,7 +72,7 @@
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <div id="header-network-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner"></div>
 
-                    <!-- TOMBOL MASTER ASN -->
+                    <!-- TOMBOL KELOLA MASTER ASN -->
                     <button type="button" onclick="openAsnMasterModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 cursor-pointer">
                         <i class="fa-solid fa-users-gear text-amber-300"></i>
                         <span class="hidden md:inline">Kelola Master ASN</span>
@@ -135,17 +125,17 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Sub Kegiatan (SK) <span class="text-rose-500">*</span></label>
                         <input type="text" id="step1_kodeSK" value="7.01.01.2.01.0003" onchange="updateSKQuotaInfo()" oninput="updateSKQuotaInfo()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono font-bold">
-                        <p class="text-[10px] text-slate-500 mt-1">Masukkan kode Sub Kegiatan (SK) penugasan.</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Kode Sub Kegiatan anggaran.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat / Desa Tujuan Perdin <span class="text-rose-500">*</span></label>
                         <input type="text" id="step1_selectDesa" placeholder="Contoh: Desa Billa / Waikanabu" value="Desa Billa" oninput="syncTujuanPerdin(this.value)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
-                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Keterangan: Isikan nama desa atau tempat lokasi tujuan penugasan dinas.</p>
+                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Isikan desa/lokasi tujuan penugasan.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Sumber Dana <span class="text-rose-500">*</span></label>
                         <input type="text" id="step1_sumberDana" value="DAU" placeholder="Contoh: DAU / DAK / APBD" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold uppercase">
-                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Keterangan: Isikan sumber pembiayaan anggaran (misal: DAU, DAK, APBD).</p>
+                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Isikan sumber pembiayaan (misal: DAU/DAK).</p>
                     </div>
                 </div>
 
@@ -181,7 +171,7 @@
                     </div>
                 </div>
 
-                <!-- Section Anggota Tim -->
+                <!-- SECTION TIM PELAKSANA -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xs font-bold text-gov-800 uppercase">Pelaksana Utama & Anggota Tim <span class="text-rose-500">*</span></h3>
@@ -219,7 +209,7 @@
             </div>
         </section>
 
-        <!-- STEP 2: LENGKAPI DOKUMEN SPPD & BIAYA -->
+        <!-- STEP 2: DOKUMEN & BIAYA -->
         <section id="step-content-2" class="step-content hidden space-y-6">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4">
@@ -297,7 +287,7 @@
                     </div>
 
                     <div class="flex justify-between items-center pt-4 border-t">
-                        <button type="button" onclick="switchStep(1)" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg">Kembali ke Step 1</button>
+                        <button type="button" onclick="switchStep(1)" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg cursor-pointer">Kembali ke Step 1</button>
                         <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow transition flex items-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-floppy-disk"></i> Simpan & Pratinjau Dokumen
                         </button>
@@ -338,7 +328,7 @@
 
     </main>
 
-    <!-- SECTION KHUSUS CETAK REKAPITULASI -->
+    <!-- SECTION CETAK REKAPITULASI -->
     <div id="rekapPrintSection" class="hidden">
         <div class="text-center mb-6">
             <h2 class="text-xl font-bold uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h2>
@@ -348,68 +338,68 @@
         <div id="rekapPrintContainer"></div>
     </div>
 
-<!-- MODAL MASTER DATA ASN (DILENGKAPI EDIT ASN & IMPORT CSV) -->
-<div id="asnMasterModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div class="bg-gov-900 text-white px-5 py-4 flex justify-between items-center">
-            <h3 class="font-bold text-base flex items-center gap-2">
-                <i class="fa-solid fa-users-gear text-amber-400"></i> Kelola Master Data ASN
-            </h3>
-            <button type="button" onclick="closeAsnMasterModal()" class="text-slate-300 hover:text-white text-2xl font-bold px-2 cursor-pointer">&times;</button>
-        </div>
-        
-        <div class="p-4 overflow-y-auto flex-1 space-y-4">
-            
-            <!-- PANEL IMPORT CSV -->
-            <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gov-900 flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-csv text-emerald-600"></i> Import Data ASN via CSV
-                    </span>
-                    <button type="button" onclick="downloadCsvTemplate()" class="text-[11px] text-gov-700 hover:text-gov-900 font-bold underline flex items-center gap-1">
-                        <i class="fa-solid fa-download"></i> Unduh Contoh Template CSV
-                    </button>
-                </div>
-                
-                <p class="text-[11px] text-slate-600 leading-tight">
-                    Format header CSV wajib: <code class="bg-white px-1 py-0.5 rounded border text-gov-800 font-mono font-bold">nama,nip,pangkat,jabatan</code>
-                </p>
-
-                <div class="flex items-center gap-2 pt-1">
-                    <input type="file" id="asnCsvFileInput" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-700 file:text-white hover:file:bg-gov-800 cursor-pointer">
-                    <button type="button" onclick="importAsnFromCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer">
-                        <i class="fa-solid fa-file-import"></i> Import CSV
-                    </button>
-                </div>
+    <!-- MODAL KELOLA MASTER DATA ASN -->
+    <div id="asnMasterModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-gov-900 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-amber-400"></i> Kelola Master Data ASN
+                </h3>
+                <button type="button" onclick="closeAsnMasterModal()" class="text-slate-300 hover:text-white text-2xl font-bold px-2 cursor-pointer">&times;</button>
             </div>
+            
+            <div class="p-4 overflow-y-auto flex-1 space-y-4">
+                
+                <!-- IMPORT CSV PANEL -->
+                <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gov-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-csv text-emerald-600"></i> Import Data ASN via CSV
+                        </span>
+                        <button type="button" onclick="downloadCsvTemplate()" class="text-[11px] text-gov-700 hover:text-gov-900 font-bold underline flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-download"></i> Unduh Contoh Template CSV
+                        </button>
+                    </div>
+                    
+                    <p class="text-[11px] text-slate-600 leading-tight">
+                        Format header CSV wajib: <code class="bg-white px-1 py-0.5 rounded border text-gov-800 font-mono font-bold">nama,nip,pangkat,jabatan</code>
+                    </p>
 
-            <!-- FORM INPUT / EDIT MANUAL ASN -->
-            <form id="asnForm" onsubmit="saveAsnMaster(event)" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                <div class="flex items-center justify-between">
-                    <p class="text-xs font-bold text-slate-700" id="asnFormTitle">Tambah / Edit Data ASN:</p>
-                    <input type="hidden" id="asnOriginalNip" value="">
-                    <button type="button" id="btnCancelEditAsn" onclick="resetAsnForm()" class="hidden text-[11px] text-rose-600 font-bold hover:underline">
-                        Batal Edit
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="file" id="asnCsvFileInput" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-700 file:text-white hover:file:bg-gov-800 cursor-pointer">
+                        <button type="button" onclick="importAsnFromCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer">
+                            <i class="fa-solid fa-file-import"></i> Import CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FORM TAMBAH / EDIT ASN MANUAL -->
+                <form id="asnForm" onsubmit="saveAsnMaster(event)" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-700" id="asnFormTitle">Tambah / Edit Data ASN:</p>
+                        <input type="hidden" id="asnOriginalNip" value="">
+                        <button type="button" id="btnCancelEditAsn" onclick="resetAsnForm()" class="hidden text-[11px] text-rose-600 font-bold hover:underline cursor-pointer">
+                            Batal Edit
+                        </button>
+                    </div>
+                    
+                    <input type="text" id="asnNama" placeholder="Nama Lengkap & Gelar" required class="w-full p-2 text-xs border rounded bg-white font-semibold">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="asnNip" placeholder="NIP (18 Digit)" required class="p-2 text-xs border rounded bg-white font-mono">
+                        <input type="text" id="asnPangkat" placeholder="Pangkat/Gol (misal: III/d)" class="p-2 text-xs border rounded bg-white">
+                    </div>
+                    <input type="text" id="asnJabatan" placeholder="Jabatan Kedinasan" required class="w-full p-2 text-xs border rounded bg-white">
+                    
+                    <button type="submit" id="btnSaveAsn" class="w-full py-2 bg-gov-700 text-white font-bold text-xs rounded hover:bg-gov-800 shadow transition cursor-pointer">
+                        + Simpan ASN Baru
                     </button>
-                </div>
-                
-                <input type="text" id="asnNama" placeholder="Nama Lengkap & Gelar" required class="w-full p-2 text-xs border rounded bg-white font-semibold">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="asnNip" placeholder="NIP (18 Digit)" required class="p-2 text-xs border rounded bg-white font-mono">
-                    <input type="text" id="asnPangkat" placeholder="Pangkat/Gol (misal: III/d)" class="p-2 text-xs border rounded bg-white">
-                </div>
-                <input type="text" id="asnJabatan" placeholder="Jabatan Kedinasan" required class="w-full p-2 text-xs border rounded bg-white">
-                
-                <button type="submit" id="btnSaveAsn" class="w-full py-2 bg-gov-700 text-white font-bold text-xs rounded hover:bg-gov-800 shadow transition cursor-pointer">
-                    + Simpan ASN Baru
-                </button>
-            </form>
+                </form>
 
-            <!-- LIST ASN TERSIMPAN -->
-            <div class="divide-y" id="asnListContainer"></div>
+                <!-- DAFTAR MASTER ASN TERSIMPAN -->
+                <div class="divide-y" id="asnListContainer"></div>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- FOOTER COPYRIGHT -->
     <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs no-print mt-8">
