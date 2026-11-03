@@ -625,52 +625,143 @@
         }
 
         // MENAMPILKAN MODAL E-PERDIN
-        function openEperdinModal() {
-            const rawData = localStorage.getItem('perdinData');
-            const container = document.getElementById('eperdinListContainer');
-            container.innerHTML = '';
+        // MODIFIKASI FUNGSI OPEN EPERDIN MODAL (MEMBACA MULTI-KEY LOCALSTORAGE)
+function openEperdinModal() {
+    // 1. Cek beberapa kemungkinan kunci storage yang digunakan perdin.html
+    const keysToTry = ['perdinData', 'eperdin_list', 'perdin_records', 'sppd_perdin_log'];
+    let rawData = null;
 
-            if (!rawData) {
-                container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim yang dicatat di Modul E-Perdin.</div>`;
+    for (const key of keysToTry) {
+        const val = localStorage.getItem(key);
+        if (val) {
+            rawData = val;
+            break;
+        }
+    }
+
+    const container = document.getElementById('eperdinListContainer');
+    container.innerHTML = '';
+
+    if (!rawData) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim yang dicatat di Modul E-Perdin.</div>`;
+    } else {
+        try {
+            const perdinLog = JSON.parse(rawData);
+            if (!Array.isArray(perdinLog) || perdinLog.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim di E-Perdin.</div>`;
             } else {
-                const perdinLog = JSON.parse(rawData);
-                if (!Array.isArray(perdinLog) || perdinLog.length === 0) {
-                    container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Belum ada data penugasan tim di E-Perdin.</div>`;
-                } else {
-                    perdinLog.slice().reverse().forEach((item, index) => {
-                        // Pastikan setiap item memiliki identifier unik
-                        const itemId = item.id || `perdin-${Date.now()}-${index}`;
-                        item.id = itemId;
+                perdinLog.slice().reverse().forEach((item, index) => {
+                    const itemId = item.id || `perdin-${Date.now()}-${index}`;
+                    item.id = itemId;
 
-                        const div = document.createElement('div');
-                        div.className = 'p-3.5 border border-slate-200 rounded-lg hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/40 transition cursor-pointer flex justify-between items-center';
-                        
-                        let pengikutText = item.pengikut && item.pengikut.length > 0 
-                            ? item.pengikut.map(p => p.nama).join(', ') 
-                            : 'Tanpa pengikut';
+                    // Normalisasi field nama pelaksana & jabatan (Handling struktur objek)
+                    const namaUtama = item.utama?.nama || item.namaPelaksana || item.nama || 'Pelaksana';
+                    const jabatanUtama = item.utama?.jabatan || item.jabatanPelaksana || item.jabatan || '';
+                    const desaTujuan = item.desa || item.tempatTujuan || item.tujuan || '-';
+                    const lamaHari = item.durasiHari || item.lamaHari || 1;
+                    const kodeSK = item.kodeSK || item.kodeSubKegiatan || '-';
 
-                        div.innerHTML = `
-                            <div>
-                                <p class="text-xs font-bold text-indigo-950">${item.utama.nama} <span class="text-slate-500 font-normal">(${item.utama.jabatan})</span></p>
-                                <p class="text-[11px] text-slate-600 mt-0.5">Tujuan: <strong>Desa ${item.desa}</strong> | Durasi: <strong>${item.durasiHari} Hari</strong></p>
-                                <p class="text-[10px] font-mono text-slate-500">SK: ${item.kodeSK} (${item.namaSK || '-'})</p>
-                                <p class="text-[10px] text-amber-700 font-semibold">Pengikut: ${pengikutText}</p>
-                            </div>
-                            <button type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded shadow-sm">
-                                Import Data <i class="fa-solid fa-arrow-right ml-1"></i>
-                            </button>
-                        `;
-                        div.onclick = () => importEperdinData(item);
-                        container.appendChild(div);
-                    });
-                }
+                    let pengikutText = 'Tanpa pengikut';
+                    if (item.pengikut && Array.isArray(item.pengikut) && item.pengikut.length > 0) {
+                        pengikutText = item.pengikut.map(p => (typeof p === 'string' ? p : p.nama)).join(', ');
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = 'p-3.5 border border-slate-200 rounded-lg hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/40 transition cursor-pointer flex justify-between items-center';
+                    
+                    div.innerHTML = `
+                        <div>
+                            <p class="text-xs font-bold text-indigo-950">${namaUtama} <span class="text-slate-500 font-normal">(${jabatanUtama})</span></p>
+                            <p class="text-[11px] text-slate-600 mt-0.5">Tujuan: <strong>${desaTujuan.startsWith('Desa') ? desaTujuan : 'Desa ' + desaTujuan}</strong> | Durasi: <strong>${lamaHari} Hari</strong></p>
+                            <p class="text-[10px] font-mono text-slate-500">SK: ${kodeSK} (${item.namaSK || '-'})</p>
+                            <p class="text-[10px] text-amber-700 font-semibold">Pengikut: ${pengikutText}</p>
+                        </div>
+                        <button type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded shadow-sm">
+                            Import Data <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    `;
+                    div.onclick = () => importEperdinData(item);
+                    container.appendChild(div);
+                });
             }
-            document.getElementById('eperdinModal').classList.remove('hidden');
+        } catch (e) {
+            console.error("Gagal membaca data E-Perdin:", e);
+            container.innerHTML = `<div class="p-6 text-center text-rose-500 text-xs">Format data E-Perdin tidak valid.</div>`;
         }
+    }
+    document.getElementById('eperdinModal').classList.remove('hidden');
+}
 
-        function closeEperdinModal() {
-            document.getElementById('eperdinModal').classList.add('hidden');
+// MODIFIKASI FUNGSI IMPORT DATA (NORMALISASI PEMETAAN DATA KE FORM)
+function importEperdinData(item) {
+    const namaUtama = item.utama?.nama || item.namaPelaksana || item.nama || '';
+    const desaTujuan = item.desa || item.tempatTujuan || item.tujuan || '';
+    const lamaHari = item.durasiHari || item.lamaHari || 1;
+    const kodeSK = item.kodeSK || item.kodeSubKegiatan || '';
+
+    // 1. Isikan Data Pelaksana Utama
+    if (namaUtama) {
+        document.getElementById('namaPelaksana').value = namaUtama;
+        onNamaInputChanged('Pelaksana', namaUtama);
+    }
+
+    // 2. Isikan Tempat Tujuan & Durasi Hari
+    if (desaTujuan) {
+        document.getElementById('tempatTujuan').value = desaTujuan.startsWith('Desa') ? desaTujuan : `Desa ${desaTujuan}`;
+    }
+    document.getElementById('lamaHari').value = lamaHari;
+
+    // 3. Isikan Kode Sub Kegiatan & Rekening APBD
+    if (kodeSK) document.getElementById('kodeSubKegiatan').value = kodeSK;
+    if (item.kodeRekening) {
+        const parts = item.kodeRekening.split('.');
+        if (parts.length >= 5) {
+            document.getElementById('rekSeg1').value = `${parts[0]}.${parts[1]}`;
+            document.getElementById('rekSeg2').value = parts[2];
+            document.getElementById('rekSeg3').value = parts[3];
+            document.getElementById('rekSeg4').value = parts[4];
+            document.getElementById('rekSeg5').value = parts[5] || '00001';
         }
+    }
+
+    // 4. Reset & Isikan Data Pengikut
+    document.getElementById('pengikutContainer').innerHTML = '';
+    pengikutCount = 0;
+
+    if (item.pengikut && Array.isArray(item.pengikut) && item.pengikut.length > 0) {
+        item.pengikut.forEach(p => {
+            addOfficerRow();
+            const pNama = typeof p === 'string' ? p : p.nama;
+            const row = document.getElementById(`pengikut-row-${pengikutCount}`);
+            if (row && pNama) {
+                row.querySelector('.pengikut-nama').value = pNama;
+                autofillPengikutRow(pengikutCount, pNama);
+            }
+        });
+    }
+
+    // 5. Hitung Ulang Anggaran
+    calculateTotalBudget();
+
+    // 6. Hapus Data dari localStorage tempat asal
+    const keysToTry = ['perdinData', 'eperdin_list', 'perdin_records', 'sppd_perdin_log'];
+    keysToTry.forEach(key => {
+        const rawData = localStorage.getItem(key);
+        if (rawData) {
+            try {
+                let perdinLog = JSON.parse(rawData);
+                if (Array.isArray(perdinLog)) {
+                    perdinLog = perdinLog.filter(logItem => logItem.id !== item.id);
+                    localStorage.setItem(key, JSON.stringify(perdinLog));
+                }
+            } catch (e) {}
+        }
+    });
+
+    // 7. Tutup Modal & Berikan Notifikasi
+    closeEperdinModal();
+    showNotification(`Data Penugasan [${namaUtama}] Berhasil Ditarik & Dihapus dari Antrean!`, 'success');
+}
 
         // FUNGSI IMPORT DATA SEKALIGUS MENGHAPUS DARI LOCALSTORAGE UNTUK MENCEGAH PENDOBELAN
         function importEperdinData(item) {
