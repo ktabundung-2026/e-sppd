@@ -309,14 +309,14 @@
                             <td class="p-2 align-top relative h-[48mm]">
                                 <table class="w-full">
                                     <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan1">Malahar</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                 </table>
                                 <div class="absolute bottom-2 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan2">-</p>
+                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat1">-</p>
                                     <div class="h-10"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
-                                    <p class="font-mono text-[10pt]" id="bktKadesNip2">-</p>
+                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat1">-</p>
+                                    <p class="font-mono text-[10pt]" id="bktKadesNipBerangkat1">-</p>
                                 </div>
                             </td>
                         </tr>
@@ -327,23 +327,23 @@
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
                                 </table>
                                 <div class="absolute bottom-2 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan3">-</p>
+                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan2">-</p>
                                     <div class="h-10"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama3">-</p>
-                                    <p class="font-mono text-[10pt]" id="bktKadesNip3">-</p>
+                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
+                                    <p class="font-mono text-[10pt]" id="bktKadesNip2">-</p>
                                 </div>
                             </td>
                             <td class="p-2 align-top relative h-[48mm]">
                                 <table class="w-full">
                                     <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat2">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan2">Malahar</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat2">-</span></td></tr>
                                 </table>
                                 <div class="absolute bottom-2 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan4">-</p>
+                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat2">-</p>
                                     <div class="h-10"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama4">-</p>
-                                    <p class="font-mono text-[10pt]" id="bktKadesNip4">-</p>
+                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat2">-</p>
+                                    <p class="font-mono text-[10pt]" id="bktKadesNipBerangkat2">-</p>
                                 </div>
                             </td>
                         </tr>
@@ -559,28 +559,48 @@
             document.getElementById('bktNoSPPD').innerText = record.noSPPD || '-';
             document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktTujuan1').innerText = record.tempatTujuan || '-';
+            
+            // Baris I (Tiba & Berangkat dari Tempat Tujuan Utama)
             document.getElementById('bktTiba1').innerText = record.tempatTujuan || '-';
             document.getElementById('bktTglTiba1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktBerangkat1').innerText = record.tempatTujuan || '-';
             document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai);
-            document.getElementById('bktTiba2').innerText = record.tempatTujuan || '-';
-            document.getElementById('bktTglTiba2').innerText = formatDate(record.tglMulai);
-            document.getElementById('bktBerangkat2').innerText = record.tempatTujuan || '-';
-            document.getElementById('bktTglBerangkat2').innerText = formatDate(record.tglSelesai);
-            document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai);
 
+            // Baris II (Terisi jika ada tujuan kedua, bersih jika tidak ada)
+            const adaTujuanKedua = record.tempatTujuanKedua && record.tempatTujuanKedua.trim() !== '';
+            document.getElementById('bktTiba2').innerText = adaTujuanKedua ? record.tempatTujuanKedua : ''; 
+            document.getElementById('bktTglTiba2').innerText = adaTujuanKedua ? formatDate(record.tglMulaiKedua) : '';
+            document.getElementById('bktBerangkat2').innerText = adaTujuanKedua ? record.tempatTujuanKedua : '';
+            document.getElementById('bktTglBerangkat2').innerText = adaTujuanKedua ? formatDate(record.tglSelesaiKedua) : '';
+            
+            document.getElementById('bktTglAkhir').innerText = formatDate(adaTujuanKedua ? record.tglSelesaiKedua : record.tglSelesai);
+
+            // Penandatangan Halaman Belakang (Kades/Pejabat Tujuan)
             const namaTujuan = record.namaPejabatTujuan || '....................................';
             const jabatanTujuan = record.jabatanPejabatTujuan || 'KEPALA DESA';
             const nipTujuan = record.nipPejabatTujuan || '-';
 
-            for (let i = 1; i <= 4; i++) {
-                const elJabatan = document.getElementById(`bktJabatanTujuan${i}`);
-                const elNama = document.getElementById(`bktKadesNama${i}`);
-                const elNip = document.getElementById(`bktKadesNip${i}`);
-                if (elJabatan) elJabatan.innerText = jabatanTujuan;
-                if (elNama) elNama.innerText = namaTujuan;
-                if (elNip) elNip.innerText = nipTujuan !== '-' ? `NIP/NIAP. ${nipTujuan}` : '';
-            }
+            // Baris 1 Penandatangan Tujuan
+            if (document.getElementById('bktJabatanTujuan1')) document.getElementById('bktJabatanTujuan1').innerText = jabatanTujuan;
+            if (document.getElementById('bktKadesNama1')) document.getElementById('bktKadesNama1').innerText = namaTujuan;
+            if (document.getElementById('bktKadesNip1')) document.getElementById('bktKadesNip1').innerText = nipTujuan !== '-' ? `NIP/NIAP. ${nipTujuan}` : '';
+
+            if (document.getElementById('bktJabatanBerangkat1')) document.getElementById('bktJabatanBerangkat1').innerText = jabatanTujuan;
+            if (document.getElementById('bktKadesNamaBerangkat1')) document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
+            if (document.getElementById('bktKadesNipBerangkat1')) document.getElementById('bktKadesNipBerangkat1').innerText = nipTujuan !== '-' ? `NIP/NIAP. ${nipTujuan}` : '';
+
+            // Baris 2 Penandatangan Tujuan (Hanya diisi jika ada tujuan kedua)
+            const namaTujuan2 = record.namaPejabatTujuanKedua || record.namaPejabatTujuan || '....................................';
+            const jabatanTujuan2 = record.jabatanPejabatTujuanKedua || record.jabatanPejabatTujuan || 'KEPALA DESA';
+            const nipTujuan2 = record.nipPejabatTujuanKedua || record.nipPejabatTujuan || '-';
+
+            if (document.getElementById('bktJabatanTujuan2')) document.getElementById('bktJabatanTujuan2').innerText = adaTujuanKedua ? jabatanTujuan2 : '';
+            if (document.getElementById('bktKadesNama2')) document.getElementById('bktKadesNama2').innerText = adaTujuanKedua ? namaTujuan2 : '';
+            if (document.getElementById('bktKadesNip2')) document.getElementById('bktKadesNip2').innerText = adaTujuanKedua && nipTujuan2 !== '-' ? `NIP/NIAP. ${nipTujuan2}` : '';
+
+            if (document.getElementById('bktJabatanBerangkat2')) document.getElementById('bktJabatanBerangkat2').innerText = adaTujuanKedua ? jabatanTujuan2 : '';
+            if (document.getElementById('bktKadesNamaBerangkat2')) document.getElementById('bktKadesNamaBerangkat2').innerText = adaTujuanKedua ? namaTujuan2 : '';
+            if (document.getElementById('bktKadesNipBerangkat2')) document.getElementById('bktKadesNipBerangkat2').innerText = adaTujuanKedua && nipTujuan2 !== '-' ? `NIP/NIAP. ${nipTujuan2}` : '';
 
             document.getElementById('bktCamatNama').innerText = defaultCamatNama;
             document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
@@ -588,7 +608,7 @@
 
             // Laporan & Kwitansi
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
-            document.getElementById('lapTujuan').innerText = record.tempatTujuan || '-';
+            document.getElementById('lapTujuan').innerText = record.tempatTujuan + (adaTujuanKedua ? ` dan ${record.tempatTujuanKedua}` : '');
             document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
