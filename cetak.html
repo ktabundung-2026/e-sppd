@@ -94,7 +94,7 @@
                 <button onclick="switchDocView('sppd-depan')" id="btnDocSppdDepan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Depan</button>
                 <button onclick="switchDocView('sppd-belakang')" id="btnDocSppdBelakang" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Belakang</button>
                 <button onclick="switchDocView('laporan')" id="btnDocLaporan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Laporan</button>
-                <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi</button>
+                <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi / Rincian</button>
             </div>
             
             <div class="flex items-center gap-2 sm:gap-3">
@@ -419,7 +419,7 @@
                 </div>
             </div>
 
-            <!-- 5. KWITANSI -->
+            <!-- 5. KWITANSI / RINCIAN BIAYA -->
             <div id="doc-kwitansi" class="document-paper mb-8 hidden">
                 <div class="flex items-center border-b-4 border-double border-black pb-2 mb-3 sppd-table-fixed">
                     <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo" class="w-16 h-20 object-contain mr-3">
@@ -430,28 +430,27 @@
                     </div>
                 </div>
 
-                <div class="text-center title-spacing font-bold text-base underline uppercase mb-4">KWITANSI</div>
+                <div class="text-center title-spacing font-bold text-base underline uppercase mb-3">RINCIAN BIAYA PERJALANAN DINAS</div>
 
                 <table class="sppd-table-fixed text-xs font-official space-y-1 mb-3">
                     <tr class="align-top"><td class="w-36 font-semibold">Sudah Terima dari</td><td class="w-4">:</td><td>Pengguna Anggaran Kecamatan Tabundung</td></tr>
                     <tr class="align-top"><td class="font-semibold">Uang Sejumlah</td><td class="w-4">:</td><td class="font-bold italic" id="kwiTerbilang">-</td></tr>
-                    <tr class="align-top"><td class="font-semibold">Untuk Keperluan</td><td class="w-4">:</td><td>Belanja Perjalanan Dinas Dalam Daerah</td></tr>
                 </table>
 
-                <table class="sppd-table-fixed border-collapse border border-black text-xs font-official mb-4">
+                <table class="sppd-table-fixed border-collapse border border-black text-[10pt] font-official mb-4">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th class="border-r border-black p-1">Kode Rekening</th>
-                            <th class="border-r border-black p-1">Uraian</th>
-                            <th class="border-r border-black p-1">Jumlah (Rp)</th>
+                            <th class="border-r border-black p-1 w-28">Kode Rekening</th>
+                            <th class="border-r border-black p-1">Uraian / Rincian Perhitungan</th>
+                            <th class="border-r border-black p-1 w-12">Vol</th>
+                            <th class="border-r border-black p-1 w-20">Harga Satuan (Rp)</th>
+                            <th class="border-r border-black p-1 w-12">Sat</th>
+                            <th class="border-r border-black p-1 w-24">Jumlah (Rp)</th>
+                            <th class="p-1 w-16">Tandatangan</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="border-b border-black font-bold">
-                            <td class="border-r border-black p-1">5.1.02.04.001.00001</td>
-                            <td class="border-r border-black p-1">Belanja Perjalanan Dinas Biasa (<span id="kwiMaksud">-</span>)</td>
-                            <td class="p-1 text-right" id="kwiJumlahTerima">-</td>
-                        </tr>
+                    <tbody id="kwiTabelRincian">
+                        <!-- Render Dinamis via JavaScript -->
                     </tbody>
                 </table>
 
@@ -464,7 +463,7 @@
                         <p>NIP. <span id="kwiCamatNip">-</span></p>
                     </div>
                     <div>
-                        <p>&nbsp;</p>
+                        <p>Malahar, <span id="kwiTglKwitansi">-</span></p>
                         <p class="font-bold">Bendahara Pengeluaran,</p>
                         <div class="h-16"></div>
                         <p class="font-bold underline" id="kwiBendaharaNama">-</p>
@@ -621,21 +620,80 @@
             document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
             document.getElementById('bktCamatNip').innerText = defaultCamatNip;
 
-            // 4. Laporan & Kwitansi
+            // 4. Laporan Perjalanan Dinas
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
             document.getElementById('lapTujuan').innerText = record.tempatTujuan + (adaTujuanKedua ? ` dan ${record.tempatTujuanKedua}` : '');
             document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
-            const total = record.totalBiaya || 0;
+            // 5. Kwitansi / Rincian Biaya
+            const total = record.totalBiaya || 850000;
+            const jumlah Orang = 1 + (record.pengikut?.length || 0);
+            const satuanBiaya = total / jumlahOrang;
+
             document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
-            document.getElementById('kwiMaksud').innerText = record.maksudTujuan || '-';
-            document.getElementById('kwiJumlahTerima').innerText = total.toLocaleString('id-ID');
+            document.getElementById('kwiTglKwitansi').innerText = formatDate(record.tglSelesai || record.tglSurat);
             document.getElementById('kwiCamatNama').innerText = defaultCamatNama;
             document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
             document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
             document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip;
+
+            // Render Rincian Tabel Kwitansi Sesuai Format Contoh File
+            let rincianHTML = `
+                <tr class="border-b border-black align-top">
+                    <td class="border-r border-black p-1 font-mono text-[9pt]">5.1.02.04.01.0001</td>
+                    <td class="border-r border-black p-1" colspan="5">
+                        <b>Belanja Perjalanan Dinas Dalam Daerah</b><br>
+                        Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
+                        Dalam rangka ${record.maksudTujuan || '-'}<br>
+                        Di ${record.tempatTujuan || '-'} Selama ${record.lamaHari || 1} Hari<br>
+                        Pada Tanggal, ${formatDate(record.tglMulai)}
+                    </td>
+                    <td class="p-1 text-center"></td>
+                </tr>
+                <tr class="border-b border-black align-top">
+                    <td class="border-r border-black p-1"></td>
+                    <td class="border-r border-black p-1">
+                        1. ${record.namaPelaksana || '-'}<br>
+                        <span class="text-[9pt] text-slate-600">${record.jabatanPelaksana || '-'}</span>
+                    </td>
+                    <td class="border-r border-black p-1 text-center">${record.lamaHari || 1}</td>
+                    <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-1 text-center">OH</td>
+                    <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                    <td class="p-1 text-center align-middle font-bold">1.</td>
+                </tr>
+            `;
+
+            if (record.pengikut && Array.isArray(record.pengikut)) {
+                record.pengikut.forEach((p, index) => {
+                    rincianHTML += `
+                        <tr class="border-b border-black align-top">
+                            <td class="border-r border-black p-1"></td>
+                            <td class="border-r border-black p-1">
+                                ${index + 2}. ${p.nama || '-'}<br>
+                                <span class="text-[9pt] text-slate-600">${p.jabatan || '-'}</span>
+                            </td>
+                            <td class="border-r border-black p-1 text-center">${record.lamaHari || 1}</td>
+                            <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-1 text-center">OH</td>
+                            <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                            <td class="p-1 text-center align-middle font-bold">${index + 2}.</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            rincianHTML += `
+                <tr class="font-bold bg-slate-50">
+                    <td class="border-r border-black p-1 text-right" colspan="5">JUMLAH TERIMA</td>
+                    <td class="border-r border-black p-1 text-right">${total.toLocaleString('id-ID')}</td>
+                    <td class="p-1"></td>
+                </tr>
+            `;
+
+            document.getElementById('kwiTabelRincian').innerHTML = rincianHTML;
 
             switchDocView('st');
         }
