@@ -636,7 +636,7 @@
         }
 
         // ==========================================
-        // FUNGSI MENAMPILKAN MODAL E-PERDIN (DARI INDEXEDDB)
+        // FUNGSI MENAMPILKAN MODAL E-PERDIN + PENGECEKAN STATUS STATUS DITARIK
         // ==========================================
         async function openEperdinModal() {
             const container = document.getElementById('eperdinListContainer');
@@ -658,23 +658,52 @@
                     const itemId = item.id || `perdin-${Date.now()}-${index}`;
                     item.id = itemId;
 
+                    // CEK APAKAH DATA INI SUDAH PERNAH DITARIK KE SPPD
+                    const isAlreadyImported = travelRecords.some(r => 
+                        r.namaPelaksana === (item.utama ? item.utama.nama : '') &&
+                        r.tempatTujuan.includes(item.desa) &&
+                        r.kodeSubKegiatan === item.kodeSK
+                    );
+
                     const div = document.createElement('div');
-                    div.className = 'p-3.5 border border-slate-200 rounded-lg hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/40 transition cursor-pointer flex justify-between items-center';
+                    div.className = `p-3.5 border rounded-lg transition flex justify-between items-center ${
+                        isAlreadyImported 
+                            ? 'bg-slate-100/90 border-slate-300 opacity-80' 
+                            : 'bg-slate-50 hover:bg-indigo-50/40 border-slate-200 hover:border-indigo-500 cursor-pointer'
+                    }`;
                     
                     let pengikutText = item.pengikut && item.pengikut.length > 0 
                         ? item.pengikut.map(p => p.nama).join(', ') 
                         : 'Tanpa pengikut';
 
+                    const statusBadge = isAlreadyImported 
+                        ? `<span class="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300 ml-2">
+                            <i class="fa-solid fa-circle-check"></i> Sudah Ditarik
+                           </span>` 
+                        : '';
+
+                    const buttonHTML = isAlreadyImported 
+                        ? `<button type="button" class="px-3 py-1.5 bg-slate-400 hover:bg-slate-500 text-white text-xs font-bold rounded shadow-sm">
+                            Tarik Lagi <i class="fa-solid fa-rotate-right ml-1"></i>
+                           </button>` 
+                        : `<button type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded shadow-sm">
+                            Import Data <i class="fa-solid fa-arrow-right ml-1"></i>
+                           </button>`;
+
                     div.innerHTML = `
                         <div>
-                            <p class="text-xs font-bold text-indigo-950">${item.utama ? item.utama.nama : '-'} <span class="text-slate-500 font-normal">(${item.utama ? item.utama.jabatan : '-'})</span></p>
+                            <p class="text-xs font-bold text-indigo-950">
+                                ${item.utama ? item.utama.nama : '-'} 
+                                <span class="text-slate-500 font-normal">(${item.utama ? item.utama.jabatan : '-'})</span>
+                                ${statusBadge}
+                            </p>
                             <p class="text-[11px] text-slate-600 mt-0.5">Tujuan: <strong>Desa ${item.desa}</strong> | Durasi: <strong>${item.durasiHari} Hari</strong></p>
                             <p class="text-[10px] font-mono text-slate-500">SK: ${item.kodeSK} (${item.namaSK || '-'})</p>
                             <p class="text-[10px] text-amber-700 font-semibold">Pengikut: ${pengikutText}</p>
                         </div>
-                        <button type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded shadow-sm">
-                            Import Data <i class="fa-solid fa-arrow-right ml-1"></i>
-                        </button>
+                        <div>
+                            ${buttonHTML}
+                        </div>
                     `;
                     div.onclick = () => importEperdinData(item);
                     container.appendChild(div);
@@ -690,7 +719,7 @@
         }
 
         // ==========================================
-        // FUNGSI IMPORT DATA (TANPA MENGHAPUS DATA E-PERDIN)
+        // FUNGSI IMPORT DATA (DATA E-PERDIN TETAP UTUH)
         // ==========================================
         function importEperdinData(item) {
             if (!item || !item.utama) return;
@@ -735,10 +764,7 @@
             // 6. Hitung Ulang Anggaran
             calculateTotalBudget();
 
-            // 7. DATA DIBIARKAN TETAP ADA DI INDEXEDDB (TIDAK ADA PROSES DELETE)
-            // Data E-Perdin tetap tersimpan sehingga perencanaan & kuota OH tetap terjaga.
-
-            // 8. Tutup Modal & Berikan Notifikasi
+            // 7. Tutup Modal & Berikan Notifikasi
             closeEperdinModal();
             showNotification(`Data Penugasan [${item.utama.nama}] Berhasil Ditarik ke SPPD!`, 'success');
         }
