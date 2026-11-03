@@ -103,7 +103,6 @@ async function loadAsnCache() {
     cachedAsnList = await db.asnMaster.toArray();
 }
 
-// OTOMATIS POPULATE SEMUA DROPDOWN PELAKSANA & PENGIKUT
 function populateSelectOptions() {
     const selectPelaksana = document.getElementById('namaPelaksana');
     const selectedVal = selectPelaksana ? selectPelaksana.value : '';
@@ -116,7 +115,6 @@ function populateSelectOptions() {
         if (selectedVal) selectPelaksana.value = selectedVal;
     }
 
-    // Update semua dropdown pengikut yang sudah dibuat di DOM
     document.querySelectorAll('.pengikut-nama').forEach(selectElem => {
         const currentPengikutVal = selectElem.value;
         selectElem.innerHTML = '<option value="">-- Pilih Anggota Pengikut --</option>';
@@ -127,7 +125,6 @@ function populateSelectOptions() {
     });
 }
 
-// AUTOFILL NIP & JABATAN PELAKSANA UTAMA
 window.onNamaInputChanged = async function(role, namaVal) {
     if (!namaVal) {
         document.getElementById('nipPelaksana').value = '';
@@ -207,7 +204,6 @@ window.updateSKQuotaInfo = async function() {
     return { maxQuota, usedOH, remainingOH, requiredOH };
 };
 
-// FUNGSI TAMBAH BARIS PENGIKUT DENGAN AUTOFILL NIP & JABATAN
 window.addOfficerRow = function() {
     pengikutCount++;
     const container = document.getElementById('pengikutContainer');
@@ -258,7 +254,6 @@ window.removeOfficerRow = function(id) {
     }
 };
 
-// AUTOFILL NIP & JABATAN PENGIKUT
 window.autofillPengikutRow = function(id, namaVal) {
     const match = cachedAsnList.find(a => a.nama === namaVal);
     const row = document.getElementById(`pengikut-row-${id}`);
@@ -292,17 +287,53 @@ window.onDateOrBudgetChanged = function() {
     window.updateSKQuotaInfo();
 };
 
+// VALIDASI KETAT PENGISIAN FITUR PADA LANGKAH 1
 window.proceedToStep2 = async function() {
-    const namaPelaksana = document.getElementById('namaPelaksana')?.value;
-    if (!namaPelaksana) return alert("Pilih Pelaksana Utama terlebih dahulu!");
+    const kodeSK = document.getElementById('step1_kodeSK')?.value.trim();
+    const desaTujuanStep1 = document.getElementById('step1_selectDesa')?.value.trim();
+    const sumberDanaStep1 = document.getElementById('step1_sumberDana')?.value.trim();
+    const namaPelaksana = document.getElementById('namaPelaksana')?.value.trim();
 
-    const desaTujuanStep1 = document.getElementById('step1_selectDesa')?.value;
+    // 1. Check Field Utama yang Wajib Isi
+    if (!kodeSK) {
+        alert("Peringatan: Kode Sub Kegiatan (SK) wajib diisi!");
+        document.getElementById('step1_kodeSK')?.focus();
+        return;
+    }
+    if (!desaTujuanStep1) {
+        alert("Peringatan: Tempat / Desa Tujuan Perdin wajib diisi!");
+        document.getElementById('step1_selectDesa')?.focus();
+        return;
+    }
+    if (!sumberDanaStep1) {
+        alert("Peringatan: Sumber Dana wajib diisi!");
+        document.getElementById('step1_sumberDana')?.focus();
+        return;
+    }
+    if (!namaPelaksana) {
+        alert("Peringatan: Silakan pilih Pelaksana Utama terlebih dahulu!");
+        document.getElementById('namaPelaksana')?.focus();
+        return;
+    }
+
+    // 2. Check Pengikut jika ada baris pengikut yang belum dipilih nama
+    let unselectedPengikut = false;
+    document.querySelectorAll('#pengikutContainer > div').forEach((row, idx) => {
+        const val = row.querySelector('.pengikut-nama')?.value;
+        if (!val) unselectedPengikut = true;
+    });
+    if (unselectedPengikut) {
+        alert("Peringatan: Terdapat baris anggota pengikut yang belum dipilih nama ASN-nya. Silakan pilih ASN atau hapus baris pengikut tersebut!");
+        return;
+    }
+
+    // Synchronize Tujuan ke Step 2
     syncTujuanPerdin(desaTujuanStep1);
 
+    // 3. Check Ketersediaan Kuota
     const quotaInfo = await window.updateSKQuotaInfo();
-
     if (quotaInfo.requiredOH > quotaInfo.remainingOH) {
-        alert(`Penugasan ditolak! Kuota Perdin untuk SK (${document.getElementById('step1_kodeSK').value}) tidak mencukupi.\n\n` +
+        alert(`Penugasan ditolak! Kuota Perdin untuk SK (${kodeSK}) tidak mencukupi.\n\n` +
               `• Dibutuhkan: ${quotaInfo.requiredOH} OH\n` +
               `• Sisa Kuota: ${quotaInfo.remainingOH} OH`);
         return;
@@ -404,7 +435,7 @@ async function loadLocalRecords() {
     `).join('');
 }
 
-// FUNGSI MANAGEMENT MODAL MASTER ASN
+// MANAGEMENT MODAL MASTER ASN
 window.openAsnMasterModal = function() { 
     const modal = document.getElementById('asnMasterModal');
     if (modal) {
@@ -469,7 +500,6 @@ window.saveAsnMaster = async function(e) {
     await db.asnMaster.put({ nama, nip, pangkat, jabatan });
     document.getElementById('asnForm').reset();
     
-    // PEMBARUAN OTOMATIS: Cache & Opsi Dropdown
     await loadAsnCache();
     renderAsnList();
     populateSelectOptions();
