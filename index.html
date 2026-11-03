@@ -14,8 +14,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- CSS Eksternal -->
-    <link rel="stylesheet" href="css/index.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        gov: {
+                            50: '#f0f7ff', 
+                            100: '#e0effe', 
+                            600: '#0284c7',
+                            700: '#0369a1', 
+                            800: '#075985', 
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- CSS Internal -->
+    <style>
+        .bg-glow-1 {
+            position: absolute; top: -8rem; left: -8rem; width: 24rem; height: 24rem;
+            background-color: rgba(14, 165, 233, 0.15); border-radius: 9999px; filter: blur(48px); pointer-events: none;
+        }
+
+        .bg-glow-2 {
+            position: absolute; bottom: -8rem; right: -8rem; width: 24rem; height: 24rem;
+            background-color: rgba(99, 102, 241, 0.15); border-radius: 9999px; filter: blur(48px); pointer-events: none;
+        }
+
+        .module-card {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .module-card:hover {
+            border-color: #0284c7 !important;
+            background-color: #f0f9ff !important;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-gov-900 via-slate-900 to-indigo-950 font-sans text-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
 
@@ -23,10 +63,10 @@
     <div class="bg-glow-1"></div>
     <div class="bg-glow-2"></div>
 
-    <!-- MAIN PORTAL CARD (Background Solid Putih Berkontras Tinggi) -->
+    <!-- MAIN PORTAL CARD -->
     <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden relative z-10 my-8">
         
-        <!-- Header Branding (Warna Gelap Tegas + Teks Putih Terang) -->
+        <!-- Header Branding -->
         <div class="bg-gov-900 px-6 py-8 text-center text-white relative">
             <div class="inline-block p-3 bg-white/10 rounded-2xl mb-3 backdrop-blur-sm border border-white/20 shadow-inner">
                 <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
@@ -48,8 +88,7 @@
             </div>
 
             <div class="space-y-3.5" id="moduleOptionGroup">
-                
-                <!-- Opsi 1: Modul E-SPPD (Warna Teks & Border Lebih Jelas) -->
+                <!-- Opsi 1: Modul E-SPPD -->
                 <label for="optSppd" class="module-card relative flex items-start p-4 rounded-xl border-2 border-slate-300 bg-white hover:border-emerald-600 transition-all cursor-pointer group shadow-sm">
                     <div class="flex items-center h-5 mt-0.5">
                         <input id="optSppd" name="module_choice" type="radio" value="sppd.html" checked
@@ -88,7 +127,7 @@
                 </label>
             </div>
 
-            <!-- Tombol Aksi Utama (Warna Biru Pemerintah Kontras Tinggi) -->
+            <!-- Tombol Aksi Utama -->
             <button type="button" onclick="navigateToSelectedModule()" 
                     class="w-full py-3.5 px-4 bg-gov-800 hover:bg-gov-900 text-white font-extrabold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2 group">
                 <span>Masuk ke Modul</span>
@@ -101,7 +140,7 @@
         </div>
     </div>
 
-    <!-- Script JS Eksternal -->
+    <!-- Script JS Eksternal Terpisah -->
     <script src="js/index.js"></script>
 </body>
 </html>
