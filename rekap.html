@@ -57,7 +57,7 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- RINGKASAN DASHBOARD METRICS -->
+        <!-- DASHBOARD METRICS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
                 <div class="w-12 h-12 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-xl font-bold">
@@ -107,9 +107,7 @@
                 <span class="text-xs text-slate-500 font-normal">Penetapan Batas Kuota Disinkronkan Dari Langkah 1</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="skQuotaCardsContainer">
-                <!-- Cards render dinamis via JS -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="skQuotaCardsContainer"></div>
         </div>
 
         <!-- REKAPITULASI DETAIL DOKUMEN PERDIN -->
@@ -171,7 +169,6 @@
                 try { skQuotaMap = JSON.parse(savedQuotas); } catch(e) { skQuotaMap = {}; }
             }
 
-            // Calculate overall metrics
             let totalBiaya = 0;
             let totalOH = 0;
             const skSet = new Set();
@@ -189,7 +186,6 @@
             document.getElementById("metricTotalBiaya").innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
             document.getElementById("metricTotalSK").innerText = Math.max(skSet.size, Object.keys(skQuotaMap).length);
 
-            // Group OH used by SK
             const skUsageMap = {};
             perdinHistory.forEach(r => {
                 const sk = r.kodeSK || "7.01.01.2.01.0003";
@@ -198,7 +194,6 @@
                 skUsageMap[sk] = (skUsageMap[sk] || 0) + (count * days);
             });
 
-            // Merge SKs from default map and history
             const allSKs = new Set([...Object.keys(skQuotaMap), ...Object.keys(skUsageMap), "7.01.01.2.01.0003"]);
             const container = document.getElementById("skQuotaCardsContainer");
             container.innerHTML = "";
@@ -250,7 +245,6 @@
                 `;
             });
 
-            // Render detailed table
             const tbody = document.getElementById("rekapTableBody");
             if (perdinHistory.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Belum ada riwayat dokumen perjalanan dinas tersimpan.</td></tr>`;
