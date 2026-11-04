@@ -64,6 +64,30 @@ async function loadMasterAsn() {
     if (!masterAsnList || masterAsnList.length === 0) {
         masterAsnList = [...DEFAULT_ASN_LIST];
         await saveMasterAsn();
+    } else {
+        // PERBAIKAN OTOMATIS: Deteksi dan perbaiki data jika NIP dan Nama terbalik di penyimpanan
+        let isRepaired = false;
+        masterAsnList = masterAsnList.map(item => {
+            if (!item) return item;
+            let namaVal = (item.nama || '').toString().trim();
+            let nipVal = (item.nip || '').toString().trim();
+
+            // Jika properti 'nama' berisi angka panjang (NIP) dan 'nip' berisi teks nama
+            if (/^\d{12,18}$/.test(namaVal.replace(/\s+/g, '')) && /[a-zA-Z]/.test(nipVal)) {
+                isRepaired = true;
+                return {
+                    nama: nipVal.toUpperCase(),
+                    nip: namaVal,
+                    pangkat: item.pangkat || '-',
+                    jabatan: item.jabatan || '-'
+                };
+            }
+            return item;
+        });
+
+        if (isRepaired) {
+            await saveMasterAsn();
+        }
     }
     
     populatePelaksanaDropdowns();
@@ -80,7 +104,7 @@ async function saveMasterAsn() {
     renderAsnTable();
 }
 
-// FORMAT RENDERING DAFTAR ASN SERAGAM (NAMA DULU, LALU NIP, PANGKAT & JABATAN DI BAWAHNYA)
+// FORMAT RENDERING DAFTAR ASN SERAGAM (BARIS 1: NAMA, BARIS 2: NIP & JABATAN)
 function renderAsnTable(filterText = '') {
     const tbody = document.getElementById('asnListContainer') || document.getElementById('asnTableBody');
     const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
@@ -106,7 +130,9 @@ function renderAsnTable(filterText = '') {
 
     tbody.innerHTML = filtered.map((asn) => {
         const originalIndex = masterAsnList.indexOf(asn);
-        const displayNama = asn.nama ? asn.nama : '<span class="text-rose-500 font-normal">[DATA RUSAK / TANPA NAMA]</span>';
+        
+        // Memastikan Nama selalu muncul di tempatnya dan NIP di tempatnya
+        const displayNama = asn.nama ? asn.nama.toUpperCase() : '<span class="text-rose-500 font-normal">[DATA RUSAK / TANPA NAMA]</span>';
         const safeNip = (asn.nip || '-').toString().trim();
         const safePangkat = asn.pangkat ? `${asn.pangkat}` : '-';
         const safeJabatan = asn.jabatan ? `${asn.jabatan}` : '-';
@@ -114,10 +140,10 @@ function renderAsnTable(filterText = '') {
         return `
             <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
                 <div>
-                    <!-- BARIS 1: NAMA ASN -->
+                    <!-- BARIS 1: NAMA ASN (HURUF KAPITAL) -->
                     <p class="font-bold text-slate-800 uppercase">${displayNama}</p>
                     
-                    <!-- BARIS 2: NIP | PANGKAT - JABATAN DI BAWAH NAMA -->
+                    <!-- BARIS 2: NIP | PANGKAT - JABATAN -->
                     <p class="text-[10px] text-slate-500 mt-0.5">
                         <span class="font-mono">NIP: ${safeNip}</span> &bull; <span>${safePangkat} - ${safeJabatan}</span>
                     </p>
@@ -132,7 +158,7 @@ function renderAsnTable(filterText = '') {
         `;
     }).join('');
 
-    // Event listener aman (mencegah Inline HTML SyntaxError)
+    // Event listener hapus aman
     tbody.querySelectorAll('.btn-delete-asn').forEach(btn => {
         btn.addEventListener('click', function() {
             const idx = parseInt(this.getAttribute('data-index'), 10);
@@ -202,7 +228,7 @@ function downloadCsvTemplate() {
 }
 window.downloadCsvTemplate = downloadCsvTemplate;
 
-// PROSES IMPOR DATA DARI BERKAS CSV
+// PROSES IMPOR DATA DARI BERKAS CSV (DENGAN PEMETAAN VALIDA NIP & NAMA)
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -229,17 +255,33 @@ function importAsnFromCsv() {
                 // Mendukung pemisah koma (,), titik koma (;), dan tab (\t)
                 const cols = line.split(/[,;\t]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
                 if (cols.length >= 2) {
-                    const nip = cols[0] || '-';
-                    const nama = (cols[1] || '').trim().toUpperCase();
-                    const pangkat = cols[2] || '-';
-                    const jabatan = cols[3] || '-';
+                    let col0 = cols[0] || '';
+                    let col1 = cols[1] || '';
+                    let pangkat = cols[2] || '-';
+                    let jabatan = cols[3] || '-';
+
+                    let nip = '-';
+                    let nama = '';
+
+                    // Deteksi Otomatis: Cek apakah Kolom 0 berisi NIP (Angka) atau Nama (Huruf)
+                    if (/^\d+$/.test(col0.replace(/\s+/g, '')) || col0.length >= 12) {
+                        nip = col0;
+                        nama = col1.toUpperCase();
+                    } else if (/^\d+$/.test(col1.replace(/\s+/g, '')) || col1.length >= 12) {
+                        nip = col1;
+                        nama = col0.toUpperCase();
+                    } else {
+                        // Default sesuai standar template (Kolom 0: NIP, Kolom 1: NAMA)
+                        nip = col0 || '-';
+                        nama = col1.toUpperCase();
+                    }
 
                     if (!nama || nama === 'NAMA' || nama === 'NIP') {
                         invalidCount++;
                         continue;
                     }
 
-                    // Deduplikasi data
+                    // Deduplikasi data (Cek NIP atau Nama)
                     const isDuplicate = masterAsnList.some(existing => {
                         const matchNip = (nip && nip !== '-' && existing.nip === nip);
                         const matchNama = (existing.nama && existing.nama.toLowerCase() === nama.toLowerCase());
@@ -249,7 +291,7 @@ function importAsnFromCsv() {
                     if (isDuplicate) {
                         skippedCount++;
                     } else {
-                        masterAsnList.push({ nip, nama, pangkat, jabatan });
+                        masterAsnList.push({ nama, nip, pangkat, jabatan });
                         addedCount++;
                     }
                 } else {
@@ -292,7 +334,7 @@ async function saveAsnMaster(e) {
         return;
     }
 
-    masterAsnList.push({ nip, nama, pangkat, jabatan });
+    masterAsnList.push({ nama, nip, pangkat, jabatan });
     await saveMasterAsn();
     resetAsnForm();
 }
