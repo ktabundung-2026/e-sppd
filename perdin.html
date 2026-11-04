@@ -9,26 +9,23 @@
     <meta name="theme-color" content="#0c4a6e">
     <link rel="apple-touch-icon" href="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png">
 
+    <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Dexie.js untuk Offline Storage -->
     <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- CSS Internal -->
     <style>
-        body {
-            background-color: #f8fafc;
-        }
-
+        body { background-color: #f8fafc; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .stat-card {
-            transition: transform 0.2s ease, shadow 0.2s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
+        .stat-card { transition: transform 0.2s ease, shadow 0.2s ease; }
+        .stat-card:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
@@ -45,7 +42,6 @@
                     <p class="text-xs text-indigo-200">Perencanaan Penugasan & Monitoring Kuota OH Global</p>
                 </div>
             </div>
-            
             <div class="flex items-center space-x-2">
                 <a href="sppd.html" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow transition flex items-center gap-1.5">
                     <i class="fa-solid fa-file-contract"></i>
@@ -56,16 +52,19 @@
     </header>
 
     <!-- CONTAINER UTAMA -->
-    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full flex-1">
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-1">
+        
+        <!-- SECTION: RINGKASAN STATISTIK -->
         <div class="lg:col-span-12 bg-white p-6 rounded-xl shadow-md border border-slate-200">
             <h2 class="text-lg font-bold text-indigo-950 mb-4 pb-2 border-b flex items-center justify-between">
                 <span><i class="fa-solid fa-chart-line text-indigo-600 mr-2"></i> Ringkasan Rekapitulasi Kuota OH</span>
+                <span id="network-status" class="text-xs font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-800">Online</span>
             </h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="stat-card bg-indigo-50 p-4 rounded-xl border border-indigo-100 shadow-sm">
                     <p class="text-xs font-bold text-indigo-700 uppercase">Target Total OH Global</p>
-                    <p id="statTotalOH" class="text-2xl font-black text-indigo-950 mt-1">202 OH</p>
+                    <p id="statTotalOH" class="text-2xl font-black text-indigo-950 mt-1">232 OH</p>
                 </div>
                 
                 <div class="stat-card bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-sm">
@@ -75,10 +74,58 @@
                 
                 <div class="stat-card bg-amber-50 p-4 rounded-xl border border-amber-100 shadow-sm">
                     <p class="text-xs font-bold text-amber-700 uppercase">Sisa Kuota OH</p>
-                    <p id="statSisaOH" class="text-2xl font-black text-amber-950 mt-1">202 OH</p>
+                    <p id="statSisaOH" class="text-2xl font-black text-amber-950 mt-1">232 OH</p>
                 </div>
             </div>
         </div>
+
+        <!-- SECTION: TABEL KUOTA PER SK -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-md border border-slate-200 self-start">
+            <h2 class="text-md font-bold text-indigo-950 mb-4 pb-2 border-b">
+                <i class="fa-solid fa-list-check text-indigo-600 mr-2"></i> Kuota OH per Sub Kegiatan (SK)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-100 text-slate-700 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="px-3 py-2 rounded-tl-lg">Nama SK</th>
+                            <th class="px-3 py-2 text-center">Target</th>
+                            <th class="px-3 py-2 text-center">Terpakai</th>
+                            <th class="px-3 py-2 text-center rounded-tr-lg">Sisa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodySK" class="divide-y divide-slate-100">
+                        <tr><td colspan="4" class="text-center py-4 text-slate-400">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION: TABEL RIWAYAT PERDIN -->
+        <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-md border border-slate-200 self-start">
+            <h2 class="text-md font-bold text-indigo-950 mb-4 pb-2 border-b flex justify-between items-center">
+                <span><i class="fa-solid fa-history text-indigo-600 mr-2"></i> Riwayat Perjalanan Dinas</span>
+                <button onclick="fetchDataPerdin()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded transition shadow-sm">
+                    <i class="fa-solid fa-rotate-right"></i> Segarkan
+                </button>
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-100 text-slate-700 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="px-3 py-2 rounded-tl-lg">Tgl/No. SPPD</th>
+                            <th class="px-3 py-2">Tujuan & Pelaksana</th>
+                            <th class="px-3 py-2">Sub Kegiatan</th>
+                            <th class="px-3 py-2 text-center rounded-tr-lg">OH</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyRiwayat" class="divide-y divide-slate-100">
+                        <tr><td colspan="4" class="text-center py-4 text-slate-400">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 
     <!-- FOOTER COPYRIGHT -->
@@ -86,7 +133,136 @@
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
-    <!-- Script JS Eksternal Terpisah -->
-    <script src="js/perdin.js"></script>
+    <!-- Script Utama (Supabase, Dexie, & Logika UI) -->
+    <script>
+        // 1. Konfigurasi Supabase
+        const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co'; // Ganti dengan URL Supabase
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw'; // Ganti dengan Anon Key Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 2. Konfigurasi Dexie (Offline Database)
+        const db = new Dexie('PerdinTabundungDB');
+        db.version(1).stores({
+            riwayat_perdin: 'id, no_sppd, tanggal, tujuan, pelaksana, sub_kegiatan, jumlah_oh, sinkron'
+        });
+
+        const TARGET_TOTAL_OH = 232;
+
+        // 3. Monitor Status Jaringan
+        function updateNetworkStatus() {
+            const badge = document.getElementById('network-status');
+            if (navigator.onLine) {
+                badge.className = 'text-xs font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-800';
+                badge.innerText = 'Online';
+                fetchDataPerdin(); // Sinkronisasi otomatis saat kembali online
+            } else {
+                badge.className = 'text-xs font-bold px-2 py-1 rounded bg-amber-100 text-amber-800';
+                badge.innerText = 'Offline';
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        // 4. Pengolahan dan Render Data
+        function renderDashboard(dataRiwayat) {
+            let totalRealisasi = 0;
+            const rekapSK = {};
+
+            const tbodyRiwayat = document.getElementById('tableBodyRiwayat');
+            tbodyRiwayat.innerHTML = '';
+
+            if (dataRiwayat.length === 0) {
+                tbodyRiwayat.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400 text-xs">Belum ada riwayat perjalanan dinas</td></tr>`;
+            } else {
+                dataRiwayat.forEach(item => {
+                    // Kalkulasi OH Global
+                    totalRealisasi += (item.jumlah_oh || 0);
+
+                    // Kalkulasi per SK
+                    if (!rekapSK[item.sub_kegiatan]) {
+                        rekapSK[item.sub_kegiatan] = { terpakai: 0 };
+                    }
+                    rekapSK[item.sub_kegiatan].terpakai += (item.jumlah_oh || 0);
+
+                    // Render Baris Riwayat
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="px-3 py-3">
+                            <div class="font-bold text-slate-900">${item.tanggal}</div>
+                            <div class="text-[10px] text-slate-500 uppercase">${item.no_sppd}</div>
+                        </td>
+                        <td class="px-3 py-3">
+                            <div class="font-bold text-indigo-700">${item.tujuan}</div>
+                            <div class="text-[11px] text-slate-600">${item.pelaksana}</div>
+                        </td>
+                        <td class="px-3 py-3 text-xs font-medium text-slate-700">${item.sub_kegiatan}</td>
+                        <td class="px-3 py-3 text-center font-black text-emerald-600">${item.jumlah_oh}</td>
+                    `;
+                    tbodyRiwayat.appendChild(tr);
+                });
+            }
+
+            // Update Kartu Statistik Atas
+            document.getElementById('statRealisasiOH').innerText = `${totalRealisasi} OH`;
+            document.getElementById('statSisaOH').innerText = `${TARGET_TOTAL_OH - totalRealisasi} OH`;
+
+            // Render Tabel Kuota per SK (Mockup Data SK Target, dapat disesuaikan)
+            const targetSKMock = {
+                "Fasilitasi Desa": 100,
+                "Pembinaan Pemerintahan": 80,
+                "Monev Infrastruktur": 52
+            };
+
+            const tbodySK = document.getElementById('tableBodySK');
+            tbodySK.innerHTML = '';
+            
+            for (const [namaSK, targetSK] of Object.entries(targetSKMock)) {
+                const terpakaiSK = rekapSK[namaSK]?.terpakai || 0;
+                const sisaSK = targetSK - terpakaiSK;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 text-xs font-bold text-slate-800">${namaSK}</td>
+                    <td class="px-3 py-2 text-center text-xs text-indigo-600 font-bold">${targetSK}</td>
+                    <td class="px-3 py-2 text-center text-xs text-amber-600 font-bold">${terpakaiSK}</td>
+                    <td class="px-3 py-2 text-center text-xs text-emerald-600 font-bold">${sisaSK}</td>
+                `;
+                tbodySK.appendChild(tr);
+            }
+        }
+
+        // 5. Fetch dari Supabase / IndexedDB
+        async function fetchDataPerdin() {
+            try {
+                if (navigator.onLine) {
+                    const { data, error } = await supabase
+                        .from('riwayat_perdin') // Sesuaikan nama tabel Supabase
+                        .select('*')
+                        .order('tanggal', { ascending: false });
+
+                    if (error) throw error;
+                    
+                    // Simpan ke local Dexie untuk cache offline
+                    await db.riwayat_perdin.clear();
+                    await db.riwayat_perdin.bulkAdd(data);
+                    
+                    renderDashboard(data);
+                } else {
+                    throw new Error("Offline mode");
+                }
+            } catch (err) {
+                console.log("Mengambil data dari cache lokal (Dexie)...");
+                const localData = await db.riwayat_perdin.toArray();
+                renderDashboard(localData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)));
+            }
+        }
+
+        // 6. Inisialisasi Saat Halaman Dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNetworkStatus();
+            fetchDataPerdin();
+        });
+    </script>
 </body>
 </html>
