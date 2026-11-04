@@ -4,8 +4,8 @@
  */
 
 // Konfigurasi Supabase REST API (Silakan sesuaikan URL dan anonKey dengan milik Anda)
-const SUPABASE_URL = "https://your-supabase-project.supabase.co";
-const SUPABASE_KEY = "your-supabase-anon-key";
+const SUPABASE_URL = "https://offeebouiohweqlgyccx.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw";
 
 // Data Master ASN Bawaan (Default Fallback)
 const DEFAULT_ASN_LIST = [
