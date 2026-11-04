@@ -10,14 +10,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Data Master ASN Bawaan (Default Fallback)
 const DEFAULT_ASN_LIST = [
     { nama: "RUDOLF UMBU RESI LOLY, ST", nip: "197205212006041008", pangkat: "Pembina, IV/a", jabatan: "Camat Tabundung" },
-    { nama: "DANIEL KAMBARU WINDI", nip: "197712312008011084", pangkat: "Penata Tk. I, III/d", jabatan: "Bendahara Pengeluaran" },
-    { nama: "Andirias Kulaawang, SP", nip: "197908302010011011", pangkat: "Penata Tk. I, III/d", jabatan: "Kasie PMD" },
-    { nama: "Melkianus Rihi Amah", nip: "197602242002121008", pangkat: "Penata Muda, III/a", jabatan: "Kasie Trantib" },
-    { nama: "Naema Ana Hutar, ST", nip: "198211082009032010", pangkat: "Penata Tk. I, III/d", jabatan: "Kasie Kesos" },
-    { nama: "Naomi Kahuatu Tamaru, S.Akun", nip: "198504122010012015", pangkat: "Penata Muda, III/a", jabatan: "Staf Subag Keuangan" },
-    { nama: "Kornelis Kopa Rihi, SE", nip: "198103152009021003", pangkat: "Penata, III/c", jabatan: "Kasie Pem" },
-    { nama: "Imanuel A. M. Yiwa, A.Md", nip: "199002142015031002", pangkat: "Pengatur, II/c", jabatan: "Staf PMD" },
-    { nama: "Yuliyanus Pumbu Mila Hamu", nip: "-", pangkat: "-", jabatan: "Staf/Pengemudi" }
+    { nama: "DANIEL KAMBARU WINDI", nip: "197712312008011084", pangkat: "Penata Tk. I, III/d", jabatan: "Bendahara Pengeluaran" }  
 ];
 
 let masterAsn = [];
