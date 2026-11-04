@@ -415,17 +415,23 @@
                         </table>
                     </div>
 
-                    <!-- PENUTUP LAPORAN DENGAN SPASI DISESUAIKAN -->
-                    <div class="mt-6 font-official text-sm leading-relaxed sppd-table-fixed">
+                    <!-- PENUTUP LAPORAN DENGAN JARAK w-6 (mb-6) SEBAGAIMANA DIMINTA -->
+                    <div class="mt-4 mb-6 font-official text-sm leading-relaxed sppd-table-fixed">
                         <p>Demikian Laporan Hasil Perjalanan Dinas ini dibuat untuk dipergunakan seperlunya.</p>
                     </div>
-                </div>
 
-                <!-- TANDA TANGAN PELAKSANA (RATA KIRI DENGAN SPASI) -->
-                <div class="mt-6 font-official text-xs sppd-table-fixed">
-                    <div class="w-full text-left">
-                        <p class="font-bold mb-3">Yang Melakukan Perjalanan Dinas :</p>
-                        <div id="lapDaftarTtd" class="space-y-4 text-left"></div>
+                    <!-- JUDUL TIM PELAKSANA TEPAT DI BAWAH TULISAN DEMIKIAN -->
+                    <div class="font-official text-sm sppd-table-fixed mb-3">
+                        <p class="font-bold">Yang Melakukan Perjalanan Dinas :</p>
+                    </div>
+
+                    <!-- TABEL/GRID NAMA DENGAN KOLOM TANDA TANGAN DI SEBELAHNYA (RATA KIRI) -->
+                    <div class="font-official text-xs sppd-table-fixed">
+                        <table class="w-full text-left font-official border-none">
+                            <tbody id="lapDaftarTtd">
+                                <!-- Render Dinamis via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -659,20 +665,32 @@
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
-            // Rata Kiri Nama-Nama Pelaksana Dengan Spasi yang Rapi & Garis/Jarak Tanda Tangan
+            // Rata Kiri Nama Pelaksana + Kolom Tanda Tangan Di Sebelahnya
             let ttdLapHtml = `
-                <div class="mb-4 text-left">
-                    <p class="font-bold">1. ${record.namaPelaksana}</p>
-                    <p class="text-xs ml-4">NIP. ${record.nipPelaksana || '-'}</p>
-                </div>
+                <tr class="align-top">
+                    <td class="py-2 pr-4 w-7/12">
+                        <p class="font-bold">1. ${record.namaPelaksana}</p>
+                        <p class="text-xs">NIP. ${record.nipPelaksana || '-'}</p>
+                    </td>
+                    <td class="py-2 pl-4 w-5/12 border-b border-dotted border-slate-400 text-slate-400 text-right font-mono">
+                        1. ................................
+                    </td>
+                </tr>
             `;
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, i) => {
+                    const no = i + 2;
+                    const alignClass = no % 2 === 0 ? 'text-left pl-6' : 'text-right';
                     ttdLapHtml += `
-                        <div class="mb-4 text-left">
-                            <p class="font-bold">${i + 2}. ${p.nama}</p>
-                            <p class="text-xs ml-4">NIP. ${p.nip || '-'}</p>
-                        </div>
+                        <tr class="align-top">
+                            <td class="py-2 pr-4">
+                                <p class="font-bold">${no}. ${p.nama}</p>
+                                <p class="text-xs">NIP. ${p.nip || '-'}</p>
+                            </td>
+                            <td class="py-2 pl-4 border-b border-dotted border-slate-400 text-slate-400 ${alignClass} font-mono">
+                                ${no}. ................................
+                            </td>
+                        </tr>
                     `;
                 });
             }
