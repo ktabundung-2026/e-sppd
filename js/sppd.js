@@ -1,7 +1,7 @@
 /**
  * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
  * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
- * impor/ekspor CSV, pencegahan data ganda, serta sinkronisasi data via AppDB.
+ * impor/ekspor CSV, pencegahan data ganda (deduplikasi), serta sinkronisasi data via AppDB.
  */
 
 // ==========================================
@@ -98,20 +98,25 @@ function renderAsnTable(filterText = '') {
         return;
     }
 
-    tbody.innerHTML = filtered.map((asn) => `
-        <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
-            <div>
-                <p class="font-bold text-slate-800">${asn.nama}</p>
-                <p class="text-[10px] text-slate-500">NIP: ${asn.nip || '-'} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
+    tbody.innerHTML = filtered.map((asn) => {
+        const safeNama = (asn.nama || '').replace(/'/g, "\\'");
+        const safeNip = asn.nip || '-';
+
+        return `
+            <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
+                <div>
+                    <p class="font-bold text-slate-800">${asn.nama}</p>
+                    <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
+                </div>
+                <button type="button" onclick="window.deleteAsn('${safeNip}', '${safeNama}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" title="Hapus ASN">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>
-            <button type="button" onclick="deleteAsn('${asn.nip}', '${asn.nama.replace(/'/g, "\\'")}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" title="Hapus ASN">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-// PERBAIKAN: Fungsi Delete ASN Aktif dan Handled Global
+// PERBAIKAN: Fungsi Delete ASN dipublikasikan secara Global
 async function deleteAsn(nip, nama) {
     if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master lokal?`)) {
         masterAsnList = masterAsnList.filter(a => {
@@ -158,7 +163,7 @@ function downloadCsvTemplate() {
     document.body.removeChild(link);
 }
 
-// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Pendobelan (Deduplikasi)
+// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Pendobelan (Deduplikasi) & Global Binding
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files[0]) {
@@ -187,7 +192,7 @@ function importAsnFromCsv() {
 
                 if (!nama) continue;
 
-                // Logika Pencegahan Ganda: Cek NIP (jika valid) ATAU Nama Lengkap
+                // Cek Pendobelan: Berdasarkan NIP (jika valid) ATAU Nama Lengkap
                 const isDuplicate = masterAsnList.some(existing => {
                     const matchNip = (nip && nip !== '-' && existing.nip === nip);
                     const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
@@ -207,7 +212,7 @@ function importAsnFromCsv() {
         fileInput.value = '';
 
         if (addedCount === 0 && skippedCount > 0) {
-            alert(`Tidak ada data baru yang ditambahkan. Semua ${skippedCount} data dalam file CSV sudah pernah terdaftar.`);
+            alert(`Tidak ada data baru yang ditambahkan. Semua (${skippedCount}) data dalam file CSV sudah pernah terdaftar.`);
         } else {
             alert(`Proses impor selesai!\n- Data Baru Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
         }
@@ -227,7 +232,7 @@ async function saveAsnMaster(e) {
 
     if (!nama) return;
 
-    // Cek Duplikasi Manual
+    // Cek Duplikasi
     const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
     
     if (isDuplicate) {
@@ -262,19 +267,16 @@ function initEventListeners() {
         });
     }
 
-    // Event Input Pencarian Master ASN
     const searchInput = document.getElementById('searchAsnInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => renderAsnTable(e.target.value));
     }
 
-    // Form Tambah Manual ASN
     const asnForm = document.getElementById('asnForm');
     if (asnForm) {
         asnForm.addEventListener('submit', saveAsnMaster);
     }
 
-    // Form Submit SPPD Utama
     const sppdForm = document.getElementById('sppdForm');
     if (sppdForm) {
         sppdForm.addEventListener('submit', handleFormSubmit);
