@@ -6,15 +6,11 @@
     {
       "src": "https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "./sppd.html",
   "background_color": "#0c4a6e",
   "theme_color": "#0c4a6e",
   "display": "standalone",
@@ -27,10 +23,10 @@
       "url": "./sppd.html"
     },
     {
-      "name": "Modul E-Perdin",
-      "short_name": "E-Perdin",
-      "description": "Buka Perencanaan Tim & Target OH",
-      "url": "./perdin.html"
+      "name": "Rekapitulasi & Kuota",
+      "short_name": "Rekap",
+      "description": "Buka Rekapitulasi Laporan & Batas Kuota",
+      "url": "./rekap.html"
     }
   ]
 }
