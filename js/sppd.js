@@ -80,6 +80,7 @@ async function saveMasterAsn() {
     renderAsnTable();
 }
 
+// FORMAT RENDERING DAFTAR ASN SERAGAM (NAMA DULU, LALU NIP, PANGKAT & JABATAN DI BAWAHNYA)
 function renderAsnTable(filterText = '') {
     const tbody = document.getElementById('asnListContainer') || document.getElementById('asnTableBody');
     const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
@@ -107,14 +108,19 @@ function renderAsnTable(filterText = '') {
         const originalIndex = masterAsnList.indexOf(asn);
         const displayNama = asn.nama ? asn.nama : '<span class="text-rose-500 font-normal">[DATA RUSAK / TANPA NAMA]</span>';
         const safeNip = (asn.nip || '-').toString().trim();
-        const safePangkat = asn.pangkat || '-';
-        const safeJabatan = asn.jabatan || '-';
+        const safePangkat = asn.pangkat ? `${asn.pangkat}` : '-';
+        const safeJabatan = asn.jabatan ? `${asn.jabatan}` : '-';
 
         return `
             <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
                 <div>
-                    <p class="font-bold text-slate-800">${displayNama}</p>
-                    <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${safePangkat} - ${safeJabatan}</p>
+                    <!-- BARIS 1: NAMA ASN -->
+                    <p class="font-bold text-slate-800 uppercase">${displayNama}</p>
+                    
+                    <!-- BARIS 2: NIP | PANGKAT - JABATAN DI BAWAH NAMA -->
+                    <p class="text-[10px] text-slate-500 mt-0.5">
+                        <span class="font-mono">NIP: ${safeNip}</span> &bull; <span>${safePangkat} - ${safeJabatan}</span>
+                    </p>
                 </div>
                 <button type="button" 
                         data-index="${originalIndex}"
@@ -126,7 +132,7 @@ function renderAsnTable(filterText = '') {
         `;
     }).join('');
 
-    // Event listener aman untuk mencegah Inline HTML SyntaxError
+    // Event listener aman (mencegah Inline HTML SyntaxError)
     tbody.querySelectorAll('.btn-delete-asn').forEach(btn => {
         btn.addEventListener('click', function() {
             const idx = parseInt(this.getAttribute('data-index'), 10);
@@ -149,7 +155,7 @@ async function deleteAsnByIndex(index) {
 }
 window.deleteAsnByIndex = deleteAsnByIndex;
 
-// RESET MASTER ASN TOTAL
+// RESET MASTER ASN TOTAL KE DATA DEFAULT
 async function clearAllMasterAsn() {
     if (confirm("Apakah Anda yakin ingin MENGHAPUS SEMUA data master ASN tersimpan?\nData akan dikembalikan ke data awal default.")) {
         masterAsnList = [...DEFAULT_ASN_LIST];
@@ -265,14 +271,14 @@ function importAsnFromCsv() {
 }
 window.importAsnFromCsv = importAsnFromCsv;
 
-// Simpan ASN Manual
+// SIMPAN ASN MANUAL
 async function saveAsnMaster(e) {
     if (e) e.preventDefault();
     const namaInput = document.getElementById('asnNama');
     const nama = namaInput?.value.trim().toUpperCase();
     const nip = document.getElementById('asnNip')?.value.trim() || '-';
-    const pangkat = document.getElementById('asnPangkat')?.value.trim();
-    const jabatan = document.getElementById('asnJabatan')?.value.trim();
+    const pangkat = document.getElementById('asnPangkat')?.value.trim() || '-';
+    const jabatan = document.getElementById('asnJabatan')?.value.trim() || '-';
 
     if (!nama) {
         alert("Nama ASN wajib diisi!");
