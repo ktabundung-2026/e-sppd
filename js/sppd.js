@@ -1,21 +1,22 @@
 /**
- * e-SPPD Terpadu Kecamatan Tabundung - JS Logic
- * Developed by aRL
+ * e-SPPD Terpadu Kecamatan Tabundung - Full Script
+ * Author/Developer: aRL
  */
 
-// Konfigurasi Supabase REST API (Silakan sesuaikan URL dan anonKey dengan milik Anda)
+// Konfigurasi Supabase REST API (Sesuaikan URL dan anonKey dengan milik Anda)
 const SUPABASE_URL = "https://offeebouiohweqlgyccx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw";
 
-// Data Master ASN Bawaan (Default Fallback)
+// Master ASN Bawaan (Default Data)
 const DEFAULT_ASN_LIST = [
     { nama: "RUDOLF UMBU RESI LOLY, ST", nip: "197205212006041008", pangkat: "Pembina, IV/a", jabatan: "Camat Tabundung" },
-    { nama: "DANIEL KAMBARU WINDI", nip: "197712312008011084", pangkat: "Penata Tk. I, III/d", jabatan: "Bendahara Pengeluaran" }  
+    { nama: "DANIEL KAMBARU WINDI", nip: "197712312008011084", pangkat: "Penata Tk. I, III/d", jabatan: "Pengadminitrasi Perkantoran" }
+    
 ];
 
 let masterAsn = [];
 let perdinHistory = [];
-let skQuotaMap = {}; // Penyimpan batas kuota per kode SK
+let skQuotaMap = {};
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,7 +43,7 @@ function checkNetworkStatus() {
 window.addEventListener('online', checkNetworkStatus);
 window.addEventListener('offline', checkNetworkStatus);
 
-// --- MASTER ASN MANAGEMENT ---
+// --- MASTER ASN MANAGEMENT & CSV IMPORT ---
 function initMasterAsn() {
     const localData = localStorage.getItem("sppd_master_asn");
     if (localData) {
@@ -55,9 +56,17 @@ function initMasterAsn() {
 
 function renderAsnList() {
     const container = document.getElementById("asnListContainer");
+    const countLabel = document.getElementById("countMasterAsn");
+    if (countLabel) countLabel.innerText = masterAsn.length;
     if (!container) return;
+
+    if (masterAsn.length === 0) {
+        container.innerHTML = `<p class="p-3 text-center text-xs text-slate-500 italic">Belum ada data ASN tersimpan.</p>`;
+        return;
+    }
+
     container.innerHTML = masterAsn.map((asn) => `
-        <div class="py-2 flex items-center justify-between text-xs">
+        <div class="py-2 px-1 flex items-center justify-between text-xs hover:bg-slate-50 transition border-b border-slate-100">
             <div>
                 <p class="font-bold text-slate-800">${asn.nama}</p>
                 <p class="text-[11px] text-slate-500">NIP: ${asn.nip} | Gol: ${asn.pangkat || '-'} | ${asn.jabatan}</p>
@@ -78,6 +87,91 @@ function openAsnMasterModal() {
 function closeAsnMasterModal() {
     document.getElementById("asnMasterModal").classList.add("hidden");
     resetAsnForm();
+}
+
+function downloadCsvTemplate() {
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "nama,nip,pangkat,jabatan\n"
+        + "RUDOLF UMBU RESI LOLY ST,197205212006041008,Pembina IV/a,Camat Tabundung\n"
+        + "DANIEL KAMBARU WINDI,197712312008011084,Penata Tk. I III/d,Pengadministrasi Perkantoran"
+        
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "template_master_asn_tabundung.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function importAsnFromCsv() {
+    const fileInput = document.getElementById('asnCsvFileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Silakan pilih file CSV terlebih dahulu!");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split(/\r\n|\n/);
+        
+        if (lines.length < 2) {
+            alert("File CSV kosong atau format tidak valid!");
+            return;
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+        
+        const idxNama = headers.indexOf('nama');
+        const idxNip = headers.indexOf('nip');
+        const idxPangkat = headers.indexOf('pangkat');
+        const idxJabatan = headers.indexOf('jabatan');
+
+        if (idxNama === -1 || idxNip === -1 || idxJabatan === -1) {
+            alert("Header CSV tidak sesuai! Pastikan terdapat kolom: nama, nip, pangkat, jabatan");
+            return;
+        }
+
+        let importedCount = 0;
+        let updatedCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+            
+            const nama = cols[idxNama] || '';
+            const nip = cols[idxNip] || '-';
+            const pangkat = idxPangkat !== -1 ? (cols[idxPangkat] || '-') : '-';
+            const jabatan = cols[idxJabatan] || '';
+
+            if (nama && jabatan) {
+                const existingIdx = masterAsn.findIndex(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
+                const asnObj = { nama, nip, pangkat, jabatan };
+
+                if (existingIdx !== -1) {
+                    masterAsn[existingIdx] = asnObj;
+                    updatedCount++;
+                } else {
+                    masterAsn.push(asnObj);
+                    importedCount++;
+                }
+            }
+        }
+
+        localStorage.setItem("sppd_master_asn", JSON.stringify(masterAsn));
+        populateAsnDropdowns();
+        renderAsnList();
+        fileInput.value = '';
+
+        alert(`Import CSV Berhasil!\n- Data Baru Ditambahkan: ${importedCount}\n- Data Diperbarui: ${updatedCount}`);
+    };
+
+    reader.readAsText(file);
 }
 
 function saveAsnMaster(e) {
@@ -119,7 +213,7 @@ function editAsn(nip) {
 function resetAsnForm() {
     document.getElementById("asnForm").reset();
     document.getElementById("asnOriginalNip").value = "";
-    document.getElementById("asnFormTitle").innerText = "Tambah / Edit Data ASN:";
+    document.getElementById("asnFormTitle").innerText = "Tambah / Edit Data ASN Manual:";
     document.getElementById("btnSaveAsn").innerText = "+ Simpan ASN Baru";
     document.getElementById("btnCancelEditAsn").classList.add("hidden");
 }
@@ -216,7 +310,7 @@ function onPengikutSelected(id, namaVal) {
     }
 }
 
-// --- NAVIGATION & STEPPER ---
+// --- ALUR STEPPER ---
 function switchStep(stepNum) {
     document.querySelectorAll(".step-content").forEach(el => el.classList.add("hidden"));
     document.getElementById(`step-content-${stepNum}`).classList.remove("hidden");
@@ -249,7 +343,7 @@ function proceedToStep2() {
     switchStep(2);
 }
 
-// --- KUOTA & HITUNGAN OH ---
+// --- LOGIKA KUOTA SK & KALKULASI BIAYA ---
 function initSKQuotas() {
     const saved = localStorage.getItem("sppd_sk_quotas");
     if (saved) {
@@ -272,7 +366,6 @@ function updateSKQuotaInfo() {
     const maxQuota = skQuotaMap[sk] !== undefined ? skQuotaMap[sk] : 50;
     document.getElementById("inputMaxQuota").value = maxQuota;
 
-    // Hitung OH terpakai untuk SK tersebut dari riwayat
     let usedOH = 0;
     perdinHistory.filter(r => r.kodeSK === sk).forEach(r => {
         const personCount = 1 + (r.pengikut ? r.pengikut.length : 0);
@@ -304,7 +397,6 @@ function updateSKQuotaInfo() {
         pBar.className = "bg-gov-700 h-2 rounded-full transition-all duration-300";
     }
 
-    // Update info jumlah tim di Langkah 1
     const totalTim = 1 + document.querySelectorAll("#pengikutContainer > div").length;
     const tglMulai = document.getElementById("tglMulai")?.value;
     const tglSelesai = document.getElementById("tglSelesai")?.value;
@@ -363,7 +455,7 @@ function numberToWords(amount) {
     return convert(num).replace(/\s+/g, ' ').trim();
 }
 
-// --- RIWAYAT PERDIN & SUPABASE INTEGRATION ---
+// --- RIWAYAT PERDIN & SUPABASE API ---
 async function initPerdinHistory() {
     const local = localStorage.getItem("sppd_records_tabundung");
     if (local) {
@@ -371,7 +463,6 @@ async function initPerdinHistory() {
     }
     renderHistoryTable();
 
-    // Sync ke Supabase (tabel riwayat_perdin)
     if (navigator.onLine) {
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/riwayat_perdin?select=*`, {
