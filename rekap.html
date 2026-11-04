@@ -12,6 +12,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
@@ -150,18 +152,24 @@
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
+    <!-- SCRIPT LAYER DATA & UTILITY -->
+    <script src="js/db.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             loadRekapData();
         });
 
-        function loadRekapData() {
+        async function loadRekapData() {
             let perdinHistory = [];
             let skQuotaMap = {};
 
-            const savedRecords = localStorage.getItem('sppd_records_tabundung');
-            if (savedRecords) {
-                try { perdinHistory = JSON.parse(savedRecords); } catch(e) { perdinHistory = []; }
+            if (window.AppDB) {
+                perdinHistory = await window.AppDB.getAllRecords();
+            } else {
+                const savedRecords = localStorage.getItem('sppd_records_tabundung');
+                if (savedRecords) {
+                    try { perdinHistory = JSON.parse(savedRecords); } catch(e) { perdinHistory = []; }
+                }
             }
 
             const savedQuotas = localStorage.getItem('sppd_sk_quotas');
@@ -178,7 +186,7 @@
                 const days = r.lamaHari || 1;
                 totalOH += (count * days);
                 totalBiaya += (r.totalBiaya || 0);
-                if (r.kodeSK) skSet.add(r.kodeSK);
+                if (r.kodeSK || r.sub_kegiatan) skSet.add(r.kodeSK || r.sub_kegiatan);
             });
 
             document.getElementById("metricTotalPerdin").innerText = perdinHistory.length;
@@ -188,7 +196,7 @@
 
             const skUsageMap = {};
             perdinHistory.forEach(r => {
-                const sk = r.kodeSK || "7.01.01.2.01.0003";
+                const sk = r.kodeSK || r.sub_kegiatan || "7.01.01.2.01.0003";
                 const count = 1 + (r.pengikut ? r.pengikut.length : 0);
                 const days = r.lamaHari || 1;
                 skUsageMap[sk] = (skUsageMap[sk] || 0) + (count * days);
@@ -255,26 +263,27 @@
                 const count = 1 + (r.pengikut ? r.pengikut.length : 0);
                 const days = r.lamaHari || 1;
                 const ohBeban = count * days;
-                const team = [r.namaPelaksana, ...(r.pengikut ? r.pengikut.map(p => p.nama) : [])].join(", ");
+                const pelaksana = r.namaPelaksana || r.pelaksana || '-';
+                const team = [pelaksana, ...(r.pengikut ? r.pengikut.map(p => p.nama) : [])].join(", ");
 
                 return `
                     <tr class="hover:bg-slate-50 border-b">
                         <td class="p-3 text-center font-bold text-slate-500">${i + 1}</td>
                         <td class="p-3">
-                            <span class="font-bold text-gov-800">${r.noSuratTugas}</span><br>
-                            <span class="text-[10px] text-slate-500">SPPD: ${r.noSPPD}</span>
+                            <span class="font-bold text-gov-800">${r.noSuratTugas || '-'}</span><br>
+                            <span class="text-[10px] text-slate-500">SPPD: ${r.noSPPD || r.no_sppd || '-'}</span>
                         </td>
                         <td class="p-3">
-                            <span class="font-mono font-bold">${r.kodeSK || '7.01.01.2.01.0003'}</span><br>
+                            <span class="font-mono font-bold">${r.kodeSK || r.sub_kegiatan || '7.01.01.2.01.0003'}</span><br>
                             <span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${r.sumberDana || 'DAU'}</span>
                         </td>
                         <td class="p-3">
-                            <span class="font-bold text-slate-800">${r.namaPelaksana}</span>
+                            <span class="font-bold text-slate-800">${pelaksana}</span>
                             <p class="text-[10px] text-slate-500 line-clamp-1" title="${team}">Anggota: ${team}</p>
                         </td>
-                        <td class="p-3 font-semibold text-slate-700">${r.tempatTujuan}</td>
+                        <td class="p-3 font-semibold text-slate-700">${r.tempatTujuan || r.tujuan || '-'}</td>
                         <td class="p-3 text-[11px]">
-                            ${r.tglMulai}<br>
+                            ${r.tglMulai || r.tanggal || '-'}<br>
                             <span class="text-slate-500 font-semibold">${days} Hari</span>
                         </td>
                         <td class="p-3 text-center font-extrabold text-gov-800 bg-slate-50">${ohBeban} OH</td>
