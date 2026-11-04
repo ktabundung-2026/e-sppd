@@ -8,8 +8,8 @@
 // 1. DATA DEFAULT & DEKLARASI STATE GLOBAL
 // ==========================================
 const DEFAULT_ASN_LIST = [
-    { nip: "197205212006041008", nama: "RUDOLF UMBU RESI LOLY, ST", pangkat: "Pembina (IV/a)", jabatan: "Camat Tabundung" },
-    { nip: "197712312008011084", nama: "DANIEL KAMBARU WINDI", pangkat: "Penata Tk. I (III/d)", jabatan: "Bendahara Pengeluaran" }
+    { nama: "RUDOLF UMBU RESI LOLY, ST", nip: "197205212006041008", pangkat: "Pembina (IV/a)", jabatan: "Camat Tabundung" },
+    { nama: "DANIEL KAMBARU WINDI", nip: "197712312008011084", pangkat: "Penata Tk. I (III/d)", jabatan: "Bendahara Pengeluaran" }
 ];
 
 let masterAsnList = [];
