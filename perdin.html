@@ -138,7 +138,7 @@
         // 1. Konfigurasi Supabase
         const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co'; // Ganti dengan URL Supabase
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw'; // Ganti dengan Anon Key Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // 2. Konfigurasi Dexie (Offline Database)
         const db = new Dexie('PerdinTabundungDB');
