@@ -414,12 +414,18 @@
                             <tr class="align-top"><td class="font-semibold">5. Hasil yang dicapai</td><td>:</td><td id="lapHasil" class="whitespace-pre-line">-</td></tr>
                         </table>
                     </div>
+
+                    <!-- PENUTUP LAPORAN DENGAN SPASI DISESUAIKAN -->
+                    <div class="mt-6 font-official text-sm leading-relaxed sppd-table-fixed">
+                        <p>Demikian Laporan Hasil Perjalanan Dinas ini dibuat untuk dipergunakan seperlunya.</p>
+                    </div>
                 </div>
 
-                <div class="mt-8 flex justify-end font-official text-xs sppd-table-fixed">
-                    <div class="w-72">
-                        <p class="font-bold mb-2">Yang Melakukan Perjalanan Dinas:</p>
-                        <div id="lapDaftarTtd" class="space-y-3"></div>
+                <!-- TANDA TANGAN PELAKSANA (RATA KIRI DENGAN SPASI) -->
+                <div class="mt-6 font-official text-xs sppd-table-fixed">
+                    <div class="w-full text-left">
+                        <p class="font-bold mb-3">Yang Melakukan Perjalanan Dinas :</p>
+                        <div id="lapDaftarTtd" class="space-y-4 text-left"></div>
                     </div>
                 </div>
             </div>
@@ -653,18 +659,19 @@
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
+            // Rata Kiri Nama-Nama Pelaksana Dengan Spasi yang Rapi & Garis/Jarak Tanda Tangan
             let ttdLapHtml = `
-                <div class="mb-3">
+                <div class="mb-4 text-left">
                     <p class="font-bold">1. ${record.namaPelaksana}</p>
-                    <p class="text-xs">NIP. ${record.nipPelaksana || '-'}</p>
+                    <p class="text-xs ml-4">NIP. ${record.nipPelaksana || '-'}</p>
                 </div>
             `;
             if (record.pengikut && record.pengikut.length > 0) {
                 record.pengikut.forEach((p, i) => {
                     ttdLapHtml += `
-                        <div class="mb-3">
+                        <div class="mb-4 text-left">
                             <p class="font-bold">${i + 2}. ${p.nama}</p>
-                            <p class="text-xs">NIP. ${p.nip || '-'}</p>
+                            <p class="text-xs ml-4">NIP. ${p.nip || '-'}</p>
                         </div>
                     `;
                 });
