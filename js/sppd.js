@@ -99,8 +99,9 @@ function renderAsnTable(filterText = '') {
     }
 
     tbody.innerHTML = filtered.map((asn) => {
+        // Escape petik tunggal agar tidak merusak inline onclick HTML
         const safeNama = (asn.nama || '').replace(/'/g, "\\'");
-        const safeNip = asn.nip || '-';
+        const safeNip = (asn.nip || '-').trim();
 
         return `
             <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
@@ -108,7 +109,10 @@ function renderAsnTable(filterText = '') {
                     <p class="font-bold text-slate-800">${asn.nama}</p>
                     <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
                 </div>
-                <button type="button" onclick="window.deleteAsn('${safeNip}', '${safeNama}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" title="Hapus ASN">
+                <button type="button" 
+                        onclick="window.deleteAsn('${safeNip}', '${safeNama}')" 
+                        class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" 
+                        title="Hapus ASN">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -116,7 +120,7 @@ function renderAsnTable(filterText = '') {
     }).join('');
 }
 
-// PERBAIKAN: Fungsi Delete ASN dipublikasikan secara Global
+// PERBAIKAN: Fungsi Delete ASN dipublikasikan ke Window Global
 async function deleteAsn(nip, nama) {
     if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master lokal?`)) {
         masterAsnList = masterAsnList.filter(a => {
@@ -163,7 +167,7 @@ function downloadCsvTemplate() {
     document.body.removeChild(link);
 }
 
-// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Pendobelan (Deduplikasi) & Global Binding
+// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Duplikasi & Global Binding
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files[0]) {
@@ -192,7 +196,7 @@ function importAsnFromCsv() {
 
                 if (!nama) continue;
 
-                // Cek Pendobelan: Berdasarkan NIP (jika valid) ATAU Nama Lengkap
+                // Logika Pencegahan Ganda: Cek NIP (jika valid) ATAU Nama Lengkap
                 const isDuplicate = masterAsnList.some(existing => {
                     const matchNip = (nip && nip !== '-' && existing.nip === nip);
                     const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
@@ -232,7 +236,7 @@ async function saveAsnMaster(e) {
 
     if (!nama) return;
 
-    // Cek Duplikasi
+    // Cek Duplikasi Manual
     const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
     
     if (isDuplicate) {
