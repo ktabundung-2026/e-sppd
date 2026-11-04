@@ -1,7 +1,12 @@
 /**
- * js/sppd.js - Logika Aplikasi e-SPPD Terpadu Kecamatan Tabundung
+ * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
+ * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
+ * impor/ekspor CSV, serta sinkronisasi data online/offline via AppDB.
  */
 
+// ==========================================
+// 1. DATA DEFAULT & DEKLARASI STATE GLOBAL
+// ==========================================
 const DEFAULT_ASN_LIST = [
     { nip: "197205212006041008", nama: "RUDOLF UMBU RESI LOLY, ST", pangkat: "Pembina (IV/a)", jabatan: "Camat Tabundung" },
     { nip: "197712312008011084", nama: "DANIEL KAMBARU WINDI", pangkat: "Penata Tk. I (III/d)", jabatan: "Bendahara Pengeluaran" }
@@ -9,14 +14,23 @@ const DEFAULT_ASN_LIST = [
 
 let masterAsnList = [];
 let currentPengikut = [];
+let currentStep = 1;
 
+// ==========================================
+// 2. INISIALISASI SAAT DOM DIMUAT
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     initOnlineStatus();
     await loadMasterAsn();
     initEventListeners();
     initFormDefaults();
+    updateSKQuotaInfo();
+    renderHistoryTable();
 });
 
+// ==========================================
+// 3. MONITOR STATUS JARINGAN (ONLINE/OFFLINE)
+// ==========================================
 function initOnlineStatus() {
     updateOnlineStatus();
     window.addEventListener('online', updateOnlineStatus);
@@ -28,14 +42,17 @@ function updateOnlineStatus() {
     if (!badge) return;
 
     if (navigator.onLine) {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Mode Online`;
+        badge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600/90 text-white border border-emerald-400/30 backdrop-blur-sm shadow-sm";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Mode Online`;
     } else {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300 shadow-sm";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Mode Offline`;
+        badge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600/90 text-white border border-amber-400/30 backdrop-blur-sm shadow-sm";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Mode Offline`;
     }
 }
 
+// ==========================================
+// 4. MANAJEMEN MASTER DATA ASN (AppDB Integration)
+// ==========================================
 async function loadMasterAsn() {
     if (window.AppDB) {
         masterAsnList = await window.AppDB.getMasterAsn();
@@ -49,7 +66,7 @@ async function loadMasterAsn() {
         await saveMasterAsn();
     }
     
-    populatePelaksanaDatalist();
+    populatePelaksanaDropdowns();
     renderAsnTable();
 }
 
@@ -59,17 +76,17 @@ async function saveMasterAsn() {
     } else {
         localStorage.setItem('sppd_master_asn', JSON.stringify(masterAsnList));
     }
-    populatePelaksanaDatalist();
+    populatePelaksanaDropdowns();
     renderAsnTable();
 }
 
 function renderAsnTable(filterText = '') {
-    const tbody = document.getElementById('asnTableBody') || document.getElementById('asnListContainer');
-    const countEl = document.getElementById('totalAsnCount') || document.getElementById('countMasterAsn');
+    const tbody = document.getElementById('asnListContainer') || document.getElementById('asnTableBody');
+    const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
     if (!tbody) return;
 
     const filtered = masterAsnList.filter(item => 
-        item.nama.toLowerCase().includes(filterText.toLowerCase()) || 
+        (item.nama && item.nama.toLowerCase().includes(filterText.toLowerCase())) || 
         (item.nip && item.nip.includes(filterText)) ||
         (item.jabatan && item.jabatan.toLowerCase().includes(filterText.toLowerCase()))
     );
@@ -82,12 +99,12 @@ function renderAsnTable(filterText = '') {
     }
 
     tbody.innerHTML = filtered.map((asn) => `
-        <div class="flex items-center justify-between p-2 hover:bg-slate-50 transition text-xs border-b border-slate-100">
+        <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
             <div>
                 <p class="font-bold text-slate-800">${asn.nama}</p>
                 <p class="text-[10px] text-slate-500">NIP: ${asn.nip || '-'} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
             </div>
-            <button onclick="deleteAsn('${asn.nip}')" class="text-rose-600 hover:text-rose-800 p-1" title="Hapus ASN">
+            <button type="button" onclick="deleteAsn('${asn.nip}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded" title="Hapus ASN">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>
@@ -95,14 +112,15 @@ function renderAsnTable(filterText = '') {
 }
 
 async function deleteAsn(nip) {
-    if (confirm("Apakah Anda yakin ingin menghapus data ASN ini dari master local?")) {
+    if (confirm("Apakah Anda yakin ingin menghapus data ASN ini dari master lokal?")) {
         masterAsnList = masterAsnList.filter(a => a.nip !== nip);
         await saveMasterAsn();
     }
 }
 
+// Modal Handler (Perbaikan Masalah Tab Kelola Master ASN Tidak Aktif)
 function openModalAsn() {
-    const modal = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
+    const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -111,13 +129,17 @@ function openModalAsn() {
 }
 
 function closeModalAsn() {
-    const modal = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
+    const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
     if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
 }
 
+function openAsnMasterModal() { openModalAsn(); }
+function closeAsnMasterModal() { closeModalAsn(); }
+
+// Fitur Import CSV & Template Download
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
     const encodedUri = encodeURI(csvContent);
@@ -129,10 +151,14 @@ function downloadCsvTemplate() {
     document.body.removeChild(link);
 }
 
-function handleCsvUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+function importAsnFromCsv() {
+    const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
+    if (!fileInput || !fileInput.files[0]) {
+        alert("Pilih berkas CSV terlebih dahulu!");
+        return;
+    }
 
+    const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = async function(e) {
         const lines = e.target.result.split('\n');
@@ -157,67 +183,87 @@ function handleCsvUpload(event) {
         }
         await saveMasterAsn();
         alert(`Berhasil mengimpor ${addedCount} data ASN baru!`);
-        event.target.value = '';
+        fileInput.value = '';
     };
     reader.readAsText(file);
 }
 
-function initEventListeners() {
-    const btnOpenAsn = document.getElementById('btnKelolaAsn');
-    if (btnOpenAsn) btnOpenAsn.addEventListener('click', openModalAsn);
+async function saveAsnMaster(e) {
+    e.preventDefault();
+    const nama = document.getElementById('asnNama')?.value.trim().toUpperCase();
+    const nip = document.getElementById('asnNip')?.value.trim();
+    const pangkat = document.getElementById('asnPangkat')?.value.trim();
+    const jabatan = document.getElementById('asnJabatan')?.value.trim();
 
-    const btnCloseAsn = document.getElementById('btnCloseModalAsn');
-    if (btnCloseAsn) btnCloseAsn.addEventListener('click', closeModalAsn);
+    if (!nama) return;
 
-    const modalAsn = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
-    if (modalAsn) {
-        modalAsn.addEventListener('click', (e) => {
-            if (e.target === modalAsn) closeModalAsn();
-        });
+    const existingIndex = masterAsnList.findIndex(a => a.nip === nip && nip !== '-');
+    if (existingIndex >= 0) {
+        masterAsnList[existingIndex] = { nip, nama, pangkat, jabatan };
+    } else {
+        masterAsnList.push({ nip, nama, pangkat, jabatan });
     }
 
-    const searchInput = document.getElementById('searchAsnInput');
-    if (searchInput) searchInput.addEventListener('input', (e) => renderAsnTable(e.target.value));
-
-    const csvInput = document.getElementById('csvFileInput') || document.getElementById('asnCsvFileInput');
-    if (csvInput) csvInput.addEventListener('change', handleCsvUpload);
-
-    const namaInput = document.getElementById('namaPelaksana');
-    if (namaInput) namaInput.addEventListener('input', (e) => autofillAsnData(e.target.value));
-
-    const btnAddPengikut = document.getElementById('btnAddPengikut');
-    if (btnAddPengikut) btnAddPengikut.addEventListener('click', addPengikutRow);
-
-    ['lamaHari', 'biayaPerOrang'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', calculateTotalBiaya);
-    });
-
-    const sppdForm = document.getElementById('sppdForm');
-    if (sppdForm) sppdForm.addEventListener('submit', handleFormSubmit);
+    await saveMasterAsn();
+    resetAsnForm();
 }
 
-function populatePelaksanaDatalist() {
-    let datalist = document.getElementById('asnDatalist');
-    if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = 'asnDatalist';
-        document.body.appendChild(datalist);
+function resetAsnForm() {
+    const form = document.getElementById('asnForm');
+    if (form) form.reset();
+}
+
+// ==========================================
+// 5. AUTOFILL DROPDOWN ASN & PELAKSANA UTAMA
+// ==========================================
+function populatePelaksanaDropdowns() {
+    const selectPelaksana = document.getElementById('namaPelaksana');
+    const selectPejabat = document.getElementById('namaPejabat');
+
+    const optionsHTML = masterAsnList.map(a => 
+        `<option value="${a.nama}">${a.nama} (${a.jabatan || 'ASN'})</option>`
+    ).join('');
+
+    if (selectPelaksana) {
+        selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>' + optionsHTML;
+        if (masterAsnList.length > 0 && !selectPelaksana.value) {
+            selectPelaksana.value = masterAsnList[0].nama;
+            onNamaInputChanged('Pelaksana', selectPelaksana.value);
+        }
     }
 
-    const namaInput = document.getElementById('namaPelaksana');
-    if (namaInput) namaInput.setAttribute('list', 'asnDatalist');
-
-    datalist.innerHTML = masterAsnList.map(a => `<option value="${a.nama}">${a.nip ? 'NIP. ' + a.nip : ''} - ${a.jabatan || ''}</option>`).join('');
+    if (selectPejabat) {
+        selectPejabat.innerHTML = '<option value="">-- Pilih Pejabat Penandatangan --</option>' + optionsHTML;
+        const defaultCamat = masterAsnList.find(a => a.jabatan && a.jabatan.toLowerCase().includes('camat')) || masterAsnList[0];
+        if (defaultCamat) {
+            selectPejabat.value = defaultCamat.nama;
+            onPejabatSelected(defaultCamat.nama);
+        }
+    }
 }
 
-function autofillAsnData(nama) {
-    const match = masterAsnList.find(a => a.nama.toLowerCase() === nama.trim().toLowerCase());
+function onNamaInputChanged(type, selectedNama) {
+    const match = masterAsnList.find(a => a.nama === selectedNama);
+    if (type === 'Pelaksana') {
+        document.getElementById('nipPelaksana').value = match ? (match.nip || '-') : '';
+        document.getElementById('jabatanPelaksana').value = match ? (match.jabatan || '-') : '';
+    }
+    updateSKQuotaInfo();
+}
+
+function onPejabatSelected(selectedNama) {
+    const match = masterAsnList.find(a => a.nama === selectedNama);
     if (match) {
-        if (document.getElementById('nipPelaksana')) document.getElementById('nipPelaksana').value = match.nip || '';
-        if (document.getElementById('pangkatPelaksana')) document.getElementById('pangkatPelaksana').value = match.pangkat || '';
-        if (document.getElementById('jabatanPelaksana')) document.getElementById('jabatanPelaksana').value = match.jabatan || '';
+        document.getElementById('nipPejabat').value = match.nip || '-';
+        document.getElementById('jabatanPejabat').value = match.jabatan || '-';
     }
+}
+
+// ==========================================
+// 6. MANAJEMEN TIM PENGIKU & KALKULASI
+// ==========================================
+function addOfficerRow() {
+    addPengikutRow();
 }
 
 function addPengikutRow() {
@@ -228,95 +274,264 @@ function addPengikutRow() {
     currentPengikut.push({ nama: '', nip: '', jabatan: '' });
 
     const row = document.createElement('div');
-    row.className = "flex flex-col sm:flex-row gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200 mt-2";
+    row.className = "flex flex-col sm:flex-row gap-2 items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm mt-2";
     row.id = `pengikutRow_${idx}`;
+
+    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${a.nama}</option>`).join('');
+
     row.innerHTML = `
-        <input type="text" placeholder="Nama Pengikut" class="w-full sm:w-1/3 p-2 text-xs border rounded uppercase focus:ring-1 focus:ring-gov-600" onchange="updatePengikut(${idx}, 'nama', this.value.toUpperCase())">
-        <input type="text" placeholder="NIP" class="w-full sm:w-1/3 p-2 text-xs border rounded font-mono focus:ring-1 focus:ring-gov-600" onchange="updatePengikut(${idx}, 'nip', this.value)">
-        <input type="text" placeholder="Jabatan" class="w-full sm:w-1/3 p-2 text-xs border rounded focus:ring-1 focus:ring-gov-600" onchange="updatePengikut(${idx}, 'jabatan', this.value)">
-        <button type="button" onclick="removePengikutRow(${idx})" class="text-rose-600 hover:text-rose-800 p-1">
-            <i class="fa-solid fa-xmark"></i>
+        <select onchange="updatePengikutSelect(${idx}, this.value)" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold bg-white">
+            <option value="">-- Pilih Anggota Tim --</option>
+            ${optionsHTML}
+        </select>
+        <input type="text" id="pengikutNip_${idx}" placeholder="NIP Anggota" class="w-full sm:w-1/3 p-2 text-xs border rounded font-mono bg-slate-50" readonly>
+        <input type="text" id="pengikutJabatan_${idx}" placeholder="Jabatan Anggota" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold bg-slate-50" readonly>
+        <button type="button" onclick="removePengikutRow(${idx})" class="text-rose-600 hover:text-rose-800 p-1.5 shrink-0" title="Hapus Anggota">
+            <i class="fa-solid fa-xmark text-base"></i>
         </button>
     `;
     container.appendChild(row);
-    calculateTotalBiaya();
+    updateSKQuotaInfo();
 }
 
-function updatePengikut(idx, field, val) {
+function updatePengikutSelect(idx, nama) {
+    const match = masterAsnList.find(a => a.nama === nama);
     if (currentPengikut[idx]) {
-        currentPengikut[idx][field] = val;
+        currentPengikut[idx] = {
+            nama: nama,
+            nip: match ? match.nip : '',
+            jabatan: match ? match.jabatan : ''
+        };
+        const nipInput = document.getElementById(`pengikutNip_${idx}`);
+        const jabInput = document.getElementById(`pengikutJabatan_${idx}`);
+        if (nipInput) nipInput.value = match ? (match.nip || '-') : '';
+        if (jabInput) jabInput.value = match ? (match.jabatan || '-') : '';
     }
+    updateSKQuotaInfo();
 }
 
 function removePengikutRow(idx) {
     const row = document.getElementById(`pengikutRow_${idx}`);
     if (row) row.remove();
     currentPengikut[idx] = null;
-    calculateTotalBiaya();
+    updateSKQuotaInfo();
 }
 
-function calculateTotalBiaya() {
-    const days = parseInt(document.getElementById('lamaHari')?.value) || 1;
-    const rate = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
-    const activePengikut = currentPengikut.filter(p => p !== null);
+// ==========================================
+// 7. SINKRONISASI KUOTA OH & HITUNG BIAYA
+// ==========================================
+function updateSKQuotaInfo() {
+    const kodeSK = document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003';
+    document.getElementById('lblCurrentSK').innerText = kodeSK;
+
+    const activePengikut = currentPengikut.filter(p => p !== null && p.nama !== '');
     const totalPersonil = 1 + activePengikut.length;
-    
+
+    const tglMulai = document.getElementById('tglMulai')?.value;
+    const tglSelesai = document.getElementById('tglSelesai')?.value;
+    let days = 1;
+
+    if (tglMulai && tglSelesai) {
+        const d1 = new Date(tglMulai);
+        const d2 = new Date(tglSelesai);
+        const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+        days = diff > 0 ? diff : 1;
+    }
+
+    const neededOH = totalPersonil * days;
+    const lblOH = document.getElementById('lblPenugasanOH');
+    if (lblOH) lblOH.innerText = `${neededOH} OH`;
+
+    const txtHari = document.getElementById('lamaHariText');
+    if (txtHari) txtHari.value = `${days} Hari`;
+
+    // Cek Realisasi Kuota dari Storage
+    let usedOH = 0;
+    const savedRecords = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
+    savedRecords.forEach(r => {
+        if ((r.kodeSK || r.sub_kegiatan) === kodeSK) {
+            const count = 1 + (r.pengikut ? r.pengikut.length : 0);
+            usedOH += (count * (r.lamaHari || 1));
+        }
+    });
+
+    const maxQuota = parseInt(document.getElementById('inputMaxQuota')?.value) || 50;
+    const remainingOH = maxQuota - usedOH;
+
+    document.getElementById('valUsedQuota').innerText = `${usedOH} OH`;
+    document.getElementById('valRemainingQuota').innerText = `${remainingOH} OH`;
+
+    const pct = Math.min(100, Math.round((usedOH / maxQuota) * 100));
+    const progress = document.getElementById('progressBarQuota');
+    if (progress) progress.style.width = `${pct}%`;
+
+    const badge = document.getElementById('badgeStatusQuota');
+    if (badge) {
+        if (remainingOH < 0) {
+            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300";
+            badge.innerText = "Over Kuota";
+        } else if (remainingOH <= 5) {
+            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+            badge.innerText = "Hampir Habis";
+        } else {
+            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+            badge.innerText = "Tersedia";
+        }
+    }
+
+    calculateTotalBiaya(days, totalPersonil);
+}
+
+function saveCustomSKQuota(val) {
+    const kodeSK = document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003';
+    const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
+    quotas[kodeSK] = parseInt(val) || 50;
+    localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+    updateSKQuotaInfo();
+}
+
+function syncTujuanPerdin(val) {
+    const destInput = document.getElementById('tempatTujuan');
+    if (destInput) destInput.value = val;
+}
+
+function onDateOrBudgetChanged() {
+    updateSKQuotaInfo();
+}
+
+function calculateTotalBiaya(daysParam, personilParam) {
+    const days = daysParam || 1;
+    const totalPersonil = personilParam || 1;
+    const rate = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
+
     const totalBiaya = days * rate * totalPersonil;
-    const totalBiayaInput = document.getElementById('totalBiaya');
-    if (totalBiayaInput) totalBiayaInput.value = totalBiaya;
+    
+    const fmtInput = document.getElementById('totalBiayaFormatted');
+    const terbilangInput = document.getElementById('terbilang');
+
+    if (fmtInput) fmtInput.value = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+    if (terbilangInput) terbilangInput.value = `${numberToWords(totalBiaya)} Rupiah`;
+}
+
+// ==========================================
+// 8. NAVIGASI STEPPER FORM & SUBMIT
+// ==========================================
+function switchStep(stepNumber) {
+    currentStep = stepNumber;
+    [1, 2, 3].forEach(s => {
+        const content = document.getElementById(`step-content-${s}`);
+        const btn = document.getElementById(`step-btn-${s}`);
+        
+        if (content) content.classList.add('hidden');
+        if (btn) {
+            btn.classList.remove('active');
+            const icon = btn.querySelector('.step-icon');
+            const label = btn.querySelector('.step-label');
+            if (icon) {
+                icon.className = "step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600";
+            }
+            if (label) {
+                label.className = "step-label text-xs font-medium text-slate-500 mt-1";
+            }
+        }
+    });
+
+    const activeContent = document.getElementById(`step-content-${stepNumber}`);
+    const activeBtn = document.getElementById(`step-btn-${stepNumber}`);
+    if (activeContent) activeContent.classList.remove('hidden');
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        const icon = activeBtn.querySelector('.step-icon');
+        const label = activeBtn.querySelector('.step-label');
+        if (icon) icon.className = "step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md";
+        if (label) label.className = "step-label text-xs font-bold text-gov-800 mt-1";
+    }
+
+    if (stepNumber === 3) {
+        renderHistoryTable();
+    }
+}
+
+function proceedToStep2() {
+    const desa = document.getElementById('step1_selectDesa')?.value;
+    if (!desa) {
+        alert("Harap isi tempat / desa tujuan perjalanan dinas!");
+        return;
+    }
+    syncTujuanPerdin(desa);
+    switchStep(2);
 }
 
 function initFormDefaults() {
+    const today = new Date().toISOString().split('T')[0];
     const tglMulai = document.getElementById('tglMulai');
     const tglSelesai = document.getElementById('tglSelesai');
-    const today = new Date().toISOString().split('T')[0];
 
     if (tglMulai && !tglMulai.value) tglMulai.value = today;
     if (tglSelesai && !tglSelesai.value) tglSelesai.value = today;
 
-    calculateTotalBiaya();
+    const modal = document.getElementById('asnMasterModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModalAsn();
+        });
+    }
 }
 
 async function handleFormSubmit(e) {
     e.preventDefault();
 
     const activePengikut = currentPengikut.filter(p => p !== null && p.nama.trim() !== '');
+    const tglMulai = document.getElementById('tglMulai')?.value || '';
+    const tglSelesai = document.getElementById('tglSelesai')?.value || '';
     
+    let days = 1;
+    if (tglMulai && tglSelesai) {
+        const d1 = new Date(tglMulai);
+        const d2 = new Date(tglSelesai);
+        const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+        days = diff > 0 ? diff : 1;
+    }
+
+    const rate = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
+    const totalPersonil = 1 + activePengikut.length;
+    const totalBiaya = days * rate * totalPersonil;
+
     const record = {
         id: Date.now(),
         noSuratTugas: document.getElementById('noSuratTugas')?.value || '',
         noSPPD: document.getElementById('noSPPD')?.value || '',
-        noBku: document.getElementById('noBku')?.value || '',
-        kodeSK: document.getElementById('kodeSK')?.value || '7.01.01.2.01.0003',
-        sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
-        dasarPelaksanaan: document.getElementById('dasarPelaksanaan')?.value || 'Atas Perintah Camat',
+        noBku: 'BKU/' + Date.now().toString().slice(-4),
+        kodeSK: document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003',
+        sumberDana: document.getElementById('step1_sumberDana')?.value || 'DAU',
+        dasarPelaksanaan: 'Atas Perintah Camat Tabundung',
         maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
         
         namaPelaksana: (document.getElementById('namaPelaksana')?.value || '').toUpperCase(),
         nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
-        pangkatPelaksana: document.getElementById('pangkatPelaksana')?.value || '',
+        pangkatPelaksana: (masterAsnList.find(a => a.nama === document.getElementById('namaPelaksana')?.value)?.pangkat) || 'Penata (III/c)',
         jabatanPelaksana: document.getElementById('jabatanPelaksana')?.value || '',
         pengikut: activePengikut,
 
         tempatBerangkat: document.getElementById('tempatBerangkat')?.value || 'Malahar',
         tempatTujuan: document.getElementById('tempatTujuan')?.value || '',
-        alatAngkutan: document.getElementById('alatAngkutan')?.value || 'Sepeda Motor / Kendaraan Dinas',
-        tglMulai: document.getElementById('tglMulai')?.value || '',
-        tglSelesai: document.getElementById('tglSelesai')?.value || '',
-        lamaHari: parseInt(document.getElementById('lamaHari')?.value) || 1,
+        alatAngkutan: document.getElementById('alatAngkutan')?.value || 'Kendaraan Roda 2',
+        tglMulai: tglMulai,
+        tglSelesai: tglSelesai,
+        lamaHari: days,
 
-        biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang')?.value) || 0,
-        totalBiaya: parseFloat(document.getElementById('totalBiaya')?.value) || 0,
+        biayaPerOrang: rate,
+        totalBiaya: totalBiaya,
 
         namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
         jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
-        nipPejabatTujuan: document.getElementById('nipPejabatTujuan')?.value || '',
+        nipPejabatTujuan: document.getElementById('nipPejabatTujuan')?.value || '-',
 
-        namaCamat: document.getElementById('namaCamat')?.value || 'RUDOLF UMBU RESI LOLY, ST',
-        nipCamat: document.getElementById('nipCamat')?.value || '197205212006041008',
-        pangkatCamat: document.getElementById('pangkatCamat')?.value || 'Camat Tabundung',
-        namaBendahara: document.getElementById('namaBendahara')?.value || 'DANIEL KAMBARU WINDI',
-        nipBendahara: document.getElementById('nipBendahara')?.value || '197712312008011084',
+        namaCamat: document.getElementById('namaPejabat')?.value || 'RUDOLF UMBU RESI LOLY, ST',
+        nipCamat: document.getElementById('nipPejabat')?.value || '197205212006041008',
+        pangkatCamat: document.getElementById('jabatanPejabat')?.value || 'Camat Tabundung',
+        namaBendahara: 'DANIEL KAMBARU WINDI',
+        nipBendahara: '197712312008011084',
 
         laporanHasil: document.getElementById('laporanHasil')?.value || '',
         createdAt: new Date().toISOString()
@@ -332,4 +547,67 @@ async function handleFormSubmit(e) {
 
     sessionStorage.setItem('sppd_print_current', JSON.stringify(record));
     window.location.href = `cetak.html?id=${record.id}`;
+}
+
+// ==========================================
+// 9. RIWAYAT & UTILITY NUMBERS TO WORDS
+// ==========================================
+async function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+
+    let records = [];
+    if (window.AppDB) {
+        records = await window.AppDB.getAllRecords();
+    } else {
+        records = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
+    }
+
+    if (!records || records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic text-xs">Belum ada riwayat dokumen SPPD tersimpan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = records.map((r) => `
+        <tr class="border-b hover:bg-slate-50 transition text-xs">
+            <td class="p-3">
+                <span class="font-bold text-gov-800">${r.noSuratTugas || '-'}</span><br>
+                <span class="text-[10px] text-slate-500">SPPD: ${r.noSPPD || r.no_sppd || '-'}</span>
+            </td>
+            <td class="p-3">
+                <span class="font-mono font-bold">${r.kodeSK || r.sub_kegiatan || '7.01.01.2.01.0003'}</span><br>
+                <span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${r.sumberDana || 'DAU'}</span>
+            </td>
+            <td class="p-3 font-semibold text-slate-800">${r.namaPelaksana || r.pelaksana || '-'}</td>
+            <td class="p-3 text-slate-600">${r.tempatTujuan || r.tujuan || '-'}</td>
+            <td class="p-3 font-extrabold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
+            <td class="p-3 text-center">
+                <a href="cetak.html?id=${r.id}" class="inline-flex items-center gap-1 bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1.5 rounded font-bold text-[11px] transition shadow-sm">
+                    <i class="fa-solid fa-print"></i> Cetak
+                </a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function printHistoryTable() {
+    window.location.href = "rekap.html";
+}
+
+function numberToWords(amount) {
+    const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    let num = Math.floor(Math.abs(amount));
+    if (num === 0) return "Nol";
+    
+    function convert(n) {
+        if (n < 12) return words[n];
+        if (n < 20) return convert(n - 10) + " Belas";
+        if (n < 100) return convert(Math.floor(n / 10)) + " Puluh " + convert(n % 10);
+        if (n < 1000) return convert(Math.floor(n / 100)) + " Ratus " + convert(n % 100);
+        if (n < 2000) return "Seribu " + convert(n - 1000);
+        if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
+        if (n < 1000000000) return convert(Math.floor(n / 1000000)) + " Juta " + convert(n % 1000000);
+        return n.toString();
+    }
+    return convert(num).replace(/\s+/g, ' ').trim();
 }
