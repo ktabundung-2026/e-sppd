@@ -85,11 +85,16 @@ function renderAsnTable(filterText = '') {
     const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
     if (!tbody) return;
 
-    const filtered = masterAsnList.filter(item => 
-        (item.nama && item.nama.toLowerCase().includes(filterText.toLowerCase())) || 
-        (item.nip && item.nip.includes(filterText)) ||
-        (item.jabatan && item.jabatan.toLowerCase().includes(filterText.toLowerCase()))
-    );
+    // Filter array dari item null/undefined
+    masterAsnList = (masterAsnList || []).filter(item => item && typeof item === 'object');
+
+    const filtered = masterAsnList.filter(item => {
+        const nama = (item.nama || '').toLowerCase();
+        const nip = (item.nip || '').toLowerCase();
+        const jabatan = (item.jabatan || '').toLowerCase();
+        const q = filterText.toLowerCase();
+        return nama.includes(q) || nip.includes(q) || jabatan.includes(q);
+    });
 
     if (countEl) countEl.innerText = masterAsnList.length;
 
@@ -98,44 +103,61 @@ function renderAsnTable(filterText = '') {
         return;
     }
 
-    tbody.innerHTML = filtered.map((asn, index) => {
-        const safeNama = (asn.nama || '').replace(/'/g, "\\'");
-        const safeNip = (asn.nip || '-').trim();
+    tbody.innerHTML = filtered.map((asn) => {
+        const originalIndex = masterAsnList.indexOf(asn);
+        const displayNama = asn.nama ? asn.nama : '<span class="text-rose-500 font-normal">[DATA RUSAK / TANPA NAMA]</span>';
+        const safeNip = (asn.nip || '-').toString().trim();
+        const safePangkat = asn.pangkat || '-';
+        const safeJabatan = asn.jabatan || '-';
 
         return `
             <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
                 <div>
-                    <p class="font-bold text-slate-800">${asn.nama}</p>
-                    <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
+                    <p class="font-bold text-slate-800">${displayNama}</p>
+                    <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${safePangkat} - ${safeJabatan}</p>
                 </div>
                 <button type="button" 
-                        onclick="window.deleteAsn('${safeNip}', '${safeNama}', ${index})" 
-                        class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" 
-                        title="Hapus ASN">
-                    <i class="fa-solid fa-trash"></i>
+                        data-index="${originalIndex}"
+                        class="btn-delete-asn text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer bg-rose-50 hover:bg-rose-100" 
+                        title="Hapus Data Ini">
+                    <i class="fa-solid fa-trash pointer-events-none"></i>
                 </button>
             </div>
         `;
     }).join('');
+
+    // Event listener aman untuk mencegah Inline HTML SyntaxError
+    tbody.querySelectorAll('.btn-delete-asn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const idx = parseInt(this.getAttribute('data-index'), 10);
+            deleteAsnByIndex(idx);
+        });
+    });
 }
 
-// PERBAIKAN: Fungsi Delete ASN Dipublikasikan ke Window Global
-async function deleteAsn(nip, nama, index) {
-    if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master data ASN?`)) {
-        if (typeof index === 'number' && index >= 0 && masterAsnList[index] && masterAsnList[index].nama === nama) {
+// HAPUS DATA ASN BERDASARKAN INDEKS PERSIS
+async function deleteAsnByIndex(index) {
+    if (index >= 0 && index < masterAsnList.length) {
+        const item = masterAsnList[index];
+        const namaLabel = item && item.nama ? `"${item.nama}"` : "data bermasalah ini";
+        
+        if (confirm(`Apakah Anda yakin ingin menghapus ${namaLabel}?`)) {
             masterAsnList.splice(index, 1);
-        } else {
-            masterAsnList = masterAsnList.filter(a => {
-                if (nip && nip !== '-' && nip !== '') {
-                    return a.nip !== nip;
-                }
-                return a.nama !== nama;
-            });
+            await saveMasterAsn();
         }
-        await saveMasterAsn();
     }
 }
-window.deleteAsn = deleteAsn;
+window.deleteAsnByIndex = deleteAsnByIndex;
+
+// RESET MASTER ASN TOTAL
+async function clearAllMasterAsn() {
+    if (confirm("Apakah Anda yakin ingin MENGHAPUS SEMUA data master ASN tersimpan?\nData akan dikembalikan ke data awal default.")) {
+        masterAsnList = [...DEFAULT_ASN_LIST];
+        await saveMasterAsn();
+        alert("Master data ASN berhasil di-reset!");
+    }
+}
+window.clearAllMasterAsn = clearAllMasterAsn;
 
 // Modal Handler
 function openModalAsn() {
@@ -161,7 +183,7 @@ function closeAsnMasterModal() { closeModalAsn(); }
 window.openAsnMasterModal = openAsnMasterModal;
 window.closeAsnMasterModal = closeAsnMasterModal;
 
-// Fitur Template & Download CSV
+// Template Download CSV
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
     const encodedUri = encodeURI(csvContent);
@@ -174,7 +196,7 @@ function downloadCsvTemplate() {
 }
 window.downloadCsvTemplate = downloadCsvTemplate;
 
-// PERBAIKAN: Fungsi Import CSV Handled & Terekspos ke Global Window
+// PROSES IMPOR DATA DARI BERKAS CSV
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -187,50 +209,54 @@ function importAsnFromCsv() {
     
     reader.onload = async function(e) {
         try {
-            const lines = e.target.result.split(/\r\n|\n/);
+            // Bersihkan Byte Order Mark (BOM) jika ada
+            const text = e.target.result.replace(/^\uFEFF/, '');
+            const lines = text.split(/\r\n|\n/);
             let addedCount = 0;
             let skippedCount = 0;
+            let invalidCount = 0;
 
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
                 
-                // Mendukung pemisah koma (,) dan titik koma (;)
-                const cols = line.split(/[,;]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+                // Mendukung pemisah koma (,), titik koma (;), dan tab (\t)
+                const cols = line.split(/[,;\t]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
                 if (cols.length >= 2) {
-                    const nip = cols[0] || '';
-                    const nama = (cols[1] || '').toUpperCase();
-                    const pangkat = cols[2] || '';
-                    const jabatan = cols[3] || '';
+                    const nip = cols[0] || '-';
+                    const nama = (cols[1] || '').trim().toUpperCase();
+                    const pangkat = cols[2] || '-';
+                    const jabatan = cols[3] || '-';
 
-                    if (!nama || nama === 'NAMA') continue;
+                    if (!nama || nama === 'NAMA' || nama === 'NIP') {
+                        invalidCount++;
+                        continue;
+                    }
 
-                    // Logika Deduplikasi: Cek NIP ATAU Nama
+                    // Deduplikasi data
                     const isDuplicate = masterAsnList.some(existing => {
                         const matchNip = (nip && nip !== '-' && existing.nip === nip);
-                        const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
+                        const matchNama = (existing.nama && existing.nama.toLowerCase() === nama.toLowerCase());
                         return matchNip || matchNama;
                     });
 
                     if (isDuplicate) {
                         skippedCount++;
                     } else {
-                        masterAsnList.push({ nip: nip || '-', nama, pangkat, jabatan });
+                        masterAsnList.push({ nip, nama, pangkat, jabatan });
                         addedCount++;
                     }
+                } else {
+                    invalidCount++;
                 }
             }
 
             await saveMasterAsn();
             fileInput.value = '';
 
-            if (addedCount === 0 && skippedCount > 0) {
-                alert(`Proses Impor Selesai:\nTidak ada data baru yang ditambahkan. Seluruh (${skippedCount}) data pada berkas CSV sudah terdaftar sebelumnya.`);
-            } else {
-                alert(`Berhasil mengimpor data CSV!\n- Data Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
-            }
+            alert(`Proses Impor Berhasil!\n- Data Ditambahkan: ${addedCount}\n- Data Duplikat Dilewati: ${skippedCount}\n- Baris Format Salah Dilewati: ${invalidCount}`);
         } catch (err) {
-            alert("Gagal memproses file CSV. Pastikan format file sesuai dengan template!");
+            alert("Gagal membaca berkas CSV. Pastikan format pemisah menggunakan koma (,) atau titik koma (;)");
             console.error(err);
         }
     };
@@ -239,7 +265,7 @@ function importAsnFromCsv() {
 }
 window.importAsnFromCsv = importAsnFromCsv;
 
-// Simpan Tambah ASN Manual
+// Simpan ASN Manual
 async function saveAsnMaster(e) {
     if (e) e.preventDefault();
     const namaInput = document.getElementById('asnNama');
@@ -253,7 +279,7 @@ async function saveAsnMaster(e) {
         return;
     }
 
-    const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
+    const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || (a.nama && a.nama.toLowerCase() === nama.toLowerCase()));
     
     if (isDuplicate) {
         alert("Data ASN ini sudah ada di dalam sistem master!");
