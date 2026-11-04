@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-SPPD Terpadu Kecamatan Tabundung</title>
+    <title>Form e-SPPD Terpadu - Kecamatan Tabundung</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c4a6e">
     <link rel="apple-touch-icon" href="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png">
 
-    <!-- Styling & Font Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        official: ['Tinos', 'Georgia', 'serif'],
-                    },
                     colors: {
                         gov: {
                             50: '#f0f7ff', 100: '#e0effe', 600: '#0284c7',
@@ -33,440 +29,387 @@
             }
         };
     </script>
-
-    <style>
-        @media print {
-            body * { visibility: hidden !important; }
-            body.printing-rekap #rekapPrintSection, 
-            body.printing-rekap #rekapPrintSection * { visibility: visible !important; }
-            body.printing-rekap #rekapPrintSection {
-                position: absolute !important; left: 0 !important; top: 0 !important;
-                width: 100% !important; padding: 10mm !important; background: white !important;
-                color: black !important; display: block !important;
-            }
-        }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .step-btn.active .step-icon { background-color: #075985; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .step-btn.active .step-label { color: #075985; font-weight: 700; }
-    </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
     <!-- HEADER NAVIGATION -->
-    <header class="bg-gov-900 text-white shadow-md sticky top-0 z-30 no-print w-full">
+    <header class="bg-gov-900 text-white shadow-md sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
-                    <a href="index.html" title="Ke Portal Utama">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
-                             alt="Logo Sumba Timur" class="h-10 sm:h-11 w-auto object-contain drop-shadow-md">
-                    </a>
+                    <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" 
+                         alt="Logo" class="h-10 w-auto object-contain">
                     <div>
-                        <h1 class="font-bold text-base sm:text-xl leading-tight">e-SPPD Terpadu</h1>
-                        <p class="text-xs text-gov-100">Kecamatan Tabundung - Sumba Timur</p>
+                        <h1 class="font-bold text-base sm:text-lg leading-tight">e-SPPD Kecamatan Tabundung</h1>
+                        <p class="text-xs text-gov-100">Pemerintah Kabupaten Sumba Timur</p>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div id="header-network-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner"></div>
-
-                    <a href="rekap.html" class="bg-gov-700 hover:bg-gov-600 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5">
-                        <i class="fa-solid fa-chart-column text-sky-300"></i>
-                        <span class="hidden md:inline">Monitoring Kuota Perdin</span>
-                    </a>
-
-                    <button type="button" onclick="openAsnMasterModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 cursor-pointer">
-                        <i class="fa-solid fa-users-gear text-amber-300"></i>
-                        <span class="hidden md:inline">Kelola Master ASN</span>
+                <div class="flex items-center space-x-3">
+                    <div id="statusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600/90 text-white border border-emerald-400/30 backdrop-blur-sm shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Mode Online
+                    </div>
+                    <button type="button" id="btnKelolaAsn" onclick="openAsnMasterModal()" class="bg-gov-700 hover:bg-gov-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm border border-gov-600">
+                        <i class="fa-solid fa-users-gear"></i> Kelola Master ASN
                     </button>
-
-                    <a href="index.html" class="bg-gov-800 hover:bg-gov-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5">
-                        <i class="fa-solid fa-house"></i>
-                        <span class="hidden md:inline">Portal Utama</span>
+                    <a href="rekap.html" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-chart-line"></i> Rekapitulasi & Kuota
                     </a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- CONTAINER UTAMA -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- STEPPER BAR NAVIGASI ALUR -->
-        <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <div class="flex justify-between items-center max-w-3xl mx-auto">
-                <button type="button" onclick="switchStep(1)" id="step-btn-1" class="step-btn flex-1 flex flex-col items-center group focus:outline-none">
+        <!-- STEPPER NAVIGATION STATUS -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div class="flex items-center justify-between max-w-2xl mx-auto">
+                <button type="button" id="step-btn-1" onclick="switchStep(1)" class="flex flex-col items-center group cursor-pointer">
                     <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md">1</div>
-                    <span class="step-label text-xs font-bold text-gov-800 mt-1">Perencanaan Tim</span>
+                    <span class="step-label text-xs font-bold text-gov-800 mt-1">1. Alokasi Kuota SK</span>
                 </button>
-
-                <div class="w-12 sm:w-24 h-1 bg-slate-200 rounded"></div>
-
-                <button type="button" onclick="switchStep(2)" id="step-btn-2" class="step-btn flex-1 flex flex-col items-center group focus:outline-none">
+                <div class="h-0.5 flex-1 bg-slate-200 mx-4"></div>
+                <button type="button" id="step-btn-2" onclick="switchStep(2)" class="flex flex-col items-center group cursor-pointer">
                     <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600">2</div>
-                    <span class="step-label text-xs font-medium text-slate-500 mt-1">Dokumen & Biaya</span>
+                    <span class="step-label text-xs font-medium text-slate-500 mt-1">2. Input Form SPPD</span>
                 </button>
-
-                <div class="w-12 sm:w-24 h-1 bg-slate-200 rounded"></div>
-
-                <button type="button" onclick="switchStep(3)" id="step-btn-3" class="step-btn flex-1 flex flex-col items-center group focus:outline-none">
+                <div class="h-0.5 flex-1 bg-slate-200 mx-4"></div>
+                <button type="button" id="step-btn-3" onclick="switchStep(3)" class="flex flex-col items-center group cursor-pointer">
                     <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600">3</div>
-                    <span class="step-label text-xs font-medium text-slate-500 mt-1">Riwayat & Rekap</span>
+                    <span class="step-label text-xs font-medium text-slate-500 mt-1">3. Riwayat Tersimpan</span>
                 </button>
             </div>
         </div>
 
-        <!-- STEP 1: PERENCANAAN TIM & CEK KUOTA OH -->
-        <section id="step-content-1" class="step-content space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
-                    <span><i class="fa-solid fa-users-viewfinder text-gov-700 mr-2"></i> Langkah 1: Penugasan Tim & Cek Kuota OH</span>
-                </h2>
+        <form id="sppdForm" onsubmit="handleFormSubmit(event)">
+            
+            <!-- STEP 1: ALOKASI KUOTA SUB KEGIATAN & TUJUAN PERDIN -->
+            <div id="step-content-1" class="space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-base font-bold text-gov-900 border-b pb-3 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-gov-700"></i> Langkah 1: Pilih Sub Kegiatan & Lokasi Tujuan
+                    </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Sub Kegiatan (SK) <span class="text-rose-500">*</span></label>
-                        <input type="text" id="step1_kodeSK" value="7.01.01.2.01.0003" onchange="updateSKQuotaInfo()" oninput="updateSKQuotaInfo()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono font-bold">
-                        <p class="text-[10px] text-slate-500 mt-1">Kode Sub Kegiatan anggaran.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat / Desa Tujuan Perdin <span class="text-rose-500">*</span></label>
-                        <input type="text" id="step1_selectDesa" placeholder="Contoh: Desa Billa / Waikanabu" value="Desa Billa" oninput="syncTujuanPerdin(this.value)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
-                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Isikan desa/lokasi tujuan penugasan.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sumber Dana <span class="text-rose-500">*</span></label>
-                        <input type="text" id="step1_sumberDana" value="DAU" placeholder="Contoh: DAU / DAK / APBD" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold uppercase">
-                        <p class="text-[10px] text-sky-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Isikan sumber pembiayaan (misal: DAU/DAK).</p>
-                    </div>
-                </div>
-
-                <!-- WIDGET INDIKATOR KUOTA OH PER SK -->
-                <div id="skQuotaBadge" class="p-4 rounded-xl border bg-slate-50 border-slate-200 transition-all duration-200 mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-extrabold uppercase tracking-wide text-slate-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-pie text-gov-600"></i> Status Kuota Perdin (SK: <span id="lblCurrentSK" class="font-mono text-gov-800">7.01.01.2.01.0003</span>)
-                        </span>
-                        <span id="badgeStatusQuota" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Tersedia</span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 text-center my-3">
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-center items-center">
-                            <span class="block text-[10px] text-slate-500 font-medium mb-0.5">Batas Kuota (OH)</span>
-                            <div class="flex items-center justify-center gap-1">
-                                <input type="number" id="inputMaxQuota" min="1" value="50" onchange="saveCustomSKQuota(this.value)" class="w-16 text-center text-xs font-extrabold text-slate-900 border border-slate-300 rounded p-1 focus:ring-1 focus:ring-gov-600">
-                                <span class="text-xs font-bold text-slate-600">OH</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-center">
-                            <span class="block text-[10px] text-slate-500 font-medium">Telah Ditugaskan</span>
-                            <span id="valUsedQuota" class="text-sm font-extrabold text-sky-700">0 OH</span>
-                        </div>
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-center">
-                            <span class="block text-[10px] text-slate-500 font-medium">Sisa Kuota Tersedia</span>
-                            <span id="valRemainingQuota" class="text-sm font-extrabold text-emerald-600">50 OH</span>
-                        </div>
-                    </div>
-
-                    <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                        <div id="progressBarQuota" class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- SECTION TIM PELAKSANA -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-gov-800 uppercase">Pelaksana Utama & Anggota Tim <span class="text-rose-500">*</span></h3>
-                        <span class="text-xs font-bold text-slate-600">Dibutuhkan: <span id="lblPenugasanOH" class="text-gov-800 font-extrabold">1 OH</span></span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label class="block text-[11px] text-slate-600 mb-0.5">Pelaksana Utama <span class="text-rose-500">*</span></label>
-                            <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold bg-white"></select>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
+                            <select id="step1_kodeSK" onchange="updateSKQuotaInfo()" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50">
+                                <option value="7.01.01.2.01.0003">7.01.01.2.01.0003 - Penyelenggaraan Urusan Pemerintahan Umum</option>
+                                <option value="7.01.01.2.01.0001">7.01.01.2.01.0001 - Koordinasi Ketentraman & Ketertiban</option>
+                                <option value="7.01.01.2.02.0002">7.01.01.2.02.0002 - Pembinaan & Pengawasan Desa</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] text-slate-600 mb-0.5">NIP Utama</label>
-                            <input type="text" id="nipPelaksana" readonly placeholder="NIP Otomatis" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 bg-slate-100 font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-600 mb-0.5">Jabatan Utama</label>
-                            <input type="text" id="jabatanPelaksana" readonly placeholder="Jabatan Otomatis" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 bg-slate-100 font-semibold">
-                        </div>
-                    </div>
-
-                    <div id="pengikutContainer" class="space-y-3 pt-2"></div>
-
-                    <button type="button" onclick="addOfficerRow()" class="mt-2 text-xs bg-gov-700 hover:bg-gov-800 text-white font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-user-plus"></i> + Tambah Anggota Pengikut
-                    </button>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="button" onclick="proceedToStep2()" class="px-6 py-2.5 bg-gov-700 hover:bg-gov-800 text-white font-bold text-xs sm:text-sm rounded-lg shadow transition flex items-center gap-2 cursor-pointer">
-                        <span>Lanjut ke Dokumen SPPD (Step 2)</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- STEP 2: DOKUMEN, PEJABAT PENANDATANGAN & BIAYA -->
-        <section id="step-content-2" class="step-content hidden space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4">
-                    <i class="fa-solid fa-file-signature text-gov-700 mr-2"></i> Langkah 2: Kelengkapan Dokumen Resmi, Pejabat & Biaya
-                </h2>
-
-                <form id="sppdForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
-                    <!-- NOMOR SURAT TUGAS & SPPD -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Surat Tugas</label>
-                            <input type="text" id="noSuratTugas" required value="003/SPT/TBD/VII/2026" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor SPPD</label>
-                            <input type="text" id="noSPPD" required value="013/SPPD/TBD/VIII/2026" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300">
-                        </div>
-                    </div>
-
-                    <!-- PEJABAT PENGUTUS (KECAMATAN) -->
-                    <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200/80 space-y-3">
-                        <div class="flex items-center justify-between border-b border-amber-200 pb-2">
-                            <h3 class="text-xs font-bold text-amber-900 uppercase flex items-center gap-1.5">
-                                <i class="fa-solid fa-user-check text-amber-600"></i> Pejabat Penandatangan Pengutus (Kecamatan)
-                            </h3>
-                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">SPPD Lembar Depan & Belakang</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Nama Pejabat <span class="text-rose-500">*</span></label>
-                                <select id="namaPejabat" onchange="onPejabatSelected(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 font-semibold bg-white"></select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">NIP Pejabat</label>
-                                <input type="text" id="nipPejabat" required placeholder="NIP Pejabat Penandatangan" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Jabatan Pejabat</label>
-                                <input type="text" id="jabatanPejabat" required placeholder="Contoh: CAMAT TABUNDUNG" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white font-semibold">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PEJABAT DI TEMPAT TUJUAN -->
-                    <div class="bg-sky-50/70 p-4 rounded-xl border border-sky-200 space-y-3">
-                        <div class="flex items-center justify-between border-b border-sky-200 pb-2">
-                            <h3 class="text-xs font-bold text-sky-900 uppercase flex items-center gap-1.5">
-                                <i class="fa-solid fa-building-user text-sky-700"></i> Pejabat Penandatangan di Tempat Tujuan (Lembar Belakang SPPD)
-                            </h3>
-                            <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">Cetak Kolom Lokasi Tujuan</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Nama Pejabat Tujuan <span class="text-rose-500">*</span></label>
-                                <input type="text" id="namaPejabatTujuan" required placeholder="Contoh: YULIUS K. NDAPAMURI" value="YULIUS K. NDAPAMURI" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white font-semibold uppercase">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">NIP / NIAP (Opsional)</label>
-                                <input type="text" id="nipPejabatTujuan" placeholder="NIP / NIAP jika ada" value="-" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Jabatan Pejabat Tujuan</label>
-                                <input type="text" id="jabatanPejabatTujuan" required placeholder="Contoh: KEPALA DESA BILLA" value="KEPALA DESA BILLA" class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white font-semibold uppercase">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Berangkat</label>
-                            <input type="text" id="tempatBerangkat" required value="Malahar" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Tujuan (Dari Langkah 1)</label>
-                            <input type="text" id="tempatTujuan" readonly required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 font-bold text-gov-800">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Alat Angkutan yang Digunakan</label>
-                            <select id="alatAngkutan" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
-                                <option value="Kendaraan Roda 2">Kendaraan Roda 2</option>
-                                <option value="Kendaraan Roda 4">Kendaraan Roda 4</option>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sumber Dana</label>
+                            <select id="step1_sumberDana" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-slate-50">
+                                <option value="DAU">DAU (Dana Alokasi Umum)</option>
+                                <option value="PAD">PAD (Pendapatan Asli Daerah)</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Berangkat</label>
-                            <input type="date" id="tglMulai" required onchange="onDateOrBudgetChanged()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 space-y-3 mb-6">
+                        <div class="flex items-center justify-between border-b border-sky-200 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono font-bold text-xs text-gov-900" id="lblCurrentSK">7.01.01.2.01.0003</span>
+                                <span id="badgeStatusQuota" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Tersedia</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-slate-500 font-medium">Set Batas Kuota:</span>
+                                <input type="number" id="inputMaxQuota" value="50" min="1" onchange="saveCustomSKQuota(this.value)" class="w-16 p-1 text-center font-bold border rounded bg-white text-xs">
+                                <span class="font-bold text-slate-700">OH</span>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Tiba / Kembali</label>
-                            <input type="date" id="tglSelesai" required onchange="onDateOrBudgetChanged()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="bg-white p-2 rounded-lg border border-sky-100">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase">Terpakai Saat Ini</span>
+                                <span id="valUsedQuota" class="font-extrabold text-sky-800 text-sm">0 OH</span>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg border border-sky-100">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase">Penugasan Ini</span>
+                                <span id="lblPenugasanOH" class="font-extrabold text-gov-700 text-sm">1 OH</span>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg border border-sky-100">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase">Sisa Kuota</span>
+                                <span id="valRemainingQuota" class="font-extrabold text-emerald-700 text-sm">50 OH</span>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Lama Perjalanan Dinas</label>
-                            <input type="text" id="lamaHariText" readonly value="1 Hari" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 font-bold text-gov-800">
+
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="progressBarQuota" class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Maksud Perjalanan Dinas</label>
-                        <textarea id="maksudTujuan" rows="2" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300">Dalam rangka Monitoring realisasi Pembayaran PBB-P2...</textarea>
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih Desa / Lokasi Tujuan Perdin</label>
+                        <select id="step1_selectDesa" onchange="syncTujuanPerdin(this.value)" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white">
+                            <option value="">-- Pilih Tujuan --</option>
+                            <option value="Desa Billa">Desa Billa</option>
+                            <option value="Desa Tarimbang">Desa Tarimbang</option>
+                            <option value="Desa Masu">Desa Masu</option>
+                            <option value="Desa Tavui">Desa Tavui</option>
+                            <option value="Desa Karita">Desa Karita</option>
+                            <option value="Waingapu (Ibu Kota Kabupaten)">Waingapu (Ibu Kota Kabupaten)</option>
+                        </select>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Hasil yang Dicapai (Untuk Laporan Perdin)</label>
-                        <textarea id="laporanHasil" rows="2" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300">Terlaksananya monitoring dan evaluasi target penerimaan PBB-P2 secara langsung di lapangan.</textarea>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Biaya per Orang/OH (Rp)</label>
-                            <input type="number" id="biayaPerOrang" min="0" value="170000" oninput="onDateOrBudgetChanged()" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Total Biaya Keseluruhan</label>
-                            <input type="text" id="totalBiayaFormatted" readonly class="w-full px-3 py-2 text-xs rounded-lg border border-emerald-300 bg-emerald-50 font-bold text-emerald-800">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Terbilang</label>
-                            <input type="text" id="terbilang" readonly class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 italic text-slate-600">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-4 border-t">
-                        <button type="button" onclick="switchStep(1)" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg cursor-pointer">Kembali ke Step 1</button>
-                        <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow transition flex items-center gap-2 cursor-pointer">
-                            <i class="fa-solid fa-floppy-disk"></i> Simpan & Pratinjau Dokumen
+                    <div class="flex justify-end">
+                        <button type="button" onclick="proceedToStep2()" class="bg-gov-700 hover:bg-gov-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                            Lanjut ke Input Detail Form SPPD <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
-        </section>
 
-        <!-- STEP 3: RIWAYAT & REKAPITULASI -->
-        <section id="step-content-3" class="step-content hidden space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div class="flex justify-between items-center border-b pb-4 mb-4">
-                    <h2 class="text-lg font-bold text-slate-900">
-                        <i class="fa-solid fa-folder-open text-gov-700 mr-2"></i> Riwayat & Rekapitulasi SPPD
+            <!-- STEP 2: FORM DETAIL SPPD -->
+            <div id="step-content-2" class="space-y-6 hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+                    <h2 class="text-base font-bold text-gov-900 border-b pb-3 flex items-center justify-between">
+                        <span><i class="fa-solid fa-file-signature text-gov-700 mr-2"></i> Langkah 2: Kelengkapan Rincian Surat Tugas & SPPD</span>
+                        <button type="button" onclick="switchStep(1)" class="text-xs text-gov-700 hover:underline">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali ke Langkah 1
+                        </button>
                     </h2>
-                    <button onclick="printHistoryTable()" class="text-xs bg-gov-700 hover:bg-gov-800 text-white font-semibold py-2 px-3 rounded-lg flex items-center gap-1.5 shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-print"></i> Cetak Rekap SPPD
-                    </button>
-                </div>
 
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[750px]">
-                        <thead>
-                            <tr class="bg-slate-50 border-b text-slate-600 font-semibold">
-                                <th class="p-3">No. Surat</th>
-                                <th class="p-3">Kode SK & Sumber Dana</th>
-                                <th class="p-3">Pelaksana Utama</th>
-                                <th class="p-3">Tujuan</th>
-                                <th class="p-3">Total Biaya</th>
-                                <th class="p-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody" class="divide-y divide-slate-200"></tbody>
-                    </table>
+                    <!-- NOMOR DOKUMEN & DASAR -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. Surat Tugas</label>
+                            <input type="text" id="noSuratTugas" value="000.1.2.3/ /KEC.TB/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. SPPD</label>
+                            <input type="text" id="noSPPD" value="000.1.2.3/ /KEC.TB/SPPD/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
+                            <input type="text" id="maksudTujuan" placeholder="Contoh: Monitoring PBB-P2 dan Pendataan Ternak" class="w-full p-2 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600">
+                        </div>
+                    </div>
+
+                    <!-- PELAKSANA UTAMA -->
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Data Pelaksana Utama (Pegawai Terperintah)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pegawai</label>
+                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP Pegawai</label>
+                                <input type="text" id="nipPelaksana" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Jabatan</label>
+                                <input type="text" id="jabatanPelaksana" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIM PENGIKUT -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-700 uppercase">Anggota Tim Pengikut (Jika Ada)</label>
+                            <button type="button" onclick="addPengikutRow()" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold py-1 px-3 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-user-plus"></i> Tambah Anggota
+                            </button>
+                        </div>
+                        <div id="pengikutContainer"></div>
+                    </div>
+
+                    <!-- LOKASI & TANGGAL PELAKSANAAN -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 border-t pt-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Berangkat</label>
+                            <input type="text" id="tempatBerangkat" value="Malahar - Desa Billa" class="w-full p-2 text-xs border rounded-lg border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Tujuan</label>
+                            <input type="text" id="tempatTujuan" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal Mulai</label>
+                            <input type="date" id="tglMulai" onchange="onDateOrBudgetChanged()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal Selesai</label>
+                            <input type="date" id="tglSelesai" onchange="onDateOrBudgetChanged()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- KALKULASI ANGGARAN SPPD -->
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Perhitungan Biaya Perjalanan Dinas</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-700 uppercase">Lama Perjalanan</label>
+                                <input type="text" id="lamaHariText" value="1 Hari" readonly class="w-full p-2 text-xs border rounded font-extrabold bg-white text-center">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-700 uppercase">Biaya Per Orang / Hari (Rp)</label>
+                                <input type="number" id="biayaPerOrang" value="150000" step="10000" oninput="onDateOrBudgetChanged()" class="w-full p-2 text-xs border rounded font-extrabold bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-700 uppercase">Total Realisasi Anggaran</label>
+                                <input type="text" id="totalBiayaFormatted" value="Rp 150.000" readonly class="w-full p-2 text-xs border rounded font-extrabold text-emerald-800 bg-emerald-100">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-emerald-700 uppercase mb-1">Terbilang</label>
+                            <input type="text" id="terbilang" readonly class="w-full p-1.5 text-xs border rounded font-semibold italic bg-white text-slate-600">
+                        </div>
+                    </div>
+
+                    <!-- PEJABAT PENANDATANGAN -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pejabat Penandatangan (Camat)</label>
+                            <select id="namaPejabat" onchange="onPejabatSelected(this.value)" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold bg-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pejabat / Tokoh di Lokasi Tujuan</label>
+                            <input type="text" id="namaPejabatTujuan" placeholder="Contoh: Kepala Desa Tarimbang" class="w-full p-2 text-xs border rounded-lg border-slate-300">
+                        </div>
+                    </div>
+
+                    <!-- TOMBOL PROSES SUBMIT FORM -->
+                    <div class="flex items-center justify-between border-t pt-4">
+                        <button type="button" onclick="switchStep(1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-print"></i> Simpan & Cetak Dokumen SPPD
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </section>
+
+            <!-- STEP 3: RIWAYAT RIWAYAT SURAT TERKINI -->
+            <div id="step-content-3" class="space-y-6 hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center justify-between border-b pb-4 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Riwayat Terbit Surat Tugas & SPPD</h2>
+                            <p class="text-xs text-slate-500">Daftar dokumen perjalanan dinas yang tersimpan secara lokal dan online.</p>
+                        </div>
+                        <button type="button" onclick="printHistoryTable()" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-table-list"></i> Buka Rekap Laporan Full
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b text-slate-700 font-bold uppercase">
+                                    <th class="p-3">No. ST / SPPD</th>
+                                    <th class="p-3">Sub Kegiatan</th>
+                                    <th class="p-3">Pelaksana Utama</th>
+                                    <th class="p-3">Tujuan</th>
+                                    <th class="p-3">Biaya Realisasi</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </form>
 
     </main>
 
-    <!-- SECTION CETAK REKAPITULASI -->
-    <div id="rekapPrintSection" class="hidden">
-        <div class="text-center mb-6">
-            <h2 class="text-xl font-bold uppercase font-official">PEMERINTAH KABUPATEN SUMBA TIMUR</h2>
-            <h1 class="text-2xl font-bold uppercase font-official">KECAMATAN TABUNDUNG</h1>
-            <p class="text-sm font-semibold mt-1">REKAPITULASI REALISASI PERJALANAN DINAS (SPPD)</p>
-        </div>
-        <div id="rekapPrintContainer"></div>
-    </div>
+    <!-- FOOTER COPYRIGHT -->
+    <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs mt-8">
+        <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
+    </footer>
 
-    <!-- MODAL KELOLA MASTER DATA ASN (FITUR CSV IMPORT) -->
-    <div id="asnMasterModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-gov-900 text-white px-5 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center gap-2">
-                    <i class="fa-solid fa-users-gear text-amber-400"></i> Kelola Master Data ASN
-                </h3>
-                <button type="button" onclick="closeAsnMasterModal()" class="text-slate-300 hover:text-white text-2xl font-bold px-2 cursor-pointer">&times;</button>
-            </div>
+    <!-- ========================================== -->
+    <!-- MODAL POPUP KELOLA MASTER ASN (PERBAIKAN) -->
+    <!-- ========================================== -->
+    <div id="asnMasterModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             
-            <div class="p-5 overflow-y-auto flex-1 space-y-5">
+            <!-- MODAL HEADER -->
+            <div class="bg-gov-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-sky-400"></i>
+                    <h3 class="font-bold text-sm sm:text-base">Kelola Master Data ASN / Pegawai</h3>
+                </div>
+                <button type="button" id="btnCloseModalAsn" onclick="closeAsnMasterModal()" class="text-slate-300 hover:text-white text-lg font-bold p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- MODAL BODY -->
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
                 
                 <!-- IMPORT CSV PANEL -->
-                <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 space-y-3">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-sky-200 pb-2">
-                        <span class="text-xs font-extrabold text-gov-900 flex items-center gap-1.5 uppercase">
-                            <i class="fa-solid fa-file-csv text-emerald-600 text-sm"></i> Import Data ASN via File CSV
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gov-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-csv text-emerald-600 text-sm"></i> Import Data ASN via CSV
                         </span>
-                        <button type="button" onclick="downloadCsvTemplate()" class="text-[11px] text-gov-700 hover:text-gov-900 font-bold underline flex items-center gap-1 cursor-pointer">
+                        <button type="button" onclick="downloadCsvTemplate()" class="text-[11px] text-gov-700 hover:underline font-semibold">
                             <i class="fa-solid fa-download"></i> Unduh Template CSV
                         </button>
                     </div>
-                    
-                    <p class="text-[11px] text-slate-600 leading-normal">
-                        Format header kolom CSV wajib: <code class="bg-white px-1.5 py-0.5 rounded border border-sky-300 text-gov-800 font-mono font-bold">nama,nip,pangkat,jabatan</code>
-                    </p>
 
+                    <!-- PERBAIKAN: TOMBOL PROSES IMPORT DENGAN ONCLICK TERHUBUNG EKSPLISIT -->
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
                         <input type="file" id="asnCsvFileInput" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-700 file:text-white hover:file:bg-gov-800 cursor-pointer border border-slate-300 rounded-lg bg-white">
-                        <button type="button" onclick="importAsnFromCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm">
+                        <button type="button" id="btnProcessCsv" onclick="importAsnFromCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm">
                             <i class="fa-solid fa-file-import"></i> Proses Import
                         </button>
                     </div>
                 </div>
 
-                <!-- FORM TAMBAH / EDIT ASN MANUAL -->
-                <form id="asnForm" onsubmit="saveAsnMaster(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-bold text-slate-800 uppercase" id="asnFormTitle">Tambah / Edit Data ASN Manual:</p>
-                        <input type="hidden" id="asnOriginalNip" value="">
-                        <button type="button" id="btnCancelEditAsn" onclick="resetAsnForm()" class="hidden text-[11px] text-rose-600 font-bold hover:underline cursor-pointer">
-                            Batal Edit
+                <!-- TAMBAH ASN MANUAL FORM -->
+                <form id="asnForm" onsubmit="saveAsnMaster(event)" class="border-t pt-4 space-y-3">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Tambah ASN Secara Manual</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="asnNama" placeholder="NAMA ASN LENGKAP" required class="p-2 text-xs border rounded uppercase font-semibold">
+                        <input type="text" id="asnNip" placeholder="NIP (18 Digit)" class="p-2 text-xs border rounded font-mono">
+                        <input type="text" id="asnPangkat" placeholder="Pangkat / Golongan (mis: Penata III/c)" class="p-2 text-xs border rounded">
+                        <input type="text" id="asnJabatan" placeholder="Jabatan Kedinasan" class="p-2 text-xs border rounded">
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-gov-700 hover:bg-gov-800 text-white px-4 py-1.5 rounded text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Simpan ASN
                         </button>
                     </div>
-                    
-                    <input type="text" id="asnNama" placeholder="Nama Lengkap & Gelar" required class="w-full px-3 py-2 text-xs border rounded-lg bg-white font-semibold">
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" id="asnNip" placeholder="NIP (18 Digit / - jika non-ASN)" required class="px-3 py-2 text-xs border rounded-lg bg-white font-mono">
-                        <input type="text" id="asnPangkat" placeholder="Pangkat/Gol (misal: III/d)" class="px-3 py-2 text-xs border rounded-lg bg-white">
-                    </div>
-                    
-                    <input type="text" id="asnJabatan" placeholder="Jabatan Kedinasan" required class="w-full px-3 py-2 text-xs border rounded-lg bg-white">
-                    
-                    <button type="submit" id="btnSaveAsn" class="w-full py-2 bg-gov-700 text-white font-bold text-xs rounded-lg hover:bg-gov-800 shadow transition cursor-pointer">
-                        + Simpan ASN
-                    </button>
                 </form>
 
-                <!-- DAFTAR MASTER ASN TERSIMPAN -->
-                <div>
-                    <h4 class="text-xs font-bold text-slate-700 mb-2 uppercase flex items-center justify-between">
-                        <span>Daftar Master ASN Tersimpan (<span id="countMasterAsn">0</span> Orang)</span>
-                    </h4>
-                    <div class="divide-y border border-slate-200 rounded-xl p-2 bg-white max-h-60 overflow-y-auto" id="asnListContainer"></div>
+                <!-- DAFTAR MASTER ASN TERSEMPAN -->
+                <div class="border-t pt-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar ASN Tersimpan (<span id="countMasterAsn">0</span>)</span>
+                        <input type="text" id="searchAsnInput" placeholder="Cari nama / NIP..." class="p-1.5 text-xs border rounded-lg w-48 font-medium">
+                    </div>
+
+                    <!-- WADAH DAFTAR ASN & PERBAIKAN TOMBOL DELETE -->
+                    <div id="asnListContainer" class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-100 bg-white"></div>
                 </div>
 
             </div>
+
+            <!-- MODAL FOOTER -->
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+                <button type="button" onclick="closeAsnMasterModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold transition">
+                    Tutup
+                </button>
+            </div>
+
         </div>
     </div>
 
-    <!-- FOOTER COPYRIGHT -->
-    <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs no-print mt-8">
-        <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
-    </footer>
+    <!-- SCRIPT INCLUSION LAYER -->
     <script src="js/db.js"></script>
     <script src="js/sppd.js"></script>
+
 </body>
 </html>
