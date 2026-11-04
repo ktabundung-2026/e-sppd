@@ -34,10 +34,10 @@ function checkNetworkStatus() {
     if (!badge) return;
     if (navigator.onLine) {
         badge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner bg-emerald-900/60 text-emerald-200 border border-emerald-500/40";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online ;
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
     } else {
         badge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-inner bg-amber-900/60 text-amber-200 border border-amber-500/40";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Offline (Local Cache)`;
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Offline `;
     }
 }
 window.addEventListener('online', checkNetworkStatus);
