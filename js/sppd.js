@@ -99,7 +99,6 @@ function renderAsnTable(filterText = '') {
     }
 
     tbody.innerHTML = filtered.map((asn, index) => {
-        // Escape petik tunggal agar tidak merusak atribut HTML onclick
         const safeNama = (asn.nama || '').replace(/'/g, "\\'");
         const safeNip = (asn.nip || '-').trim();
 
@@ -120,7 +119,7 @@ function renderAsnTable(filterText = '') {
     }).join('');
 }
 
-// PERBAIKAN PENTING: Fungsi Delete ASN Dipublikasikan ke Window Global
+// PERBAIKAN: Fungsi Delete ASN Dipublikasikan ke Window Global
 async function deleteAsn(nip, nama, index) {
     if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master data ASN?`)) {
         if (typeof index === 'number' && index >= 0 && masterAsnList[index] && masterAsnList[index].nama === nama) {
@@ -159,6 +158,9 @@ function closeModalAsn() {
 function openAsnMasterModal() { openModalAsn(); }
 function closeAsnMasterModal() { closeModalAsn(); }
 
+window.openAsnMasterModal = openAsnMasterModal;
+window.closeAsnMasterModal = closeAsnMasterModal;
+
 // Fitur Template & Download CSV
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
@@ -170,12 +172,13 @@ function downloadCsvTemplate() {
     link.click();
     document.body.removeChild(link);
 }
+window.downloadCsvTemplate = downloadCsvTemplate;
 
-// PERBAIKAN PENTING: Fungsi Import CSV Handled & Terekspos ke Global Window
+// PERBAIKAN: Fungsi Import CSV Handled & Terekspos ke Global Window
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        alert("Silakan pilih file CSV terlebih dahulu!");
+        alert("Silakan pilih berkas CSV terlebih dahulu!");
         return;
     }
 
@@ -192,7 +195,7 @@ function importAsnFromCsv() {
                 const line = lines[i].trim();
                 if (!line) continue;
                 
-                // Pemisahan kolom CSV (mendukung koma dan titik koma)
+                // Mendukung pemisah koma (,) dan titik koma (;)
                 const cols = line.split(/[,;]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
                 if (cols.length >= 2) {
                     const nip = cols[0] || '';
@@ -202,7 +205,7 @@ function importAsnFromCsv() {
 
                     if (!nama || nama === 'NAMA') continue;
 
-                    // Logika Deduplikasi: Cek NIP (jika ada) ATAU Nama
+                    // Logika Deduplikasi: Cek NIP ATAU Nama
                     const isDuplicate = masterAsnList.some(existing => {
                         const matchNip = (nip && nip !== '-' && existing.nip === nip);
                         const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
@@ -222,7 +225,7 @@ function importAsnFromCsv() {
             fileInput.value = '';
 
             if (addedCount === 0 && skippedCount > 0) {
-                alert(`Impor selesai: Tidak ada data baru yang ditambahkan. Seluruh (${skippedCount}) data pada berkas sudah pernah terdaftar.`);
+                alert(`Proses Impor Selesai:\nTidak ada data baru yang ditambahkan. Seluruh (${skippedCount}) data pada berkas CSV sudah terdaftar sebelumnya.`);
             } else {
                 alert(`Berhasil mengimpor data CSV!\n- Data Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
             }
