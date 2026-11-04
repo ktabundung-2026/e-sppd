@@ -435,7 +435,7 @@
                     </div>
                 </div>
 
-                <!-- JUDUL & INFORMASI BKU (KANAN ATAS) -->
+                <!-- JUDUL & INFORMASI BKU -->
                 <div class="flex justify-between items-start sppd-table-fixed mb-2">
                     <div></div>
                     <div class="text-right text-xs font-official leading-tight">
@@ -477,7 +477,7 @@
                     <tbody id="kwiTabelRincian"></tbody>
                 </table>
 
-                <!-- TANDA TANGAN SEJAJAR DI BAWAH TABEL -->
+                <!-- TANDA TANGAN SEJAJAR -->
                 <div class="flex justify-between items-start text-xs font-official sppd-table-fixed mt-4">
                     <div class="w-1/2 text-center pr-4">
                         <p class="font-bold">Mengetahui / Menyetujui,</p>
@@ -499,7 +499,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT LOGIC -->
+    <!-- SCRIPT CETAK LOGIC -->
     <script>
         window.onload = function() {
             loadPrintData();
@@ -671,7 +671,7 @@
             }
             document.getElementById('lapDaftarTtd').innerHTML = ttdLapHtml;
 
-            // 5. Kwitansi / Rincian Biaya
+            // 5. Kwitansi & Rincian
             const total = record.totalBiaya || 0;
             const jumlahOrang = 1 + (record.pengikut?.length || 0);
             const days = record.lamaHari || 1;
