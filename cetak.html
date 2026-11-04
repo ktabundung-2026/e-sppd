@@ -46,7 +46,6 @@
             }
             .no-print { display: none !important; }
             .document-paper { box-shadow: none !important; margin: 0 !important; width: 215mm !important; height: 330mm !important; }
-            .page-break { page-break-before: always; }
         }
         
         .document-paper {
@@ -158,7 +157,7 @@
                     <div class="w-64 text-center">
                         <p class="text-left">Dikeluarkan di : Malahar</p>
                         <p class="text-left">Pada Tanggal : <span id="stTglSurat">-</span></p>
-                        <p class="font-bold mt-2">Camat Tabundung,</p>
+                        <p class="font-bold mt-2" id="stJabatanPengutusHeader">Camat Tabundung,</p>
                         <div class="h-20"></div>
                         <p class="font-bold underline" id="stNamaCamat">-</p>
                         <p id="stPangkatCamat">-</p>
@@ -197,7 +196,7 @@
                         <tr class="border-b border-black">
                             <td class="border-r border-black p-1.5 w-6 text-center align-top">1.</td>
                             <td class="border-r border-black p-1.5 w-1/2 align-top">Pejabat yang memberi perintah</td>
-                            <td class="p-1.5 align-top">Camat Tabundung</td>
+                            <td class="p-1.5 align-top" id="sppdPejabatPengutus">: Camat Tabundung</td>
                         </tr>
                         <tr class="border-b border-black">
                             <td class="border-r border-black p-1.5 text-center align-top">2.</td>
@@ -281,7 +280,7 @@
                     <div class="w-64 text-center">
                         <p>Dikeluarkan di : Malahar</p>
                         <p>Pada Tanggal : <span id="sppdTglSurat">-</span></p>
-                        <p class="font-bold mt-1">Camat Tabundung,</p>
+                        <p class="font-bold mt-1" id="sppdCamatJabatanLabel">Camat Tabundung,</p>
                         <div class="h-16"></div>
                         <p class="font-bold underline" id="sppdCamatNama">-</p>
                         <p id="sppdCamatPangkat">-</p>
@@ -299,7 +298,7 @@
                             <td class="p-2 w-1/2 align-top">
                                 <table class="w-full">
                                     <tr><td class="w-28">SPPD Nomor</td><td>: <span class="data-fillable" id="bktNoSPPD">-</span></td></tr>
-                                    <tr><td class="w-28 pt-1">Berangkat Dari</td><td class="pt-1">: <span class="data-fillable">Malahar</span></td></tr>
+                                    <tr><td class="w-28 pt-1">Berangkat Dari</td><td class="pt-1">: <span class="data-fillable" id="bktBerangkatAwal">Malahar</span></td></tr>
                                     <tr><td colspan="2">(Tempat Kedudukan)</td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTgl1">-</span></td></tr>
                                     <tr><td>Ke</td><td>: <span class="data-fillable" id="bktTujuan1">-</span></td></tr>
@@ -416,6 +415,13 @@
                         </table>
                     </div>
                 </div>
+
+                <div class="mt-8 flex justify-end font-official text-xs sppd-table-fixed">
+                    <div class="w-72">
+                        <p class="font-bold mb-2">Yang Melakukan Perjalanan Dinas:</p>
+                        <div id="lapDaftarTtd" class="space-y-3"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- 5. KWITANSI & RINCIAN -->
@@ -468,9 +474,7 @@
                             <th class="border-r border-black p-1 w-1.5">Sat</th>
                         </tr>
                     </thead>
-                    <tbody id="kwiTabelRincian">
-                        <!-- Render Dinamis via JavaScript -->
-                    </tbody>
+                    <tbody id="kwiTabelRincian"></tbody>
                 </table>
 
                 <!-- TANDA TANGAN SEJAJAR DI BAWAH TABEL -->
@@ -545,7 +549,7 @@
 
             const defaultCamatNama = record.namaCamat || 'RUDOLF UMBU RESI LOLY, ST';
             const defaultCamatNip = record.nipCamat || '197205212006041008';
-            const defaultCamatPangkat = record.pangkatCamat || 'Pembina';
+            const defaultCamatPangkat = record.pangkatCamat || 'Camat Tabundung';
             const defaultBendaharaNama = record.namaBendahara || 'DANIEL KAMBARU WINDI';
             const defaultBendaharaNip = record.nipBendahara || '197712312008011084';
 
@@ -553,7 +557,7 @@
             document.getElementById('stNoSurat').innerText = record.noSuratTugas || '-';
             document.getElementById('stDasar').innerText = record.dasarPelaksanaan || 'Atas Perintah Camat';
             document.getElementById('stUntuk').innerText = record.maksudTujuan || '-';
-            document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat);
+            document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
             document.getElementById('stNamaCamat').innerText = defaultCamatNama;
             document.getElementById('stPangkatCamat').innerText = defaultCamatPangkat;
             document.getElementById('stNipCamat').innerText = defaultCamatNip;
@@ -586,6 +590,7 @@
 
             // 2. SPPD Depan
             document.getElementById('sppdNoSurat').innerText = record.noSPPD || '-';
+            document.getElementById('sppdPejabatPengutus').innerText = `: ${defaultCamatPangkat}`;
             document.getElementById('sppdNama').innerText = record.namaPelaksana || '-';
             document.getElementById('sppdNip').innerText = record.nipPelaksana || '-';
             document.getElementById('sppdPangkat').innerText = record.pangkatPelaksana || '-';
@@ -597,7 +602,7 @@
             document.getElementById('sppdLama').innerText = `: ${record.lamaHari || 1} Hari`;
             document.getElementById('sppdTglMulai').innerText = ': ' + formatDate(record.tglMulai);
             document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai);
-            document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat);
+            document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
             document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
             document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
             document.getElementById('sppdCamatNip').innerText = defaultCamatNip;
@@ -614,32 +619,28 @@
 
             // 3. SPPD Belakang
             document.getElementById('bktNoSPPD').innerText = record.noSPPD || '-';
+            document.getElementById('bktBerangkatAwal').innerText = record.tempatBerangkat || 'Malahar';
             document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktTujuan1').innerText = record.tempatTujuan || '-';
             
             document.getElementById('bktTiba1').innerText = record.tempatTujuan || '-';
             document.getElementById('bktTglTiba1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktBerangkat1').innerText = record.tempatTujuan || '-';
+            document.getElementById('bktKeTujuan1').innerText = record.tempatBerangkat || 'Malahar';
             document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai);
-
-            const adaTujuanKedua = record.tempatTujuanKedua && record.tempatTujuanKedua.trim() !== '';
-            document.getElementById('bktTiba2').innerText = adaTujuanKedua ? record.tempatTujuanKedua : ''; 
-            document.getElementById('bktTglTiba2').innerText = adaTujuanKedua ? formatDate(record.tglMulaiKedua) : '';
-            document.getElementById('bktBerangkat2').innerText = adaTujuanKedua ? record.tempatTujuanKedua : '';
-            document.getElementById('bktTglBerangkat2').innerText = adaTujuanKedua ? formatDate(record.tglSelesaiKedua) : '';
-            document.getElementById('bktTglAkhir').innerText = formatDate(adaTujuanKedua ? record.tglSelesaiKedua : record.tglSelesai);
+            document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai);
 
             const namaTujuan = record.namaPejabatTujuan || '....................................';
             const jabatanTujuan = record.jabatanPejabatTujuan || 'KEPALA DESA';
             const nipTujuan = record.nipPejabatTujuan || '-';
 
-            if (document.getElementById('bktJabatanTujuan1')) document.getElementById('bktJabatanTujuan1').innerText = jabatanTujuan;
-            if (document.getElementById('bktKadesNama1')) document.getElementById('bktKadesNama1').innerText = namaTujuan;
-            if (document.getElementById('bktKadesNip1')) document.getElementById('bktKadesNip1').innerText = nipTujuan !== '-' ? `NIP/NIAP. ${nipTujuan}` : '';
+            document.getElementById('bktJabatanTujuan1').innerText = jabatanTujuan;
+            document.getElementById('bktKadesNama1').innerText = namaTujuan;
+            document.getElementById('bktKadesNip1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
 
-            if (document.getElementById('bktJabatanBerangkat1')) document.getElementById('bktJabatanBerangkat1').innerText = jabatanTujuan;
-            if (document.getElementById('bktKadesNamaBerangkat1')) document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
-            if (document.getElementById('bktKadesNipBerangkat1')) document.getElementById('bktKadesNipBerangkat1').innerText = nipTujuan !== '-' ? `NIP/NIAP. ${nipTujuan}` : '';
+            document.getElementById('bktJabatanBerangkat1').innerText = jabatanTujuan;
+            document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
+            document.getElementById('bktKadesNipBerangkat1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
 
             document.getElementById('bktCamatNama').innerText = defaultCamatNama;
             document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
@@ -648,14 +649,33 @@
             // 4. Laporan Perjalanan Dinas
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
             document.getElementById('lapTujuan').innerText = record.tempatTujuan;
-            document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari`;
+            document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai)})`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
+            let ttdLapHtml = `
+                <div class="mb-3">
+                    <p class="font-bold">1. ${record.namaPelaksana}</p>
+                    <p class="text-xs">NIP. ${record.nipPelaksana || '-'}</p>
+                </div>
+            `;
+            if (record.pengikut && record.pengikut.length > 0) {
+                record.pengikut.forEach((p, i) => {
+                    ttdLapHtml += `
+                        <div class="mb-3">
+                            <p class="font-bold">${i + 2}. ${p.nama}</p>
+                            <p class="text-xs">NIP. ${p.nip || '-'}</p>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('lapDaftarTtd').innerHTML = ttdLapHtml;
+
             // 5. Kwitansi / Rincian Biaya
-            const total = record.totalBiaya || 850000;
+            const total = record.totalBiaya || 0;
             const jumlahOrang = 1 + (record.pengikut?.length || 0);
-            const satuanBiaya = record.biayaPerOrang || (total / jumlahOrang);
+            const days = record.lamaHari || 1;
+            const rate = record.biayaPerOrang || (total / (jumlahOrang * days));
 
             document.getElementById('kwiNoBku').innerText = record.noBku || '-';
             document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
@@ -665,6 +685,8 @@
             document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
             document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
             document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip;
+
+            const kodeSKVal = record.kodeSK || '7.01.01.2.01.0003';
 
             let rincianHTML = `
                 <tr class="border-b border-black align-top">
@@ -686,13 +708,13 @@
                     <td class="p-1 text-center"></td>
                 </tr>
                 <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04.01.0001</td>
+                    <td class="border-r border-black p-1 font-mono text-left">${kodeSKVal}</td>
                     <td class="border-r border-black p-1" colspan="4">
-                        <b>Belanja Perjalanan Dinas Dalam Daerah</b><br>
+                        <b>Belanja Perjalanan Dinas Dalam Daerah (${record.sumberDana || 'DAU'})</b><br>
                         Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
                         Dalam rangka ${record.maksudTujuan || '-'}<br>
-                        Di ${record.tempatTujuan || '-'} Selama ${record.lamaHari || 1} (Satu) Hari<br>
-                        Pada Tanggal, ${formatDate(record.tglMulai)}
+                        Di ${record.tempatTujuan || '-'} Selama ${days} Hari<br>
+                        Pada Tanggal ${formatDate(record.tglMulai)}
                     </td>
                     <td class="border-r border-black p-1 text-right"></td>
                     <td class="p-1 text-center"></td>
@@ -702,26 +724,27 @@
                     <td class="border-r border-black p-1">
                         1. ${record.namaPelaksana || '-'}
                     </td>
-                    <td class="border-r border-black p-1 text-center">${record.lamaHari || 1}</td>
-                    <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-1 text-center">${days}</td>
+                    <td class="border-r border-black p-1 text-right">${rate.toLocaleString('id-ID')}</td>
                     <td class="border-r border-black p-1 text-center">OH</td>
-                    <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                    <td class="border-r border-black p-1 text-right">${(days * rate).toLocaleString('id-ID')}</td>
                     <td class="p-1 text-center font-bold">1.</td>
                 </tr>
             `;
 
             if (record.pengikut && Array.isArray(record.pengikut)) {
                 record.pengikut.forEach((p, index) => {
+                    const subtotal = days * rate;
                     rincianHTML += `
                         <tr class="border-b border-black align-top">
                             <td class="border-r border-black p-1 font-mono text-left"></td>
                             <td class="border-r border-black p-1">
                                 ${index + 2}. ${p.nama || '-'}
                             </td>
-                            <td class="border-r border-black p-1 text-center">${record.lamaHari || 1}</td>
-                            <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-1 text-center">${days}</td>
+                            <td class="border-r border-black p-1 text-right">${rate.toLocaleString('id-ID')}</td>
                             <td class="border-r border-black p-1 text-center">OH</td>
-                            <td class="border-r border-black p-1 text-right">${satuanBiaya.toLocaleString('id-ID')}</td>
+                            <td class="border-r border-black p-1 text-right">${subtotal.toLocaleString('id-ID')}</td>
                             <td class="p-1 text-center font-bold">${index + 2}.</td>
                         </tr>
                     `;
