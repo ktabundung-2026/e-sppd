@@ -1,7 +1,7 @@
 /**
  * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
  * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
- * impor/ekspor CSV, serta sinkronisasi data online/offline via AppDB.
+ * impor/ekspor CSV, pencegahan data ganda, serta sinkronisasi data via AppDB.
  */
 
 // ==========================================
@@ -51,7 +51,7 @@ function updateOnlineStatus() {
 }
 
 // ==========================================
-// 4. MANAJEMEN MASTER DATA ASN (AppDB Integration)
+// 4. MANAJEMEN MASTER DATA ASN (AppDB & DEDUPING)
 // ==========================================
 async function loadMasterAsn() {
     if (window.AppDB) {
@@ -104,21 +104,28 @@ function renderAsnTable(filterText = '') {
                 <p class="font-bold text-slate-800">${asn.nama}</p>
                 <p class="text-[10px] text-slate-500">NIP: ${asn.nip || '-'} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
             </div>
-            <button type="button" onclick="deleteAsn('${asn.nip}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded" title="Hapus ASN">
+            <button type="button" onclick="deleteAsn('${asn.nip}', '${asn.nama.replace(/'/g, "\\'")}')" class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" title="Hapus ASN">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>
     `).join('');
 }
 
-async function deleteAsn(nip) {
-    if (confirm("Apakah Anda yakin ingin menghapus data ASN ini dari master lokal?")) {
-        masterAsnList = masterAsnList.filter(a => a.nip !== nip);
+// PERBAIKAN: Fungsi Delete ASN Aktif dan Handled Global
+async function deleteAsn(nip, nama) {
+    if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master lokal?`)) {
+        masterAsnList = masterAsnList.filter(a => {
+            if (nip && nip !== '-' && nip !== '') {
+                return a.nip !== nip;
+            }
+            return a.nama !== nama;
+        });
         await saveMasterAsn();
     }
 }
+window.deleteAsn = deleteAsn;
 
-// Modal Handler (Perbaikan Masalah Tab Kelola Master ASN Tidak Aktif)
+// Modal Handler
 function openModalAsn() {
     const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
     if (modal) {
@@ -139,7 +146,7 @@ function closeModalAsn() {
 function openAsnMasterModal() { openModalAsn(); }
 function closeAsnMasterModal() { closeModalAsn(); }
 
-// Fitur Import CSV & Template Download
+// Fitur Template & Download CSV
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
     const encodedUri = encodeURI(csvContent);
@@ -151,6 +158,7 @@ function downloadCsvTemplate() {
     document.body.removeChild(link);
 }
 
+// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Pendobelan (Deduplikasi)
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files[0]) {
@@ -160,9 +168,11 @@ function importAsnFromCsv() {
 
     const file = fileInput.files[0];
     const reader = new FileReader();
+    
     reader.onload = async function(e) {
         const lines = e.target.result.split('\n');
         let addedCount = 0;
+        let skippedCount = 0;
 
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
@@ -170,40 +180,62 @@ function importAsnFromCsv() {
             
             const cols = line.split(',').map(c => c.trim().replace(/^"(.*)"$/, '$1'));
             if (cols.length >= 2) {
-                const nip = cols[0];
-                const nama = cols[1];
+                const nip = cols[0] || '';
+                const nama = (cols[1] || '').toUpperCase();
                 const pangkat = cols[2] || '';
                 const jabatan = cols[3] || '';
 
-                if (nama && !masterAsnList.some(a => a.nip === nip)) {
-                    masterAsnList.push({ nip, nama: nama.toUpperCase(), pangkat, jabatan });
+                if (!nama) continue;
+
+                // Logika Pencegahan Ganda: Cek NIP (jika valid) ATAU Nama Lengkap
+                const isDuplicate = masterAsnList.some(existing => {
+                    const matchNip = (nip && nip !== '-' && existing.nip === nip);
+                    const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
+                    return matchNip || matchNama;
+                });
+
+                if (isDuplicate) {
+                    skippedCount++;
+                } else {
+                    masterAsnList.push({ nip: nip || '-', nama, pangkat, jabatan });
                     addedCount++;
                 }
             }
         }
+
         await saveMasterAsn();
-        alert(`Berhasil mengimpor ${addedCount} data ASN baru!`);
         fileInput.value = '';
+
+        if (addedCount === 0 && skippedCount > 0) {
+            alert(`Tidak ada data baru yang ditambahkan. Semua ${skippedCount} data dalam file CSV sudah pernah terdaftar.`);
+        } else {
+            alert(`Proses impor selesai!\n- Data Baru Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
+        }
     };
+    
     reader.readAsText(file);
 }
+window.importAsnFromCsv = importAsnFromCsv;
 
+// Simpan Tambah/Edit ASN Manual
 async function saveAsnMaster(e) {
     e.preventDefault();
     const nama = document.getElementById('asnNama')?.value.trim().toUpperCase();
-    const nip = document.getElementById('asnNip')?.value.trim();
+    const nip = document.getElementById('asnNip')?.value.trim() || '-';
     const pangkat = document.getElementById('asnPangkat')?.value.trim();
     const jabatan = document.getElementById('asnJabatan')?.value.trim();
 
     if (!nama) return;
 
-    const existingIndex = masterAsnList.findIndex(a => a.nip === nip && nip !== '-');
-    if (existingIndex >= 0) {
-        masterAsnList[existingIndex] = { nip, nama, pangkat, jabatan };
-    } else {
-        masterAsnList.push({ nip, nama, pangkat, jabatan });
+    // Cek Duplikasi Manual
+    const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
+    
+    if (isDuplicate) {
+        alert("Data ASN ini sudah ada di dalam sistem!");
+        return;
     }
 
+    masterAsnList.push({ nip, nama, pangkat, jabatan });
     await saveMasterAsn();
     resetAsnForm();
 }
@@ -214,7 +246,43 @@ function resetAsnForm() {
 }
 
 // ==========================================
-// 5. AUTOFILL DROPDOWN ASN & PELAKSANA UTAMA
+// 5. EVENT LISTENERS & BINDING TERPUSAT
+// ==========================================
+function initEventListeners() {
+    const btnOpenAsn = document.getElementById('btnKelolaAsn');
+    if (btnOpenAsn) btnOpenAsn.addEventListener('click', openModalAsn);
+
+    const btnCloseAsn = document.getElementById('btnCloseModalAsn');
+    if (btnCloseAsn) btnCloseAsn.addEventListener('click', closeModalAsn);
+
+    const modalAsn = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
+    if (modalAsn) {
+        modalAsn.addEventListener('click', (e) => {
+            if (e.target === modalAsn) closeModalAsn();
+        });
+    }
+
+    // Event Input Pencarian Master ASN
+    const searchInput = document.getElementById('searchAsnInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => renderAsnTable(e.target.value));
+    }
+
+    // Form Tambah Manual ASN
+    const asnForm = document.getElementById('asnForm');
+    if (asnForm) {
+        asnForm.addEventListener('submit', saveAsnMaster);
+    }
+
+    // Form Submit SPPD Utama
+    const sppdForm = document.getElementById('sppdForm');
+    if (sppdForm) {
+        sppdForm.addEventListener('submit', handleFormSubmit);
+    }
+}
+
+// ==========================================
+// 6. AUTOFILL DROPDOWN ASN & PELAKSANA
 // ==========================================
 function populatePelaksanaDropdowns() {
     const selectPelaksana = document.getElementById('namaPelaksana');
@@ -260,11 +328,9 @@ function onPejabatSelected(selectedNama) {
 }
 
 // ==========================================
-// 6. MANAJEMEN TIM PENGIKU & KALKULASI
+// 7. MANAJEMEN PENGIKUT & KALKULASI BIAYA
 // ==========================================
-function addOfficerRow() {
-    addPengikutRow();
-}
+function addOfficerRow() { addPengikutRow(); }
 
 function addPengikutRow() {
     const container = document.getElementById('pengikutContainer');
@@ -286,7 +352,7 @@ function addPengikutRow() {
         </select>
         <input type="text" id="pengikutNip_${idx}" placeholder="NIP Anggota" class="w-full sm:w-1/3 p-2 text-xs border rounded font-mono bg-slate-50" readonly>
         <input type="text" id="pengikutJabatan_${idx}" placeholder="Jabatan Anggota" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold bg-slate-50" readonly>
-        <button type="button" onclick="removePengikutRow(${idx})" class="text-rose-600 hover:text-rose-800 p-1.5 shrink-0" title="Hapus Anggota">
+        <button type="button" onclick="removePengikutRow(${idx})" class="text-rose-600 hover:text-rose-800 p-1.5 shrink-0 cursor-pointer" title="Hapus Anggota">
             <i class="fa-solid fa-xmark text-base"></i>
         </button>
     `;
@@ -318,11 +384,12 @@ function removePengikutRow(idx) {
 }
 
 // ==========================================
-// 7. SINKRONISASI KUOTA OH & HITUNG BIAYA
+// 8. SINKRONISASI KUOTA OH & HITUNG BIAYA
 // ==========================================
 function updateSKQuotaInfo() {
     const kodeSK = document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003';
-    document.getElementById('lblCurrentSK').innerText = kodeSK;
+    const lblSK = document.getElementById('lblCurrentSK');
+    if (lblSK) lblSK.innerText = kodeSK;
 
     const activePengikut = currentPengikut.filter(p => p !== null && p.nama !== '');
     const totalPersonil = 1 + activePengikut.length;
@@ -345,7 +412,6 @@ function updateSKQuotaInfo() {
     const txtHari = document.getElementById('lamaHariText');
     if (txtHari) txtHari.value = `${days} Hari`;
 
-    // Cek Realisasi Kuota dari Storage
     let usedOH = 0;
     const savedRecords = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
     savedRecords.forEach(r => {
@@ -358,8 +424,11 @@ function updateSKQuotaInfo() {
     const maxQuota = parseInt(document.getElementById('inputMaxQuota')?.value) || 50;
     const remainingOH = maxQuota - usedOH;
 
-    document.getElementById('valUsedQuota').innerText = `${usedOH} OH`;
-    document.getElementById('valRemainingQuota').innerText = `${remainingOH} OH`;
+    const valUsed = document.getElementById('valUsedQuota');
+    const valRemaining = document.getElementById('valRemainingQuota');
+
+    if (valUsed) valUsed.innerText = `${usedOH} OH`;
+    if (valRemaining) valRemaining.innerText = `${remainingOH} OH`;
 
     const pct = Math.min(100, Math.round((usedOH / maxQuota) * 100));
     const progress = document.getElementById('progressBarQuota');
@@ -403,7 +472,6 @@ function calculateTotalBiaya(daysParam, personilParam) {
     const days = daysParam || 1;
     const totalPersonil = personilParam || 1;
     const rate = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
-
     const totalBiaya = days * rate * totalPersonil;
     
     const fmtInput = document.getElementById('totalBiayaFormatted');
@@ -414,7 +482,7 @@ function calculateTotalBiaya(daysParam, personilParam) {
 }
 
 // ==========================================
-// 8. NAVIGASI STEPPER FORM & SUBMIT
+// 9. NAVIGASI STEPPER FORM & SUBMIT
 // ==========================================
 function switchStep(stepNumber) {
     currentStep = stepNumber;
@@ -427,12 +495,8 @@ function switchStep(stepNumber) {
             btn.classList.remove('active');
             const icon = btn.querySelector('.step-icon');
             const label = btn.querySelector('.step-label');
-            if (icon) {
-                icon.className = "step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600";
-            }
-            if (label) {
-                label.className = "step-label text-xs font-medium text-slate-500 mt-1";
-            }
+            if (icon) icon.className = "step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600";
+            if (label) label.className = "step-label text-xs font-medium text-slate-500 mt-1";
         }
     });
 
@@ -469,13 +533,6 @@ function initFormDefaults() {
 
     if (tglMulai && !tglMulai.value) tglMulai.value = today;
     if (tglSelesai && !tglSelesai.value) tglSelesai.value = today;
-
-    const modal = document.getElementById('asnMasterModal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModalAsn();
-        });
-    }
 }
 
 async function handleFormSubmit(e) {
@@ -550,7 +607,7 @@ async function handleFormSubmit(e) {
 }
 
 // ==========================================
-// 9. RIWAYAT & UTILITY NUMBERS TO WORDS
+// 10. RIWAYAT & UTILITY TERBILANG
 // ==========================================
 async function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
