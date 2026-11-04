@@ -98,8 +98,8 @@ function renderAsnTable(filterText = '') {
         return;
     }
 
-    tbody.innerHTML = filtered.map((asn) => {
-        // Escape petik tunggal agar tidak merusak inline onclick HTML
+    tbody.innerHTML = filtered.map((asn, index) => {
+        // Escape petik tunggal agar tidak merusak atribut HTML onclick
         const safeNama = (asn.nama || '').replace(/'/g, "\\'");
         const safeNip = (asn.nip || '-').trim();
 
@@ -110,7 +110,7 @@ function renderAsnTable(filterText = '') {
                     <p class="text-[10px] text-slate-500">NIP: ${safeNip} | ${asn.pangkat || '-'} - ${asn.jabatan || '-'}</p>
                 </div>
                 <button type="button" 
-                        onclick="window.deleteAsn('${safeNip}', '${safeNama}')" 
+                        onclick="window.deleteAsn('${safeNip}', '${safeNama}', ${index})" 
                         class="text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer" 
                         title="Hapus ASN">
                     <i class="fa-solid fa-trash"></i>
@@ -120,15 +120,19 @@ function renderAsnTable(filterText = '') {
     }).join('');
 }
 
-// PERBAIKAN: Fungsi Delete ASN dipublikasikan ke Window Global
-async function deleteAsn(nip, nama) {
-    if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master lokal?`)) {
-        masterAsnList = masterAsnList.filter(a => {
-            if (nip && nip !== '-' && nip !== '') {
-                return a.nip !== nip;
-            }
-            return a.nama !== nama;
-        });
+// PERBAIKAN PENTING: Fungsi Delete ASN Dipublikasikan ke Window Global
+async function deleteAsn(nip, nama, index) {
+    if (confirm(`Apakah Anda yakin ingin menghapus "${nama}" dari master data ASN?`)) {
+        if (typeof index === 'number' && index >= 0 && masterAsnList[index] && masterAsnList[index].nama === nama) {
+            masterAsnList.splice(index, 1);
+        } else {
+            masterAsnList = masterAsnList.filter(a => {
+                if (nip && nip !== '-' && nip !== '') {
+                    return a.nip !== nip;
+                }
+                return a.nama !== nama;
+            });
+        }
         await saveMasterAsn();
     }
 }
@@ -167,11 +171,11 @@ function downloadCsvTemplate() {
     document.body.removeChild(link);
 }
 
-// PERBAIKAN: Fungsi Import CSV dengan Logika Pencegahan Duplikasi & Global Binding
+// PERBAIKAN PENTING: Fungsi Import CSV Handled & Terekspos ke Global Window
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
-    if (!fileInput || !fileInput.files[0]) {
-        alert("Pilih berkas CSV terlebih dahulu!");
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert("Silakan pilih file CSV terlebih dahulu!");
         return;
     }
 
@@ -179,46 +183,52 @@ function importAsnFromCsv() {
     const reader = new FileReader();
     
     reader.onload = async function(e) {
-        const lines = e.target.result.split('\n');
-        let addedCount = 0;
-        let skippedCount = 0;
+        try {
+            const lines = e.target.result.split(/\r\n|\n/);
+            let addedCount = 0;
+            let skippedCount = 0;
 
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            const cols = line.split(',').map(c => c.trim().replace(/^"(.*)"$/, '$1'));
-            if (cols.length >= 2) {
-                const nip = cols[0] || '';
-                const nama = (cols[1] || '').toUpperCase();
-                const pangkat = cols[2] || '';
-                const jabatan = cols[3] || '';
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Pemisahan kolom CSV (mendukung koma dan titik koma)
+                const cols = line.split(/[,;]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+                if (cols.length >= 2) {
+                    const nip = cols[0] || '';
+                    const nama = (cols[1] || '').toUpperCase();
+                    const pangkat = cols[2] || '';
+                    const jabatan = cols[3] || '';
 
-                if (!nama) continue;
+                    if (!nama || nama === 'NAMA') continue;
 
-                // Logika Pencegahan Ganda: Cek NIP (jika valid) ATAU Nama Lengkap
-                const isDuplicate = masterAsnList.some(existing => {
-                    const matchNip = (nip && nip !== '-' && existing.nip === nip);
-                    const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
-                    return matchNip || matchNama;
-                });
+                    // Logika Deduplikasi: Cek NIP (jika ada) ATAU Nama
+                    const isDuplicate = masterAsnList.some(existing => {
+                        const matchNip = (nip && nip !== '-' && existing.nip === nip);
+                        const matchNama = (existing.nama.toLowerCase() === nama.toLowerCase());
+                        return matchNip || matchNama;
+                    });
 
-                if (isDuplicate) {
-                    skippedCount++;
-                } else {
-                    masterAsnList.push({ nip: nip || '-', nama, pangkat, jabatan });
-                    addedCount++;
+                    if (isDuplicate) {
+                        skippedCount++;
+                    } else {
+                        masterAsnList.push({ nip: nip || '-', nama, pangkat, jabatan });
+                        addedCount++;
+                    }
                 }
             }
-        }
 
-        await saveMasterAsn();
-        fileInput.value = '';
+            await saveMasterAsn();
+            fileInput.value = '';
 
-        if (addedCount === 0 && skippedCount > 0) {
-            alert(`Tidak ada data baru yang ditambahkan. Semua (${skippedCount}) data dalam file CSV sudah pernah terdaftar.`);
-        } else {
-            alert(`Proses impor selesai!\n- Data Baru Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
+            if (addedCount === 0 && skippedCount > 0) {
+                alert(`Impor selesai: Tidak ada data baru yang ditambahkan. Seluruh (${skippedCount}) data pada berkas sudah pernah terdaftar.`);
+            } else {
+                alert(`Berhasil mengimpor data CSV!\n- Data Ditambahkan: ${addedCount}\n- Data Dilewati (Sudah Ada): ${skippedCount}`);
+            }
+        } catch (err) {
+            alert("Gagal memproses file CSV. Pastikan format file sesuai dengan template!");
+            console.error(err);
         }
     };
     
@@ -226,21 +236,24 @@ function importAsnFromCsv() {
 }
 window.importAsnFromCsv = importAsnFromCsv;
 
-// Simpan Tambah/Edit ASN Manual
+// Simpan Tambah ASN Manual
 async function saveAsnMaster(e) {
-    e.preventDefault();
-    const nama = document.getElementById('asnNama')?.value.trim().toUpperCase();
+    if (e) e.preventDefault();
+    const namaInput = document.getElementById('asnNama');
+    const nama = namaInput?.value.trim().toUpperCase();
     const nip = document.getElementById('asnNip')?.value.trim() || '-';
     const pangkat = document.getElementById('asnPangkat')?.value.trim();
     const jabatan = document.getElementById('asnJabatan')?.value.trim();
 
-    if (!nama) return;
+    if (!nama) {
+        alert("Nama ASN wajib diisi!");
+        return;
+    }
 
-    // Cek Duplikasi Manual
     const isDuplicate = masterAsnList.some(a => (nip !== '-' && a.nip === nip) || a.nama.toLowerCase() === nama.toLowerCase());
     
     if (isDuplicate) {
-        alert("Data ASN ini sudah ada di dalam sistem!");
+        alert("Data ASN ini sudah ada di dalam sistem master!");
         return;
     }
 
@@ -319,8 +332,10 @@ function populatePelaksanaDropdowns() {
 function onNamaInputChanged(type, selectedNama) {
     const match = masterAsnList.find(a => a.nama === selectedNama);
     if (type === 'Pelaksana') {
-        document.getElementById('nipPelaksana').value = match ? (match.nip || '-') : '';
-        document.getElementById('jabatanPelaksana').value = match ? (match.jabatan || '-') : '';
+        const nipEl = document.getElementById('nipPelaksana');
+        const jabEl = document.getElementById('jabatanPelaksana');
+        if (nipEl) nipEl.value = match ? (match.nip || '-') : '';
+        if (jabEl) jabEl.value = match ? (match.jabatan || '-') : '';
     }
     updateSKQuotaInfo();
 }
@@ -328,8 +343,10 @@ function onNamaInputChanged(type, selectedNama) {
 function onPejabatSelected(selectedNama) {
     const match = masterAsnList.find(a => a.nama === selectedNama);
     if (match) {
-        document.getElementById('nipPejabat').value = match.nip || '-';
-        document.getElementById('jabatanPejabat').value = match.jabatan || '-';
+        const nipEl = document.getElementById('nipPejabat');
+        const jabEl = document.getElementById('jabatanPejabat');
+        if (nipEl) nipEl.value = match.nip || '-';
+        if (jabEl) jabEl.value = match.jabatan || '-';
     }
 }
 
