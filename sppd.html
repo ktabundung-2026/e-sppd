@@ -149,15 +149,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pegawai</label>
-                                <input type="text" id="namaPelaksana" placeholder="Pilih / Ketik Nama" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase">
+                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase"></select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP Pegawai</label>
-                                <input type="text" id="nipPelaksana" class="w-full p-2 text-xs border rounded font-mono bg-white">
+                                <input type="text" id="nipPelaksana" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Jabatan</label>
-                                <input type="text" id="jabatanPelaksana" class="w-full p-2 text-xs border rounded font-semibold bg-white">
+                                <input type="text" id="jabatanPelaksana" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
                             </div>
                         </div>
                     </div>
@@ -260,7 +260,7 @@
                     <i class="fa-solid fa-users-gear text-sky-400"></i>
                     <h3 class="font-bold text-sm sm:text-base">Kelola Master Data ASN / Pegawai</h3>
                 </div>
-                <button type="button" id="btnCloseModalAsn" class="text-slate-300 hover:text-white text-lg font-bold p-1">
+                <button type="button" id="btnCloseModalAsn" onclick="closeModalAsn()" class="text-slate-300 hover:text-white text-lg font-bold p-1">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -277,10 +277,13 @@
                     </div>
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
                         <input type="file" id="csvFileInput" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-700 file:text-white hover:file:bg-gov-800 cursor-pointer border border-slate-300 rounded-lg bg-white">
+                        <button type="button" onclick="importAsnFromCsv()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-file-import"></i> Proses Import
+                        </button>
                     </div>
                 </div>
 
-                <form id="formAddAsn" class="border-t pt-4 space-y-3">
+                <form id="formAddAsn" onsubmit="saveAsnMaster(event)" class="border-t pt-4 space-y-3">
                     <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Tambah ASN Secara Manual</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input type="text" id="addAsnNama" placeholder="NAMA ASN LENGKAP" required class="p-2 text-xs border rounded uppercase font-semibold">
@@ -300,17 +303,15 @@
                         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar ASN Tersimpan (<span id="totalAsnCount">0</span>)</span>
                         <input type="text" id="searchAsnInput" placeholder="Cari nama / NIP..." class="p-1.5 text-xs border rounded-lg w-40 font-medium">
                     </div>
+                    <!-- SINGLE HEADER MAIN COLUMN -->
                     <div class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto bg-white">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 border-b">
+                            <thead class="bg-slate-50 border-b sticky top-0 z-10">
                                 <tr>
-                                    <th class="p-2">Nama</th>
-                                    <th class="p-2">NIP</th>
-                                    <th class="p-2">Pangkat / Jabatan</th>
-                                    <th class="p-2 text-center">Aksi</th>
+                                    <th class="p-2.5 font-bold text-slate-700 uppercase">Informasi Pegawai / ASN</th>
                                 </tr>
                             </thead>
-                            <tbody id="asnTableBody"></tbody>
+                            <tbody id="asnTableBody" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
