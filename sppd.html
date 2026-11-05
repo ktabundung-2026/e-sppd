@@ -399,7 +399,14 @@
         </div>
     </div>
 
-    <!-- SCRIPT INCLUSION LAYER -->
+    <!-- ============================================================ -->
+    <!-- SCRIPT INCLUSION LAYER (BERURUTAN DARI ATAS KE BAWAH)        -->
+    <!-- ============================================================ -->
+    <!-- 1. Library Supabase CDN (Wajib Pertama) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 2. Layer Database Utama (db.js) -->
+    <script src="js/db.js"></script>
+    <!-- 3. Logic Aplikasi SPPD (sppd.js) -->
     <script src="js/sppd.js"></script>
 
 </body>
