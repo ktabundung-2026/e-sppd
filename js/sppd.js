@@ -391,10 +391,11 @@ async function saveNewSK(e) {
     }
 
     const newSKObj = { kode, nama, quota };
+    let isSuccess = false;
 
-    // 1. Simpan ke Supabase via AppDB atau localStorage
+    // 1. Simpan via AppDB (menunggu Supabase & Cache Selesai)
     if (window.AppDB && typeof window.AppDB.saveMasterSK === 'function') {
-        await window.AppDB.saveMasterSK(newSKObj);
+        isSuccess = await window.AppDB.saveMasterSK(newSKObj);
     } else {
         const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
         const isDuplicate = customSK.some(sk => sk.kode === kode);
@@ -403,21 +404,23 @@ async function saveNewSK(e) {
             localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
         }
 
-        // Simpan pemetaan kuota lokal
         const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
         quotas[kode] = quota;
         localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+        isSuccess = true;
     }
 
-    // 2. Reload dropdown & set value terpilih
-    await loadCustomSKList();
-    
-    const selectSK = document.getElementById('step1_kodeSK');
-    if (selectSK) selectSK.value = kode;
+    // 2. Hanya jika sukses: Reload dropdown, set nilai, tutup modal, dan beri pemberitahuan
+    if (isSuccess) {
+        await loadCustomSKList();
+        
+        const selectSK = document.getElementById('step1_kodeSK');
+        if (selectSK) selectSK.value = kode;
 
-    closeModalSK();
-    updateSKQuotaInfo();
-    alert(`Sub Kegiatan ${kode} berhasil disimpan ke Database!`);
+        closeModalSK();
+        updateSKQuotaInfo();
+        alert(`Sub Kegiatan ${kode} berhasil disimpan ke Database!`);
+    }
 }
 window.saveNewSK = saveNewSK;
 
