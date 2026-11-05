@@ -51,7 +51,7 @@ function updateOnlineStatus() {
 }
 
 // ==========================================
-// 4. MANAJEMEN MASTER DATA ASN (SANITISASI OTOMATIS REAL-TIME)
+// 4. MANAJEMEN MASTER DATA ASN
 // ==========================================
 
 function sanitizeAsnList(list) {
@@ -113,9 +113,10 @@ async function saveMasterAsn() {
     renderAsnTable();
 }
 
+// FORMAT RENDERING: NAMA DENGAN DETAIL TEKS KECIL DI BAWAHNYA
 function renderAsnTable(filterText = '') {
-    const tbody = document.getElementById('asnListContainer') || document.getElementById('asnTableBody');
-    const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
+    const tbody = document.getElementById('asnTableBody') || document.getElementById('asnListContainer');
+    const countEl = document.getElementById('totalAsnCount') || document.getElementById('countMasterAsn');
     if (!tbody) return;
 
     masterAsnList = sanitizeAsnList(masterAsnList);
@@ -131,67 +132,31 @@ function renderAsnTable(filterText = '') {
     if (countEl) countEl.innerText = masterAsnList.length;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = `<div class="text-center py-4 text-slate-400 italic text-xs">Data ASN tidak ditemukan</div>`;
+        tbody.innerHTML = `<tr><td class="p-3 text-center text-slate-400 italic">Data ASN tidak ditemukan</td></tr>`;
         return;
     }
 
     tbody.innerHTML = filtered.map((asn) => {
-        const originalIndex = masterAsnList.indexOf(asn);
-        const displayNama = asn.nama ? asn.nama.toUpperCase() : '<span class="text-rose-500 font-normal">[DATA RUSAK / TANPA NAMA]</span>';
+        const displayNama = asn.nama ? asn.nama.toUpperCase() : '<span class="text-rose-500 font-normal">[TANPA NAMA]</span>';
         const safeNip = (asn.nip || '-').toString().trim();
         const safePangkat = asn.pangkat ? `${asn.pangkat}` : '-';
         const safeJabatan = asn.jabatan ? `${asn.jabatan}` : '-';
 
         return `
-            <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
-                <div>
-                    <p class="font-bold text-slate-800 uppercase">${displayNama}</p>
-                    <p class="text-[10px] text-slate-500 mt-0.5">
+            <tr class="hover:bg-slate-50 transition text-xs border-b border-slate-100">
+                <td class="p-2.5">
+                    <div class="font-bold text-slate-800 uppercase">${displayNama}</div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">
                         <span class="font-mono">NIP: ${safeNip}</span> &bull; <span>${safePangkat} - ${safeJabatan}</span>
-                    </p>
-                </div>
-                <button type="button" 
-                        data-index="${originalIndex}"
-                        class="btn-delete-asn text-rose-600 hover:text-rose-800 p-1.5 rounded transition cursor-pointer bg-rose-50 hover:bg-rose-100" 
-                        title="Hapus Data Ini">
-                    <i class="fa-solid fa-trash pointer-events-none"></i>
-                </button>
-            </div>
+                    </div>
+                </td>
+            </tr>
         `;
     }).join('');
-
-    tbody.querySelectorAll('.btn-delete-asn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const idx = parseInt(this.getAttribute('data-index'), 10);
-            deleteAsnByIndex(idx);
-        });
-    });
 }
-
-async function deleteAsnByIndex(index) {
-    if (index >= 0 && index < masterAsnList.length) {
-        const item = masterAsnList[index];
-        const namaLabel = item && item.nama ? `"${item.nama}"` : "data bermasalah ini";
-        
-        if (confirm(`Apakah Anda yakin ingin menghapus ${namaLabel}?`)) {
-            masterAsnList.splice(index, 1);
-            await saveMasterAsn();
-        }
-    }
-}
-window.deleteAsnByIndex = deleteAsnByIndex;
-
-async function clearAllMasterAsn() {
-    if (confirm("Apakah Anda yakin ingin MENGHAPUS SEMUA data master ASN tersimpan?\nData akan dikembalikan ke data awal default.")) {
-        masterAsnList = [...DEFAULT_ASN_LIST];
-        await saveMasterAsn();
-        alert("Master data ASN berhasil di-reset!");
-    }
-}
-window.clearAllMasterAsn = clearAllMasterAsn;
 
 function openModalAsn() {
-    const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
+    const modal = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -200,18 +165,15 @@ function openModalAsn() {
 }
 
 function closeModalAsn() {
-    const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
+    const modal = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
     if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
 }
 
-function openAsnMasterModal() { openModalAsn(); }
-function closeAsnMasterModal() { closeModalAsn(); }
-
-window.openAsnMasterModal = openAsnMasterModal;
-window.closeAsnMasterModal = closeAsnMasterModal;
+window.openModalAsn = openModalAsn;
+window.closeModalAsn = closeModalAsn;
 
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
@@ -226,7 +188,7 @@ function downloadCsvTemplate() {
 window.downloadCsvTemplate = downloadCsvTemplate;
 
 function importAsnFromCsv() {
-    const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
+    const fileInput = document.getElementById('csvFileInput') || document.getElementById('asnCsvFileInput');
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
         alert("Silakan pilih berkas CSV terlebih dahulu!");
         return;
@@ -306,11 +268,11 @@ window.importAsnFromCsv = importAsnFromCsv;
 
 async function saveAsnMaster(e) {
     if (e) e.preventDefault();
-    const namaInput = document.getElementById('asnNama') || document.getElementById('addAsnNama');
+    const namaInput = document.getElementById('addAsnNama') || document.getElementById('asnNama');
     const nama = namaInput?.value.trim().toUpperCase();
-    const nip = (document.getElementById('asnNip') || document.getElementById('addAsnNip'))?.value.trim() || '-';
-    const pangkat = (document.getElementById('asnPangkat') || document.getElementById('addAsnPangkat'))?.value.trim() || '-';
-    const jabatan = (document.getElementById('asnJabatan') || document.getElementById('addAsnJabatan'))?.value.trim() || '-';
+    const nip = (document.getElementById('addAsnNip') || document.getElementById('asnNip'))?.value.trim() || '-';
+    const pangkat = (document.getElementById('addAsnPangkat') || document.getElementById('asnPangkat'))?.value.trim() || '-';
+    const jabatan = (document.getElementById('addAsnJabatan') || document.getElementById('asnJabatan'))?.value.trim() || '-';
 
     if (!nama) {
         alert("Nama ASN wajib diisi!");
@@ -330,7 +292,7 @@ async function saveAsnMaster(e) {
 }
 
 function resetAsnForm() {
-    const form = document.getElementById('asnForm') || document.getElementById('formAddAsn');
+    const form = document.getElementById('formAddAsn') || document.getElementById('asnForm');
     if (form) form.reset();
 }
 
@@ -344,7 +306,7 @@ function initEventListeners() {
     const btnCloseAsn = document.getElementById('btnCloseModalAsn');
     if (btnCloseAsn) btnCloseAsn.addEventListener('click', closeModalAsn);
 
-    const modalAsn = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
+    const modalAsn = document.getElementById('modalAsn') || document.getElementById('asnMasterModal');
     if (modalAsn) {
         modalAsn.addEventListener('click', (e) => {
             if (e.target === modalAsn) closeModalAsn();
@@ -356,7 +318,7 @@ function initEventListeners() {
         searchInput.addEventListener('input', (e) => renderAsnTable(e.target.value));
     }
 
-    const asnForm = document.getElementById('asnForm') || document.getElementById('formAddAsn');
+    const asnForm = document.getElementById('formAddAsn') || document.getElementById('asnForm');
     if (asnForm) {
         asnForm.addEventListener('submit', saveAsnMaster);
     }
@@ -650,7 +612,7 @@ async function handleFormSubmit(e) {
         noSPPD: document.getElementById('noSPPD')?.value || '',
         noBku: 'BKU/' + Date.now().toString().slice(-4),
         kodeSK: document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003',
-        sumberDana: document.getElementById('step1_sumberDana')?.value || 'DAU',
+        sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
         dasarPelaksanaan: 'Atas Perintah Camat Tabundung',
         maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
         
@@ -662,7 +624,7 @@ async function handleFormSubmit(e) {
 
         tempatBerangkat: document.getElementById('tempatBerangkat')?.value || 'Malahar',
         tempatTujuan: document.getElementById('tempatTujuan')?.value || '',
-        alatAngkutan: document.getElementById('alatAngkutan')?.value || 'Kendaraan Roda 2',
+        alatAngkutan: 'Kendaraan Roda 2',
         tglMulai: tglMulai,
         tglSelesai: tglSelesai,
         lamaHari: days,
@@ -680,7 +642,6 @@ async function handleFormSubmit(e) {
         namaBendahara: 'DANIEL KAMBARU WINDI',
         nipBendahara: '197712312008011084',
 
-        laporanHasil: document.getElementById('laporanHasil')?.value || '',
         createdAt: new Date().toISOString()
     };
 
