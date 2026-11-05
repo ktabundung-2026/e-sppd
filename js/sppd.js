@@ -1,7 +1,5 @@
 /**
  * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
- * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
- * impor/ekspor CSV, serta CRUD Master Sub Kegiatan (SK) ke Supabase / AppDB.
  */
 
 // ==========================================
@@ -66,7 +64,6 @@ async function loadCustomSKList() {
         masterSKList = saved ? JSON.parse(saved) : [];
     }
 
-    // Mengosongkan opsi lama dan mengeset opsi placeholder default
     selectSK.innerHTML = '<option value="">(Isi Kode SK) - (Isi Nama Sub Kegiatan)</option>';
 
     masterSKList.forEach(sk => {
@@ -475,7 +472,7 @@ function onBendaharaSelected(selectedNama) {
 window.onBendaharaSelected = onBendaharaSelected;
 
 // ==========================================
-// 7. MANAJEMEN PENGIKUT & KALKULASI BIAYA
+// 7. MANAJEMEN PENGIKUT, KALKULASI TANGGAL & BIAYA
 // ==========================================
 function addPengikutRow() {
     const container = document.getElementById('pengikutContainer');
@@ -530,6 +527,30 @@ function removePengikutRow(idx) {
     updateSKQuotaInfo();
 }
 window.removePengikutRow = removePengikutRow;
+
+/**
+ * Otomatis menghitung Lama Hari berdasarkan Tanggal Berangkat & Tanggal Kembali
+ */
+function calculateLamaHariFromDates() {
+    const tglMulaiVal = document.getElementById('tglMulai')?.value;
+    const tglKembaliVal = document.getElementById('tglKembali')?.value;
+    const lamaHariInput = document.getElementById('lamaHari');
+
+    if (tglMulaiVal && tglKembaliVal && lamaHariInput) {
+        const dMulai = new Date(tglMulaiVal);
+        const dKembali = new Date(tglKembaliVal);
+        const diffTime = dKembali - dMulai;
+        
+        if (diffTime >= 0) {
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            lamaHariInput.value = diffDays;
+        } else {
+            lamaHariInput.value = 1;
+        }
+    }
+    updateSKQuotaInfo();
+}
+window.calculateLamaHariFromDates = calculateLamaHariFromDates;
 
 function updateSKQuotaInfo() {
     const activePengikut = currentPengikut.filter(p => p !== null && p.nama !== '');
@@ -601,7 +622,9 @@ function proceedToStep2() {
 function initFormDefaults() {
     const today = new Date().toISOString().split('T')[0];
     const tglMulai = document.getElementById('tglMulai');
+    const tglKembali = document.getElementById('tglKembali');
     if (tglMulai && !tglMulai.value) tglMulai.value = today;
+    if (tglKembali && !tglKembali.value) tglKembali.value = today;
 }
 
 function initEventListeners() {
@@ -652,6 +675,8 @@ async function handleFormSubmit(e) {
 
         tempatBerangkat: document.getElementById('tempatBerangkat')?.value || 'Malahar',
         tempatTujuan: document.getElementById('tempatTujuan')?.value || '',
+        tglMulai: document.getElementById('tglMulai')?.value || new Date().toISOString().split('T')[0],
+        tglKembali: document.getElementById('tglKembali')?.value || new Date().toISOString().split('T')[0],
         lamaHari: days,
         biayaPerOrang: rate,
         totalBiaya: totalBiaya,
