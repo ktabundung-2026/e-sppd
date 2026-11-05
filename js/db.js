@@ -1,13 +1,8 @@
 /**
  * js/db.js - Layer Akses & Manajemen Data Terpusat
  * Aplikasi e-SPPD & Rekapitulasi Perdin Kecamatan Tabundung
- * Mengintegrasikan Dexie.js (IndexedDB Offline), Supabase Client (Cloud), 
- * dan LocalStorage Sync secara transparan.
  */
 
-// ==========================================
-// 1. KONFIGURASI SUPABASE CLIENT
-// ==========================================
 const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw';
 
@@ -16,9 +11,6 @@ if (typeof window !== 'undefined' && window.supabase && window.supabase.createCl
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-// ==========================================
-// 2. KONFIGURASI DEXIE (OFFLINE INDEXEDDB)
-// ==========================================
 let localDexieDB = null;
 if (typeof window !== 'undefined' && window.Dexie) {
     localDexieDB = new window.Dexie('PerdinTabundungDB');
@@ -29,9 +21,6 @@ if (typeof window !== 'undefined' && window.Dexie) {
     });
 }
 
-// ==========================================
-// 3. LAYER DATA API TERPUSAT (AppDB)
-// ==========================================
 const AppDB = {
     supabase: supabaseClient,
     dexie: localDexieDB,
@@ -73,7 +62,6 @@ const AppDB = {
     async getMasterSK() {
         let skList = [];
 
-        // Prioritas 1: Ambil dari Supabase (Cloud) jika Online
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase
@@ -83,7 +71,6 @@ const AppDB = {
 
                 if (!error && data && data.length > 0) {
                     skList = data;
-                    // Cache ke Dexie & LocalStorage
                     if (this.dexie) {
                         await this.dexie.master_sk.clear();
                         await this.dexie.master_sk.bulkPut(data.map(item => ({
@@ -96,17 +83,15 @@ const AppDB = {
                     return skList;
                 }
             } catch (err) {
-                console.warn("Gagal dari tabel, fallback ke storage lokal:", err);
+                console.warn("Gagal dari tabel Supabase, fallback ke storage lokal:", err);
             }
         }
 
-        // Prioritas 2: LocalStorage Cache
         const saved = localStorage.getItem('sppd_custom_sk_list');
         if (saved) {
             try { return JSON.parse(saved); } catch (e) { console.error(e); }
         }
 
-        // Prioritas 3: Dexie IndexedDB Offline
         if (this.dexie) {
             skList = await this.dexie.master_sk.toArray();
         }
@@ -122,7 +107,6 @@ const AppDB = {
             quota: quotaVal
         };
 
-        // 1. Simpan/Upsert ke Supabase Cloud jika Online
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase
@@ -132,19 +116,16 @@ const AppDB = {
 
                 if (error) {
                     console.error("Gagal simpan master_sk ke Supabase:", error);
-                    alert(`[Supabase Error] Gagal simpan ke Supabase: ${error.message} (Code: ${error.code})`);
+                    alert(`[Supabase Error] Gagal simpan: ${error.message}`);
                     return false;
-                } else {
-                    console.log("Berhasil tersimpan di Supabase master_sk:", data);
                 }
             } catch (err) {
                 console.error("Error jaringan ke Supabase:", err);
-                alert(`[Error Jaringan] Gagal terhubung ke Supabase: ${err.message}`);
+                alert(`[Error Jaringan] ${err.message}`);
                 return false;
             }
         }
 
-        // 2. Simpan ke LocalStorage & Dexie
         const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
         const idx = customSK.findIndex(item => item.kode === skObj.kode);
         if (idx >= 0) {
@@ -165,13 +146,34 @@ const AppDB = {
         return true;
     },
 
+    async deleteMasterSK(kode) {
+        if (this.isOnline() && this.supabase) {
+            try {
+                const { error } = await this.supabase
+                    .from('master_sk')
+                    .delete()
+                    .eq('kode', kode);
+                if (error) console.error("Gagal hapus di Supabase:", error);
+            } catch (err) {
+                console.error("Error hapus Supabase:", err);
+            }
+        }
+
+        let customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+        customSK = customSK.filter(sk => sk.kode !== kode);
+        localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+
+        if (this.dexie) {
+            await this.dexie.master_sk.delete(kode);
+        }
+        return true;
+    },
+
     // --------------------------------------
     // MANAJEMEN RIWAYAT PERDIN & REKAP
     // --------------------------------------
     async getAllRecords() {
         let records = [];
-
-        // Prioritas 1: Supabase jika Online
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase
@@ -202,13 +204,11 @@ const AppDB = {
             }
         }
 
-        // Prioritas 2: LocalStorage Cache
         const saved = localStorage.getItem('sppd_records_tabundung');
         if (saved) {
             try { return JSON.parse(saved); } catch (e) { console.error(e); }
         }
 
-        // Prioritas 3: Dexie IndexedDB
         if (this.dexie) {
             records = await this.dexie.riwayat_perdin.toArray();
         }
@@ -217,12 +217,10 @@ const AppDB = {
     },
 
     async saveRecord(record) {
-        // Simpan ke LocalStorage
         const existing = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
         existing.unshift(record);
         localStorage.setItem('sppd_records_tabundung', JSON.stringify(existing));
 
-        // Simpan ke Dexie (IndexedDB)
         if (this.dexie) {
             await this.dexie.riwayat_perdin.put({
                 id: record.id,
@@ -236,7 +234,6 @@ const AppDB = {
             });
         }
 
-        // Sinkronisasi ke Supabase Cloud
         if (this.isOnline() && this.supabase) {
             try {
                 await this.supabase.from('riwayat_perdin').insert([record]);
