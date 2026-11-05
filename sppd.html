@@ -106,9 +106,6 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
                             <select id="step1_kodeSK" onchange="updateSKQuotaInfo()" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50">
                                 <option value="">(Isi Kode SK) - (Isi Nama Sub Kegiatan)</option>
-                                <option value="7.01.01.2.01.0003">7.01.01.2.01.0003 - Penyelenggaraan Urusan Pemerintahan Umum</option>
-                                <option value="7.01.01.2.01.0001">7.01.01.2.01.0001 - Koordinasi Ketentraman & Ketertiban</option>
-                                <option value="7.01.01.2.02.0002">7.01.01.2.02.0002 - Pembinaan & Pengawasan Desa</option>
                             </select>
                         </div>
                         <div>
@@ -121,19 +118,11 @@
                     </div>
 
                     <!-- DESA / TUJUAN PERDIN -->
+                    <!-- TUJUAN PERDIN -->
                     <div class="mb-6">
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih Desa / Lokasi Tujuan Perdin</label>
-                        <select id="step1_selectDesa" onchange="syncTujuanPerdin(this.value)" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white">
-                            <option value="">-- Pilih Tujuan --</option>
-                            <option value="Desa Billa">Desa Billa</option>
-                            <option value="Desa Tarimbang">Desa Tarimbang</option>
-                            <option value="Desa Masu">Desa Masu</option>
-                            <option value="Desa Tavui">Desa Tavui</option>
-                            <option value="Desa Karita">Desa Karita</option>
-                            <option value="Waingapu (Ibu Kota Kabupaten)">Waingapu (Ibu Kota Kabupaten)</option>
-                        </select>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih Tujuan Perjalanan Dinas</label>
+                        <input type="text" id="step1_selectDesa" oninput="syncTujuanPerdin(this.value)" placeholder="Isi Tujuan Perdin" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white uppercase">
                     </div>
-
                     <div class="flex justify-end">
                         <button type="button" onclick="proceedToStep2()" class="bg-gov-700 hover:bg-gov-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
                             Lanjut ke Input Detail Form SPPD <i class="fa-solid fa-arrow-right"></i>
