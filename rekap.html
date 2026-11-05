@@ -8,10 +8,12 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c4a6e">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="apple-touch-icon" href="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png">
-    <link rel="icon" type="image/png" href="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png">
+    
+    <link id="appFavicon" rel="icon" type="image/png" href="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png">
+    <link id="appAppleIcon" rel="apple-touch-icon" href="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
 
     <script>
@@ -26,28 +28,53 @@
         };
     </script>
 
-    <!-- CSS KHUSUS FORMAT CETAK TABELARIS LAPORAN (PDF) -->
     <style>
         @media print {
-            body { background: white !important; color: black !important; font-family: 'Tinos', Georgia, serif !important; padding: 10mm; }
-            .no-print, header, footer, button, .no-print-area { display: none !important; }
-            .print-header { display: block !important; text-align: center; margin-bottom: 15px; border-bottom: 3px double #000; padding-bottom: 10px; }
-            .print-table { width: 100% !important; border-collapse: collapse !important; font-size: 9pt !important; }
-            .print-table th, .print-table td { border: 1px solid #000 !important; padding: 6px !important; }
-            .print-footer { display: flex !important; justify-content: flex-end; margin-top: 30px; font-size: 10pt; }
+            body { 
+                background: white !important; 
+                color: black !important; 
+                font-family: 'Tinos', Georgia, serif !important; 
+                padding: 10mm; 
+            }
+            .no-print, header, footer, button, .no-print-area { 
+                display: none !important; 
+            }
+            .print-header { 
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 15px !important;
+                margin-bottom: 15px; 
+                border-bottom: 3px double #000; 
+                padding-bottom: 10px; 
+            }
+            .print-table { 
+                width: 100% !important; 
+                border-collapse: collapse !important; 
+                font-size: 9pt !important; 
+            }
+            .print-table th, .print-table td { 
+                border: 1px solid #000 !important; 
+                padding: 6px !important; 
+            }
+            .print-footer { 
+                display: flex !important; 
+                justify-content: flex-end; 
+                margin-top: 30px; 
+                font-size: 10pt; 
+            }
         }
         .print-header, .print-footer { display: none; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
-    <!-- HEADER NAVIGATION (NO PRINT) -->
     <header class="bg-gov-900 text-white shadow-md sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
                     <a href="sppd.html">
-                        <img src="https://www.sumbatimurkab.go.id/public/img/konfigurasi/logo/1747657288_a8dff28fb3906c556fac.png" alt="Logo" class="h-10 w-auto">
+                        <img id="headerLogo" src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Sumba Timur" class="h-10 w-auto object-contain brand-logo">
                     </a>
                     <div>
                         <h1 class="font-bold text-base sm:text-lg leading-tight">Monitoring Kuota & Rekap Perdin</h1>
@@ -64,18 +91,18 @@
         </div>
     </header>
 
-    <!-- HEADER KOP SURAT CETAK (HANYA MUNCUL SAAT CETAK PDF) -->
     <div class="print-header">
-        <h3 class="font-bold text-base uppercase">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-        <h2 class="font-bold text-xl uppercase">KECAMATAN TABUNDUNG</h2>
-        <p class="text-xs italic">Malahar - Sumba Timur</p>
-        <h4 class="font-bold text-sm uppercase underline mt-3">LAPORAN REKAPITULASI REALISASI PERJALANAN DINAS</h4>
+        <img id="printLogo" src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda" class="h-16 w-auto brand-logo">
+        <div class="text-center">
+            <h3 class="font-bold text-base uppercase">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+            <h2 class="font-bold text-xl uppercase">KECAMATAN TABUNDUNG</h2>
+            <p class="text-xs italic">Malahar - Desa Billa, Sumba Timur</p>
+            <h4 class="font-bold text-sm uppercase underline mt-2">LAPORAN REKAPITULASI REALISASI PERJALANAN DINAS</h4>
+        </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- DASHBOARD METRICS (NO PRINT) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
                 <div class="w-12 h-12 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-xl font-bold"><i class="fa-solid fa-file-lines"></i></div>
@@ -110,7 +137,6 @@
             </div>
         </div>
 
-        <!-- MONITORING KUOTA (NO PRINT) -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 no-print">
             <h2 class="text-base font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
                 <span><i class="fa-solid fa-chart-pie text-gov-700 mr-2"></i> Status Kuota & Serapan Sub Kegiatan</span>
@@ -118,7 +144,6 @@
             <div class="flex flex-col space-y-3 w-full" id="skQuotaCardsContainer"></div>
         </div>
 
-        <!-- REKAPITULASI DETAIL DOKUMEN PERDIN (DITAMPILKAN SECARA TABELARIS SAAT PRINT PDF) -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4 gap-2 no-print">
                 <div>
@@ -153,7 +178,6 @@
 
     </main>
 
-    <!-- LEMBAR TANDA TANGAN CETAK (HANYA MUNCUL SAAT CETAK PDF) -->
     <div class="print-footer">
         <div class="text-center w-64">
             <p>Malahar, <span id="printDateToday">-</span></p>
@@ -164,7 +188,6 @@
         </div>
     </div>
 
-    <!-- FOOTER COPYRIGHT (NO PRINT) -->
     <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs mt-8 no-print">
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
@@ -173,7 +196,29 @@
     <script src="js/db.js"></script>
     <script src="js/rekap.js"></script>
     <script>
-        document.getElementById('printDateToday').innerText = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateEl = document.getElementById('printDateToday');
+            if (dateEl) {
+                dateEl.innerText = new Date().toLocaleDateString('id-ID', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            }
+
+            if (window.AppDB && typeof window.AppDB.getImageUrl === 'function') {
+                const logoUrl = window.AppDB.getImageUrl('logo_st.png', 'image');
+                
+                document.querySelectorAll('.brand-logo').forEach(img => {
+                    img.src = logoUrl;
+                });
+
+                const favicon = document.getElementById('appFavicon');
+                const appleIcon = document.getElementById('appAppleIcon');
+                if (favicon) favicon.href = logoUrl;
+                if (appleIcon) appleIcon.href = logoUrl;
+            }
+        });
     </script>
 </body>
 </html>
