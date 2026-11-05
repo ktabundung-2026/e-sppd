@@ -10,7 +10,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./sppd.html",
+  "start_url": "./index.html",
   "background_color": "#0c4a6e",
   "theme_color": "#0c4a6e",
   "display": "standalone",
