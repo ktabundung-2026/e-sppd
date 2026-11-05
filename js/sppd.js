@@ -1,7 +1,7 @@
 /**
  * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
  * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
- * impor/ekspor CSV, pencegahan data ganda (deduplikasi), serta sinkronisasi data via AppDB.
+ * impor/ekspor CSV, pencegahan data ganda, serta sinkronisasi data via AppDB.
  */
 
 // ==========================================
@@ -22,6 +22,7 @@ let currentStep = 1;
 document.addEventListener('DOMContentLoaded', async () => {
     initOnlineStatus();
     await loadMasterAsn();
+    loadCustomSKList();
     initEventListeners();
     initFormDefaults();
     updateSKQuotaInfo();
@@ -113,7 +114,6 @@ async function saveMasterAsn() {
     renderAsnTable();
 }
 
-// FORMAT RENDERING: NAMA DENGAN DETAIL TEKS KECIL DI BAWAHNYA
 function renderAsnTable(filterText = '') {
     const tbody = document.getElementById('asnTableBody') || document.getElementById('asnListContainer');
     const countEl = document.getElementById('totalAsnCount') || document.getElementById('countMasterAsn');
@@ -323,6 +323,11 @@ function initEventListeners() {
         asnForm.addEventListener('submit', saveAsnMaster);
     }
 
+    const btnAddPengikut = document.getElementById('btnAddPengikut');
+    if (btnAddPengikut) {
+        btnAddPengikut.addEventListener('click', addPengikutRow);
+    }
+
     const sppdForm = document.getElementById('sppdForm');
     if (sppdForm) {
         sppdForm.addEventListener('submit', handleFormSubmit);
@@ -330,11 +335,76 @@ function initEventListeners() {
 }
 
 // ==========================================
-// 6. AUTOFILL DROPDOWN ASN & PELAKSANA
+// 6. MANAJEMEN SK KUSTOM (LANGKAH 1)
+// ==========================================
+function openModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+window.openModalSK = openModalSK;
+window.closeModalSK = closeModalSK;
+
+function saveNewSK(e) {
+    e.preventDefault();
+    const kode = document.getElementById('newKodeSK')?.value.trim();
+    const nama = document.getElementById('newNamaSK')?.value.trim();
+    const quota = parseInt(document.getElementById('newQuotaSK')?.value) || 50;
+
+    if (!kode || !nama) return;
+
+    const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+    customSK.push({ kode, nama, quota });
+    localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+
+    saveCustomSKQuotaValue(kode, quota);
+    loadCustomSKList();
+    
+    const selectSK = document.getElementById('step1_kodeSK');
+    if (selectSK) selectSK.value = kode;
+
+    closeModalSK();
+    updateSKQuotaInfo();
+}
+window.saveNewSK = saveNewSK;
+
+function loadCustomSKList() {
+    const selectSK = document.getElementById('step1_kodeSK');
+    if (!selectSK) return;
+
+    const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+    customSK.forEach(sk => {
+        if (!Array.from(selectSK.options).some(opt => opt.value === sk.kode)) {
+            const opt = document.createElement('option');
+            opt.value = sk.kode;
+            opt.innerText = `${sk.kode} - ${sk.nama}`;
+            selectSK.appendChild(opt);
+        }
+    });
+}
+
+function saveCustomSKQuotaValue(kode, val) {
+    const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
+    quotas[kode] = parseInt(val) || 50;
+    localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+}
+
+// ==========================================
+// 7. AUTOFILL DROPDOWN ASN, PELAKSANA & BENDAHARA
 // ==========================================
 function populatePelaksanaDropdowns() {
     const selectPelaksana = document.getElementById('namaPelaksana');
-    const selectPejabat = document.getElementById('namaPejabat');
+    const selectBendahara = document.getElementById('selectBendahara');
 
     const optionsHTML = masterAsnList.map(a => 
         `<option value="${a.nama}">${a.nama} (${a.jabatan || 'ASN'})</option>`
@@ -348,12 +418,12 @@ function populatePelaksanaDropdowns() {
         }
     }
 
-    if (selectPejabat) {
-        selectPejabat.innerHTML = '<option value="">-- Pilih Pejabat Penandatangan --</option>' + optionsHTML;
-        const defaultCamat = masterAsnList.find(a => a.jabatan && a.jabatan.toLowerCase().includes('camat')) || masterAsnList[0];
-        if (defaultCamat) {
-            selectPejabat.value = defaultCamat.nama;
-            onPejabatSelected(defaultCamat.nama);
+    if (selectBendahara) {
+        selectBendahara.innerHTML = '<option value="">-- Pilih Bendahara Pengeluaran --</option>' + optionsHTML;
+        const defaultBendahara = masterAsnList.find(a => a.jabatan && a.jabatan.toLowerCase().includes('bendahara')) || masterAsnList[1] || masterAsnList[0];
+        if (defaultBendahara) {
+            selectBendahara.value = defaultBendahara.nama;
+            onBendaharaSelected(defaultBendahara.nama);
         }
     }
 }
@@ -369,18 +439,15 @@ function onNamaInputChanged(type, selectedNama) {
     updateSKQuotaInfo();
 }
 
-function onPejabatSelected(selectedNama) {
+function onBendaharaSelected(selectedNama) {
     const match = masterAsnList.find(a => a.nama === selectedNama);
-    if (match) {
-        const nipEl = document.getElementById('nipPejabat');
-        const jabEl = document.getElementById('jabatanPejabat');
-        if (nipEl) nipEl.value = match.nip || '-';
-        if (jabEl) jabEl.value = match.jabatan || '-';
-    }
+    const nipEl = document.getElementById('nipBendahara');
+    if (nipEl) nipEl.value = match ? (match.nip || '-') : '';
 }
+window.onBendaharaSelected = onBendaharaSelected;
 
 // ==========================================
-// 7. MANAJEMEN PENGIKUT & KALKULASI BIAYA
+// 8. MANAJEMEN PENGIKUT & KALKULASI BIAYA
 // ==========================================
 function addOfficerRow() { addPengikutRow(); }
 
@@ -411,6 +478,7 @@ function addPengikutRow() {
     container.appendChild(row);
     updateSKQuotaInfo();
 }
+window.addPengikutRow = addPengikutRow;
 
 function updatePengikutSelect(idx, nama) {
     const match = masterAsnList.find(a => a.nama === nama);
@@ -427,6 +495,7 @@ function updatePengikutSelect(idx, nama) {
     }
     updateSKQuotaInfo();
 }
+window.updatePengikutSelect = updatePengikutSelect;
 
 function removePengikutRow(idx) {
     const row = document.getElementById(`pengikutRow_${idx}`);
@@ -434,90 +503,23 @@ function removePengikutRow(idx) {
     currentPengikut[idx] = null;
     updateSKQuotaInfo();
 }
+window.removePengikutRow = removePengikutRow;
 
 // ==========================================
-// 8. SINKRONISASI KUOTA OH & HITUNG BIAYA
+// 9. SINKRONISASI KUOTA OH & HITUNG BIAYA
 // ==========================================
 function updateSKQuotaInfo() {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003';
-    const lblSK = document.getElementById('lblCurrentSK');
-    if (lblSK) lblSK.innerText = kodeSK;
-
     const activePengikut = currentPengikut.filter(p => p !== null && p.nama !== '');
     const totalPersonil = 1 + activePengikut.length;
 
-    const tglMulai = document.getElementById('tglMulai')?.value;
-    const tglSelesai = document.getElementById('tglSelesai')?.value;
-    let days = 1;
-
-    if (tglMulai && tglSelesai) {
-        const d1 = new Date(tglMulai);
-        const d2 = new Date(tglSelesai);
-        const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
-        days = diff > 0 ? diff : 1;
-    }
-
-    const neededOH = totalPersonil * days;
-    const lblOH = document.getElementById('lblPenugasanOH');
-    if (lblOH) lblOH.innerText = `${neededOH} OH`;
-
-    const txtHari = document.getElementById('lamaHariText');
-    if (txtHari) txtHari.value = `${days} Hari`;
-
-    let usedOH = 0;
-    const savedRecords = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
-    savedRecords.forEach(r => {
-        if ((r.kodeSK || r.sub_kegiatan) === kodeSK) {
-            const count = 1 + (r.pengikut ? r.pengikut.length : 0);
-            usedOH += (count * (r.lamaHari || 1));
-        }
-    });
-
-    const maxQuota = parseInt(document.getElementById('inputMaxQuota')?.value) || 50;
-    const remainingOH = maxQuota - usedOH;
-
-    const valUsed = document.getElementById('valUsedQuota');
-    const valRemaining = document.getElementById('valRemainingQuota');
-
-    if (valUsed) valUsed.innerText = `${usedOH} OH`;
-    if (valRemaining) valRemaining.innerText = `${remainingOH} OH`;
-
-    const pct = Math.min(100, Math.round((usedOH / maxQuota) * 100));
-    const progress = document.getElementById('progressBarQuota');
-    if (progress) progress.style.width = `${pct}%`;
-
-    const badge = document.getElementById('badgeStatusQuota');
-    if (badge) {
-        if (remainingOH < 0) {
-            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300";
-            badge.innerText = "Over Kuota";
-        } else if (remainingOH <= 5) {
-            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
-            badge.innerText = "Hampir Habis";
-        } else {
-            badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
-            badge.innerText = "Tersedia";
-        }
-    }
+    const days = parseInt(document.getElementById('lamaHari')?.value) || 1;
 
     calculateTotalBiaya(days, totalPersonil);
-}
-
-function saveCustomSKQuota(val) {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value || '7.01.01.2.01.0003';
-    const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
-    quotas[kodeSK] = parseInt(val) || 50;
-    localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
-    updateSKQuotaInfo();
 }
 
 function syncTujuanPerdin(val) {
     const destInput = document.getElementById('tempatTujuan');
     if (destInput) destInput.value = val;
-}
-
-function onDateOrBudgetChanged() {
-    updateSKQuotaInfo();
 }
 
 function calculateTotalBiaya(daysParam, personilParam) {
@@ -534,7 +536,7 @@ function calculateTotalBiaya(daysParam, personilParam) {
 }
 
 // ==========================================
-// 9. NAVIGASI STEPPER FORM & SUBMIT
+// 10. NAVIGASI STEPPER FORM & SUBMIT
 // ==========================================
 function switchStep(stepNumber) {
     currentStep = stepNumber;
@@ -591,17 +593,7 @@ async function handleFormSubmit(e) {
     e.preventDefault();
 
     const activePengikut = currentPengikut.filter(p => p !== null && p.nama.trim() !== '');
-    const tglMulai = document.getElementById('tglMulai')?.value || '';
-    const tglSelesai = document.getElementById('tglSelesai')?.value || '';
-    
-    let days = 1;
-    if (tglMulai && tglSelesai) {
-        const d1 = new Date(tglMulai);
-        const d2 = new Date(tglSelesai);
-        const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
-        days = diff > 0 ? diff : 1;
-    }
-
+    const days = parseInt(document.getElementById('lamaHari')?.value) || 1;
     const rate = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
     const totalPersonil = 1 + activePengikut.length;
     const totalBiaya = days * rate * totalPersonil;
@@ -615,6 +607,7 @@ async function handleFormSubmit(e) {
         sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
         dasarPelaksanaan: 'Atas Perintah Camat Tabundung',
         maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
+        laporanHasil: document.getElementById('laporanHasil')?.value || '',
         
         namaPelaksana: (document.getElementById('namaPelaksana')?.value || '').toUpperCase(),
         nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
@@ -624,23 +617,16 @@ async function handleFormSubmit(e) {
 
         tempatBerangkat: document.getElementById('tempatBerangkat')?.value || 'Malahar',
         tempatTujuan: document.getElementById('tempatTujuan')?.value || '',
-        alatAngkutan: 'Kendaraan Roda 2',
-        tglMulai: tglMulai,
-        tglSelesai: tglSelesai,
         lamaHari: days,
 
         biayaPerOrang: rate,
         totalBiaya: totalBiaya,
 
-        namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
-        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
-        nipPejabatTujuan: document.getElementById('nipPejabatTujuan')?.value || '-',
-
-        namaCamat: document.getElementById('namaPejabat')?.value || 'RUDOLF UMBU RESI LOLY, ST',
-        nipCamat: document.getElementById('nipPejabat')?.value || '197205212006041008',
-        pangkatCamat: document.getElementById('jabatanPejabat')?.value || 'Camat Tabundung',
-        namaBendahara: 'DANIEL KAMBARU WINDI',
-        nipBendahara: '197712312008011084',
+        namaCamat: document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST',
+        nipCamat: document.getElementById('nipPenggunaAnggaran')?.value || '197205212006041008',
+        pangkatCamat: 'Camat Tabundung',
+        namaBendahara: document.getElementById('selectBendahara')?.value || 'DANIEL KAMBARU WINDI',
+        nipBendahara: document.getElementById('nipBendahara')?.value || '197712312008011084',
 
         createdAt: new Date().toISOString()
     };
@@ -658,7 +644,7 @@ async function handleFormSubmit(e) {
 }
 
 // ==========================================
-// 10. RIWAYAT, AKSI HAPUS & UTILITY TERBILANG
+// 11. RIWAYAT & UTILITY TERBILANG
 // ==========================================
 async function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
@@ -717,10 +703,6 @@ async function deleteSppdRecord(id) {
     }
 }
 window.deleteSppdRecord = deleteSppdRecord;
-
-function printHistoryTable() {
-    window.location.href = "rekap.html";
-}
 
 function numberToWords(amount) {
     const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
