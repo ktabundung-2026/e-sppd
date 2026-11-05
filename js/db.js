@@ -22,9 +22,10 @@ if (typeof window !== 'undefined' && window.supabase && window.supabase.createCl
 let localDexieDB = null;
 if (typeof window !== 'undefined' && window.Dexie) {
     localDexieDB = new window.Dexie('PerdinTabundungDB');
-    localDexieDB.version(1).stores({
+    localDexieDB.version(2).stores({
         riwayat_perdin: 'id, no_sppd, tanggal, tujuan, pelaksana, sub_kegiatan, jumlah_oh, sinkron',
-        master_asn: 'nip, nama, pangkat, jabatan'
+        master_asn: 'nip, nama, pangkat, jabatan',
+        master_sk: 'kode, nama, quota'
     });
 }
 
@@ -63,6 +64,94 @@ const AppDB = {
         if (this.dexie) {
             await this.dexie.master_asn.clear();
             await this.dexie.master_asn.bulkAdd(asnList);
+        }
+    },
+
+    // --------------------------------------
+    // MANAJEMEN MASTER SUB KEGIATAN (SK & KUOTA)
+    // --------------------------------------
+    async getMasterSK() {
+        let skList = [];
+
+        // Prioritas 1: Ambil dari Supabase (Cloud) jika Online
+        if (this.isOnline() && this.supabase) {
+            try {
+                const { data, error } = await this.supabase
+                    .from('master_sk')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (!error && data && data.length > 0) {
+                    skList = data;
+                    // Cache ke Dexie & LocalStorage
+                    if (this.dexie) {
+                        await this.dexie.master_sk.clear();
+                        await this.dexie.master_sk.bulkPut(data.map(item => ({
+                            kode: item.kode,
+                            nama: item.nama,
+                            quota: item.quota || 50
+                        })));
+                    }
+                    localStorage.setItem('sppd_custom_sk_list', JSON.stringify(skList));
+                    return skList;
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil master_sk dari Supabase, fallback ke storage lokal:", err);
+            }
+        }
+
+        // Prioritas 2: LocalStorage Cache
+        const saved = localStorage.getItem('sppd_custom_sk_list');
+        if (saved) {
+            try { return JSON.parse(saved); } catch (e) { console.error(e); }
+        }
+
+        // Prioritas 3: Dexie IndexedDB Offline
+        if (this.dexie) {
+            skList = await this.dexie.master_sk.toArray();
+        }
+
+        return skList;
+    },
+
+    async saveMasterSK(skObj) {
+        // 1. Simpan ke LocalStorage
+        const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+        const idx = customSK.findIndex(item => item.kode === skObj.kode);
+        if (idx >= 0) {
+            customSK[idx] = skObj;
+        } else {
+            customSK.push(skObj);
+        }
+        localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+
+        // 2. Simpan Pemetaan Kuota di LocalStorage
+        const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
+        quotas[skObj.kode] = parseInt(skObj.quota) || 50;
+        localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+
+        // 3. Simpan ke Dexie IndexedDB
+        if (this.dexie) {
+            await this.dexie.master_sk.put({
+                kode: skObj.kode,
+                nama: skObj.nama,
+                quota: parseInt(skObj.quota) || 50
+            });
+        }
+
+        // 4. Upsert/Sinkronkan ke Supabase Cloud jika Online
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_sk').upsert([
+                    {
+                        kode: skObj.kode,
+                        nama: skObj.nama,
+                        quota: parseInt(skObj.quota) || 50
+                    }
+                ], { onConflict: 'kode' });
+            } catch (err) {
+                console.error("Gagal sync master_sk ke Supabase:", err);
+            }
         }
     },
 
