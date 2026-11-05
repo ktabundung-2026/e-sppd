@@ -1,7 +1,7 @@
 /**
  * js/sppd.js - Sistem Pengelolaan SPPD Kecamatan Tabundung
  * Mengelola form input multi-step SPPD, kalkulasi biaya, manajemen master ASN,
- * impor/ekspor CSV, pencegahan data ganda, serta sinkronisasi data via AppDB.
+ * impor/ekspor CSV, sinkronisasi Master Sub Kegiatan (SK) ke Supabase / AppDB.
  */
 
 // ==========================================
@@ -13,6 +13,7 @@ const DEFAULT_ASN_LIST = [
 ];
 
 let masterAsnList = [];
+let masterSKList = [];
 let currentPengikut = [];
 let currentStep = 1;
 
@@ -22,7 +23,7 @@ let currentStep = 1;
 document.addEventListener('DOMContentLoaded', async () => {
     initOnlineStatus();
     await loadMasterAsn();
-    loadCustomSKList();
+    await loadCustomSKList();
     initEventListeners();
     initFormDefaults();
     updateSKQuotaInfo();
@@ -87,7 +88,7 @@ function sanitizeAsnList(list) {
 }
 
 async function loadMasterAsn() {
-    if (window.AppDB) {
+    if (window.AppDB && typeof window.AppDB.getMasterAsn === 'function') {
         masterAsnList = await window.AppDB.getMasterAsn();
     } else {
         const saved = localStorage.getItem('sppd_master_asn');
@@ -105,7 +106,7 @@ async function loadMasterAsn() {
 async function saveMasterAsn() {
     masterAsnList = sanitizeAsnList(masterAsnList);
 
-    if (window.AppDB) {
+    if (window.AppDB && typeof window.AppDB.saveMasterAsn === 'function') {
         await window.AppDB.saveMasterAsn(masterAsnList);
     } else {
         localStorage.setItem('sppd_master_asn', JSON.stringify(masterAsnList));
@@ -335,7 +336,7 @@ function initEventListeners() {
 }
 
 // ==========================================
-// 6. MANAJEMEN SK KUSTOM (LANGKAH 1)
+// 6. MANAJEMEN SUB KEGIATAN (SUPABASE / AppDB INTEGRATED)
 // ==========================================
 function openModalSK() {
     const modal = document.getElementById('modalSK');
@@ -355,35 +356,20 @@ function closeModalSK() {
 window.openModalSK = openModalSK;
 window.closeModalSK = closeModalSK;
 
-function saveNewSK(e) {
-    e.preventDefault();
-    const kode = document.getElementById('newKodeSK')?.value.trim();
-    const nama = document.getElementById('newNamaSK')?.value.trim();
-    const quota = parseInt(document.getElementById('newQuotaSK')?.value) || 50;
-
-    if (!kode || !nama) return;
-
-    const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
-    customSK.push({ kode, nama, quota });
-    localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
-
-    saveCustomSKQuotaValue(kode, quota);
-    loadCustomSKList();
-    
-    const selectSK = document.getElementById('step1_kodeSK');
-    if (selectSK) selectSK.value = kode;
-
-    closeModalSK();
-    updateSKQuotaInfo();
-}
-window.saveNewSK = saveNewSK;
-
-function loadCustomSKList() {
+async function loadCustomSKList() {
     const selectSK = document.getElementById('step1_kodeSK');
     if (!selectSK) return;
 
-    const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
-    customSK.forEach(sk => {
+    // 1. Ambil data dari Supabase / AppDB
+    if (window.AppDB && typeof window.AppDB.getMasterSK === 'function') {
+        masterSKList = await window.AppDB.getMasterSK();
+    } else {
+        const saved = localStorage.getItem('sppd_custom_sk_list');
+        masterSKList = saved ? JSON.parse(saved) : [];
+    }
+
+    // 2. Render opsi SK tambahan ke dropdown
+    masterSKList.forEach(sk => {
         if (!Array.from(selectSK.options).some(opt => opt.value === sk.kode)) {
             const opt = document.createElement('option');
             opt.value = sk.kode;
@@ -393,11 +379,47 @@ function loadCustomSKList() {
     });
 }
 
-function saveCustomSKQuotaValue(kode, val) {
-    const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
-    quotas[kode] = parseInt(val) || 50;
-    localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+async function saveNewSK(e) {
+    e.preventDefault();
+    const kode = document.getElementById('newKodeSK')?.value.trim();
+    const nama = document.getElementById('newNamaSK')?.value.trim();
+    const quota = parseInt(document.getElementById('newQuotaSK')?.value) || 50;
+
+    if (!kode || !nama) {
+        alert("Kode SK dan Nama Sub Kegiatan wajib diisi!");
+        return;
+    }
+
+    const newSKObj = { kode, nama, quota };
+
+    // 1. Simpan ke Supabase via AppDB atau localStorage
+    if (window.AppDB && typeof window.AppDB.saveMasterSK === 'function') {
+        await window.AppDB.saveMasterSK(newSKObj);
+    } else {
+        const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+        const isDuplicate = customSK.some(sk => sk.kode === kode);
+        if (!isDuplicate) {
+            customSK.push(newSKObj);
+            localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+        }
+
+        // Simpan pemetaan kuota lokal
+        const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
+        quotas[kode] = quota;
+        localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+    }
+
+    // 2. Reload dropdown & set value terpilih
+    await loadCustomSKList();
+    
+    const selectSK = document.getElementById('step1_kodeSK');
+    if (selectSK) selectSK.value = kode;
+
+    closeModalSK();
+    updateSKQuotaInfo();
+    alert(`Sub Kegiatan ${kode} berhasil disimpan ke Database!`);
 }
+window.saveNewSK = saveNewSK;
 
 // ==========================================
 // 7. AUTOFILL DROPDOWN ASN, PELAKSANA & BENDAHARA
@@ -631,7 +653,7 @@ async function handleFormSubmit(e) {
         createdAt: new Date().toISOString()
     };
 
-    if (window.AppDB) {
+    if (window.AppDB && typeof window.AppDB.saveRecord === 'function') {
         await window.AppDB.saveRecord(record);
     } else {
         const existing = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
@@ -651,7 +673,7 @@ async function renderHistoryTable() {
     if (!tbody) return;
 
     let records = [];
-    if (window.AppDB) {
+    if (window.AppDB && typeof window.AppDB.getAllRecords === 'function') {
         records = await window.AppDB.getAllRecords();
     } else {
         records = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
