@@ -96,7 +96,7 @@ const AppDB = {
                     return skList;
                 }
             } catch (err) {
-                console.warn("Gagal mengambil master_sk dari Supabase, fallback ke storage lokal:", err);
+                console.warn("Gagal dari tabel, fallback ke storage lokal:", err);
             }
         }
 
@@ -115,42 +115,53 @@ const AppDB = {
     },
 
     async saveMasterSK(skObj) {
+        const quotaVal = parseInt(skObj.quota) || 50;
+
         // 1. Simpan ke LocalStorage
         const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
         const idx = customSK.findIndex(item => item.kode === skObj.kode);
         if (idx >= 0) {
-            customSK[idx] = skObj;
+            customSK[idx] = { kode: skObj.kode, nama: skObj.nama, quota: quotaVal };
         } else {
-            customSK.push(skObj);
+            customSK.push({ kode: skObj.kode, nama: skObj.nama, quota: quotaVal });
         }
         localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
 
         // 2. Simpan Pemetaan Kuota di LocalStorage
         const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
-        quotas[skObj.kode] = parseInt(skObj.quota) || 50;
+        quotas[skObj.kode] = quotaVal;
         localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
 
-        // 3. Simpan ke Dexie IndexedDB
+        // 3. Simpan ke Dexie IndexedDB (Offline DB)
         if (this.dexie) {
             await this.dexie.master_sk.put({
                 kode: skObj.kode,
                 nama: skObj.nama,
-                quota: parseInt(skObj.quota) || 50
+                quota: quotaVal
             });
         }
 
-        // 4. Upsert/Sinkronkan ke Supabase Cloud jika Online
+        // 4. Upsert / Simpan ke Supabase Cloud
         if (this.isOnline() && this.supabase) {
             try {
-                await this.supabase.from('master_sk').upsert([
-                    {
-                        kode: skObj.kode,
-                        nama: skObj.nama,
-                        quota: parseInt(skObj.quota) || 50
-                    }
-                ], { onConflict: 'kode' });
+                const { data, error } = await this.supabase
+                    .from('master_sk')
+                    .upsert([
+                        {
+                            kode: skObj.kode,
+                            nama: skObj.nama,
+                            quota: quotaVal
+                        }
+                    ], { onConflict: 'kode' });
+
+                if (error) {
+                    console.error("Gagal Simpan", error);
+                    alert(`Gagal simpan ke Supabase: ${error.message}`);
+                } else {
+                    console.log("Berhasil Tersimpan", data);
+                }
             } catch (err) {
-                console.error("Gagal sync master_sk ke Supabase:", err);
+                console.error("Error jaringan", err);
             }
         }
     },
@@ -188,7 +199,7 @@ const AppDB = {
                     return records;
                 }
             } catch (err) {
-                console.warn("Supabase fetch failed, fallback ke local storage:", err);
+                console.warn("Fetch failed, fallback ke local storage:", err);
             }
         }
 
@@ -231,7 +242,7 @@ const AppDB = {
             try {
                 await this.supabase.from('riwayat_perdin').insert([record]);
             } catch (err) {
-                console.error("Gagal sync record ke Supabase:", err);
+                console.error("Gagal sync record", err);
             }
         }
     },
@@ -249,7 +260,7 @@ const AppDB = {
             try {
                 await this.supabase.from('riwayat_perdin').delete().eq('id', recordId);
             } catch (err) {
-                console.error("Gagal hapus record di Supabase:", err);
+                console.error("Gagal hapus record", err);
             }
         }
     }
