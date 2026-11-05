@@ -88,14 +88,19 @@
             <!-- STEP 1: ALOKASI KUOTA SUB KEGIATAN & TUJUAN PERDIN -->
             <div id="step-content-1" class="space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h2 class="text-base font-bold text-gov-900 border-b pb-3 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-calculator text-gov-700"></i> Langkah 1: Pilih Sub Kegiatan & Lokasi Tujuan
-                    </h2>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-gov-900 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-gov-700"></i> Langkah 1: Pilih Sub Kegiatan & Lokasi Tujuan
+                        </h2>
+                        <button type="button" onclick="openModalSK()" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus-circle"></i> Tambah Sub Kegiatan Baru
+                        </button>
+                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
-                            <select id="step1_kodeSK" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50">
+                            <select id="step1_kodeSK" onchange="updateSKQuotaInfo()" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50">
                                 <option value="7.01.01.2.01.0003">7.01.01.2.01.0003 - Penyelenggaraan Urusan Pemerintahan Umum</option>
                                 <option value="7.01.01.2.01.0001">7.01.01.2.01.0001 - Koordinasi Ketentraman & Ketertiban</option>
                                 <option value="7.01.01.2.02.0002">7.01.01.2.02.0002 - Pembinaan & Pengawasan Desa</option>
@@ -110,8 +115,22 @@
                         </div>
                     </div>
 
+                    <!-- DESA / TUJUAN PERDIN -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih Desa / Lokasi Tujuan Perdin</label>
+                        <select id="step1_selectDesa" onchange="syncTujuanPerdin(this.value)" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white">
+                            <option value="">-- Pilih Tujuan --</option>
+                            <option value="Desa Billa">Desa Billa</option>
+                            <option value="Desa Tarimbang">Desa Tarimbang</option>
+                            <option value="Desa Masu">Desa Masu</option>
+                            <option value="Desa Tavui">Desa Tavui</option>
+                            <option value="Desa Karita">Desa Karita</option>
+                            <option value="Waingapu (Ibu Kota Kabupaten)">Waingapu (Ibu Kota Kabupaten)</option>
+                        </select>
+                    </div>
+
                     <div class="flex justify-end">
-                        <button type="button" onclick="switchStep(2)" class="bg-gov-700 hover:bg-gov-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                        <button type="button" onclick="proceedToStep2()" class="bg-gov-700 hover:bg-gov-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
                             Lanjut ke Input Detail Form SPPD <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
@@ -123,9 +142,6 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
                     <h2 class="text-base font-bold text-gov-900 border-b pb-3 flex items-center justify-between">
                         <span><i class="fa-solid fa-file-signature text-gov-700 mr-2"></i> Langkah 2: Kelengkapan Rincian Surat Tugas & SPPD</span>
-                        <button type="button" onclick="switchStep(1)" class="text-xs text-gov-700 hover:underline">
-                            <i class="fa-solid fa-arrow-left"></i> Kembali ke Langkah 1
-                        </button>
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -166,7 +182,7 @@
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="text-xs font-bold text-slate-700 uppercase">Anggota Tim Pengikut (Jika Ada)</label>
-                            <button type="button" id="btnAddPengikut" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold py-1 px-3 rounded-lg transition flex items-center gap-1">
+                            <button type="button" id="btnAddPengikut" onclick="addPengikutRow()" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold py-1 px-3 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-user-plus"></i> Tambah Anggota
                             </button>
                         </div>
@@ -185,18 +201,45 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Lama Hari</label>
-                            <input type="number" id="lamaHari" value="1" min="1" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
+                            <input type="number" id="lamaHari" value="1" min="1" oninput="updateSKQuotaInfo()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Biaya Per Orang (Rp)</label>
-                            <input type="number" id="biayaPerOrang" value="150000" step="10000" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
+                            <input type="number" id="biayaPerOrang" value="150000" step="10000" oninput="updateSKQuotaInfo()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
                         </div>
                     </div>
 
-                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                    <!-- INPUT HASIL YANG DICAPAI (LAPORAN) -->
+                    <div class="border-t pt-4">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hasil yang Dicapai / Laporan Ringkas</label>
+                        <textarea id="laporanHasil" rows="3" placeholder="Tuliskan poin-poin hasil pelaksanaan penugasan di lapangan..." class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
+                    </div>
+
+                    <!-- INPUT PEJABAT PENANDATANGAN & BENDAHARA (DI ATAS TOTAL ESTIMASI) -->
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Pejabat Penandatangan & Pengelola Keuangan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna Anggaran (Otomatis Camat)</label>
+                                <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
+                                <input type="hidden" id="nipPenggunaAnggaran" value="197205212006041008">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bendahara Pengeluaran (Pilih dari Master ASN)</label>
+                                <select id="selectBendahara" onchange="onBendaharaSelected(this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white"></select>
+                                <input type="hidden" id="nipBendahara" value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOTAL ESTIMASI BIAYA -->
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-emerald-900 uppercase">Total Estimasi Biaya:</span>
-                            <input type="number" id="totalBiaya" readonly class="p-2 text-xs font-extrabold border rounded text-emerald-800 bg-white w-48 text-right">
+                            <input type="text" id="totalBiayaFormatted" readonly class="p-2 text-xs font-extrabold border rounded text-emerald-800 bg-white w-48 text-right">
+                        </div>
+                        <div>
+                            <input type="text" id="terbilang" readonly class="w-full p-1.5 text-xs border rounded font-semibold italic bg-white text-slate-600">
                         </div>
                     </div>
 
@@ -303,7 +346,6 @@
                         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar ASN Tersimpan (<span id="totalAsnCount">0</span>)</span>
                         <input type="text" id="searchAsnInput" placeholder="Cari nama / NIP..." class="p-1.5 text-xs border rounded-lg w-40 font-medium">
                     </div>
-                    <!-- SINGLE HEADER MAIN COLUMN -->
                     <div class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto bg-white">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-50 border-b sticky top-0 z-10">
@@ -322,6 +364,34 @@
                     Tutup
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP TAMBAH SUB KEGIATAN BARU (LANGKAH 1) -->
+    <div id="modalSK" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col">
+            <div class="bg-gov-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm">Tambah Sub Kegiatan (SK) Baru</h3>
+                <button type="button" onclick="closeModalSK()" class="text-slate-300 hover:text-white font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveNewSK(event)" class="p-6 space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan</label>
+                    <input type="text" id="newKodeSK" placeholder="Contoh: 7.01.01.2.03.0001" required class="w-full p-2 text-xs border rounded font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Sub Kegiatan</label>
+                    <input type="text" id="newNamaSK" placeholder="Contoh: Pembangunan Infrastruktur Desa" required class="w-full p-2 text-xs border rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Batas Kuota Alokasi (OH)</label>
+                    <input type="number" id="newQuotaSK" value="50" min="1" required class="w-full p-2 text-xs border rounded font-bold">
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModalSK()" class="px-4 py-1.5 bg-slate-200 text-xs font-bold rounded">Batal</button>
+                    <button type="submit" class="px-4 py-1.5 bg-gov-700 text-white text-xs font-bold rounded">Simpan SK</button>
+                </div>
+            </form>
         </div>
     </div>
 
