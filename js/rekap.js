@@ -1,5 +1,5 @@
 /**
- * js/rekap.js - Logika Monitoring Kuota & Rekapitulasi SPPD (Tampilan Berbaris Atas Bawah)
+ * js/rekap.js - Logika Monitoring Kuota & Rekapitulasi SPPD
  * Aplikasi e-SPPD Kecamatan Tabundung
  */
 
@@ -62,7 +62,6 @@ async function loadRekapData() {
     const container = document.getElementById("skQuotaCardsContainer");
     if (!container) return;
 
-    // Mengubah class container dari grid menjadi flex col (berbaris atas bawah)
     container.className = "flex flex-col space-y-3 w-full";
     container.innerHTML = "";
 
@@ -138,7 +137,7 @@ async function loadRekapData() {
     if (!tbody) return;
 
     if (perdinHistory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-500 italic">Belum ada riwayat dokumen perjalanan dinas tersimpan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-500 italic">Belum ada riwayat dokumen perjalanan dinas tersimpan.</td></tr>`;
         return;
     }
 
@@ -171,7 +170,38 @@ async function loadRekapData() {
                 </td>
                 <td class="p-3 text-center font-extrabold text-gov-800 bg-slate-50">${ohBeban} OH</td>
                 <td class="p-3 text-right font-extrabold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
+                <td class="p-3 text-center print:hidden">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <a href="sppd.html?edit=${r.id}" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded font-bold text-[11px] transition shadow-sm" title="Edit Dokumen">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </a>
+                        <button type="button" onclick="deletePerdinRecord(${r.id})" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-2 py-1 rounded font-bold text-[11px] transition shadow-sm" title="Hapus Dokumen">
+                            <i class="fa-solid fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                </td>
             </tr>
         `;
     }).join("");
 }
+
+/**
+ * Menghapus dokumen SPPD terpilih dari Supabase, Dexie (IndexedDB), dan LocalStorage
+ */
+async function deletePerdinRecord(recordId) {
+    if (confirm("Apakah Anda yakin ingin menghapus dokumen Perjalanan Dinas ini?")) {
+        if (window.AppDB && typeof window.AppDB.deleteRecord === 'function') {
+            await window.AppDB.deleteRecord(recordId);
+        } else {
+            let records = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
+            records = records.filter(r => r.id != recordId);
+            localStorage.setItem('sppd_records_tabundung', JSON.stringify(records));
+        }
+
+        // Muat ulang metrik dan data rekapitulasi setelah dihapus
+        await loadRekapData();
+        alert("Dokumen Perjalanan Dinas berhasil dihapus.");
+    }
+}
+
+window.deletePerdinRecord = deletePerdinRecord;
