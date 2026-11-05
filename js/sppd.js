@@ -54,7 +54,6 @@ function updateOnlineStatus() {
 // 4. MANAJEMEN MASTER DATA ASN (SANITISASI OTOMATIS REAL-TIME)
 // ==========================================
 
-// FUNGSI UTAMA UNTUK MEMASTIKAN FORMAT NAMA & NIP SELALU TEPAT
 function sanitizeAsnList(list) {
     if (!Array.isArray(list)) return [];
     return list.map(item => {
@@ -65,12 +64,10 @@ function sanitizeAsnList(list) {
         let pangkatVal = item.pangkat || '-';
         let jabatanVal = item.jabatan || '-';
 
-        // Deteksi jika 'nama' terisi angka NIP (12-18 digit) dan 'nip' terisi karakter huruf (Nama)
         const namaIsNip = /^\d{12,18}$/.test(namaVal.replace(/\s+/g, ''));
         const nipIsNama = /[a-zA-Z]/.test(nipVal);
 
         if (namaIsNip && nipIsNama) {
-            // Tukar posisi agar selalu tepat
             return {
                 nama: nipVal.toUpperCase(),
                 nip: namaVal,
@@ -100,13 +97,11 @@ async function loadMasterAsn() {
         masterAsnList = [...DEFAULT_ASN_LIST];
     }
 
-    // Sanitasi data langsung saat dimuat
     masterAsnList = sanitizeAsnList(masterAsnList);
     await saveMasterAsn();
 }
 
 async function saveMasterAsn() {
-    // Sanitasi ulang sebelum disimpan agar state lokal dan tampilan UI selalu seragam real-time
     masterAsnList = sanitizeAsnList(masterAsnList);
 
     if (window.AppDB) {
@@ -118,7 +113,6 @@ async function saveMasterAsn() {
     renderAsnTable();
 }
 
-// RENDERING TAMPILAN DAFTAR ASN MASTER
 function renderAsnTable(filterText = '') {
     const tbody = document.getElementById('asnListContainer') || document.getElementById('asnTableBody');
     const countEl = document.getElementById('countMasterAsn') || document.getElementById('totalAsnCount');
@@ -151,10 +145,7 @@ function renderAsnTable(filterText = '') {
         return `
             <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition text-xs border-b border-slate-100">
                 <div>
-                    <!-- BARIS 1: NAMA ASN -->
                     <p class="font-bold text-slate-800 uppercase">${displayNama}</p>
-                    
-                    <!-- BARIS 2: NIP | PANGKAT - JABATAN -->
                     <p class="text-[10px] text-slate-500 mt-0.5">
                         <span class="font-mono">NIP: ${safeNip}</span> &bull; <span>${safePangkat} - ${safeJabatan}</span>
                     </p>
@@ -169,7 +160,6 @@ function renderAsnTable(filterText = '') {
         `;
     }).join('');
 
-    // Attach handler hapus
     tbody.querySelectorAll('.btn-delete-asn').forEach(btn => {
         btn.addEventListener('click', function() {
             const idx = parseInt(this.getAttribute('data-index'), 10);
@@ -178,7 +168,6 @@ function renderAsnTable(filterText = '') {
     });
 }
 
-// HAPUS DATA ASN BERDASARKAN INDEKS PERSIS
 async function deleteAsnByIndex(index) {
     if (index >= 0 && index < masterAsnList.length) {
         const item = masterAsnList[index];
@@ -192,7 +181,6 @@ async function deleteAsnByIndex(index) {
 }
 window.deleteAsnByIndex = deleteAsnByIndex;
 
-// RESET MASTER ASN TOTAL KE DEFAULT
 async function clearAllMasterAsn() {
     if (confirm("Apakah Anda yakin ingin MENGHAPUS SEMUA data master ASN tersimpan?\nData akan dikembalikan ke data awal default.")) {
         masterAsnList = [...DEFAULT_ASN_LIST];
@@ -202,7 +190,6 @@ async function clearAllMasterAsn() {
 }
 window.clearAllMasterAsn = clearAllMasterAsn;
 
-// Modal Handler
 function openModalAsn() {
     const modal = document.getElementById('asnMasterModal') || document.getElementById('modalAsn');
     if (modal) {
@@ -226,7 +213,6 @@ function closeAsnMasterModal() { closeModalAsn(); }
 window.openAsnMasterModal = openAsnMasterModal;
 window.closeAsnMasterModal = closeAsnMasterModal;
 
-// Template Download CSV
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NIP,NAMA,PANGKAT,JABATAN\n198501012010011001,NAMA ASN LENGKAP,Penata (III/c),Kepala Sub Bagian";
     const encodedUri = encodeURI(csvContent);
@@ -239,7 +225,6 @@ function downloadCsvTemplate() {
 }
 window.downloadCsvTemplate = downloadCsvTemplate;
 
-// PROSES IMPOR DATA DARI BERKAS CSV
 function importAsnFromCsv() {
     const fileInput = document.getElementById('asnCsvFileInput') || document.getElementById('csvFileInput');
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -272,7 +257,6 @@ function importAsnFromCsv() {
                     let nip = '-';
                     let nama = '';
 
-                    // Deteksi Kolom: Mana NIP dan mana Nama
                     if (/^\d+$/.test(col0.replace(/\s+/g, '')) || col0.length >= 12) {
                         nip = col0;
                         nama = col1.toUpperCase();
@@ -289,7 +273,6 @@ function importAsnFromCsv() {
                         continue;
                     }
 
-                    // Deduplikasi data
                     const isDuplicate = masterAsnList.some(existing => {
                         const matchNip = (nip && nip !== '-' && existing.nip === nip);
                         const matchNama = (existing.nama && existing.nama.toLowerCase() === nama.toLowerCase());
@@ -307,7 +290,6 @@ function importAsnFromCsv() {
                 }
             }
 
-            // Simpan dan jalankan sanitasi otomatis real-time
             await saveMasterAsn();
             fileInput.value = '';
 
@@ -322,14 +304,13 @@ function importAsnFromCsv() {
 }
 window.importAsnFromCsv = importAsnFromCsv;
 
-// SIMPAN ASN MANUAL
 async function saveAsnMaster(e) {
     if (e) e.preventDefault();
-    const namaInput = document.getElementById('asnNama');
+    const namaInput = document.getElementById('asnNama') || document.getElementById('addAsnNama');
     const nama = namaInput?.value.trim().toUpperCase();
-    const nip = document.getElementById('asnNip')?.value.trim() || '-';
-    const pangkat = document.getElementById('asnPangkat')?.value.trim() || '-';
-    const jabatan = document.getElementById('asnJabatan')?.value.trim() || '-';
+    const nip = (document.getElementById('asnNip') || document.getElementById('addAsnNip'))?.value.trim() || '-';
+    const pangkat = (document.getElementById('asnPangkat') || document.getElementById('addAsnPangkat'))?.value.trim() || '-';
+    const jabatan = (document.getElementById('asnJabatan') || document.getElementById('addAsnJabatan'))?.value.trim() || '-';
 
     if (!nama) {
         alert("Nama ASN wajib diisi!");
@@ -349,7 +330,7 @@ async function saveAsnMaster(e) {
 }
 
 function resetAsnForm() {
-    const form = document.getElementById('asnForm');
+    const form = document.getElementById('asnForm') || document.getElementById('formAddAsn');
     if (form) form.reset();
 }
 
@@ -375,7 +356,7 @@ function initEventListeners() {
         searchInput.addEventListener('input', (e) => renderAsnTable(e.target.value));
     }
 
-    const asnForm = document.getElementById('asnForm');
+    const asnForm = document.getElementById('asnForm') || document.getElementById('formAddAsn');
     if (asnForm) {
         asnForm.addEventListener('submit', saveAsnMaster);
     }
@@ -716,7 +697,7 @@ async function handleFormSubmit(e) {
 }
 
 // ==========================================
-// 10. RIWAYAT & UTILITY TERBILANG
+// 10. RIWAYAT, AKSI HAPUS & UTILITY TERBILANG
 // ==========================================
 async function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
@@ -748,13 +729,33 @@ async function renderHistoryTable() {
             <td class="p-3 text-slate-600">${r.tempatTujuan || r.tujuan || '-'}</td>
             <td class="p-3 font-extrabold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
             <td class="p-3 text-center">
-                <a href="cetak.html?id=${r.id}" class="inline-flex items-center gap-1 bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1.5 rounded font-bold text-[11px] transition shadow-sm">
-                    <i class="fa-solid fa-print"></i> Cetak
-                </a>
+                <div class="flex items-center justify-center gap-1.5">
+                    <a href="cetak.html?id=${r.id}" class="inline-flex items-center gap-1 bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1.5 rounded font-bold text-[11px] transition shadow-sm" title="Cetak Dokumen">
+                        <i class="fa-solid fa-print"></i> Cetak
+                    </a>
+                    <button type="button" onclick="deleteSppdRecord(${r.id})" class="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1.5 rounded font-bold text-[11px] transition" title="Hapus Dokumen">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </div>
             </td>
         </tr>
     `).join('');
 }
+
+async function deleteSppdRecord(id) {
+    if (confirm("Apakah Anda yakin ingin menghapus riwayat dokumen SPPD ini?")) {
+        if (window.AppDB && typeof window.AppDB.deleteRecord === 'function') {
+            await window.AppDB.deleteRecord(id);
+        } else {
+            let records = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem('sppd_records_tabundung', JSON.stringify(records));
+        }
+        await renderHistoryTable();
+        updateSKQuotaInfo();
+    }
+}
+window.deleteSppdRecord = deleteSppdRecord;
 
 function printHistoryTable() {
     window.location.href = "rekap.html";
