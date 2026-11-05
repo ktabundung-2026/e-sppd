@@ -108,7 +108,7 @@
                 <span class="text-xs text-slate-500 font-normal">Penetapan Batas Kuota Disinkronkan Dari Langkah 1</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="skQuotaCardsContainer"></div>
+            <div class="flex flex-col space-y-3 w-full" id="skQuotaCardsContainer"></div>
         </div>
 
         <!-- REKAPITULASI DETAIL DOKUMEN PERDIN -->
@@ -118,7 +118,6 @@
                     <h2 class="text-base font-bold text-slate-900">
                         <i class="fa-solid fa-list-check text-gov-700 mr-2"></i> Daftar Seluruh Perjalanan Dinas Terdaftar
                     </h2>
-                    <p class="text-xs text-slate-500">Tersimpan di tabel <code class="bg-slate-100 px-1 py-0.5 rounded font-mono font-bold text-sky-800">riwayat_perdin</code> Supabase & LocalStorage.</p>
                 </div>
                 <button onclick="window.print()" class="text-xs bg-gov-700 hover:bg-gov-800 text-white font-semibold py-2 px-3 rounded-lg flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-print"></i> Cetak Ringkasan Laporan
@@ -126,7 +125,7 @@
             </div>
 
             <div class="overflow-x-auto w-full">
-                <table class="w-full text-left text-xs border-collapse min-w-[850px]">
+                <table class="w-full text-left text-xs border-collapse min-w-[950px]">
                     <thead>
                         <tr class="bg-slate-100 border-b text-slate-700 font-bold uppercase tracking-wider">
                             <th class="p-3">No</th>
@@ -137,6 +136,7 @@
                             <th class="p-3">Pelaksanaan</th>
                             <th class="p-3 text-center">Beban OH</th>
                             <th class="p-3 text-right">Total Biaya</th>
+                            <th class="p-3 text-center print:hidden">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="rekapTableBody" class="divide-y divide-slate-200"></tbody>
@@ -151,7 +151,7 @@
         <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
-    <!-- SCRIPT LAYER DATA & LOGIKA REKAP (BERURUTAN) -->
+    <!-- SCRIPT LAYER DATA & LOGIKA REKAP -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/db.js"></script>
     <script src="js/rekap.js"></script>
