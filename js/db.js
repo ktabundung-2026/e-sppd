@@ -116,54 +116,53 @@ const AppDB = {
 
     async saveMasterSK(skObj) {
         const quotaVal = parseInt(skObj.quota) || 50;
+        const payload = {
+            kode: skObj.kode,
+            nama: skObj.nama,
+            quota: quotaVal
+        };
 
-        // 1. Simpan ke LocalStorage
-        const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
-        const idx = customSK.findIndex(item => item.kode === skObj.kode);
-        if (idx >= 0) {
-            customSK[idx] = { kode: skObj.kode, nama: skObj.nama, quota: quotaVal };
-        } else {
-            customSK.push({ kode: skObj.kode, nama: skObj.nama, quota: quotaVal });
-        }
-        localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
-
-        // 2. Simpan Pemetaan Kuota di LocalStorage
-        const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
-        quotas[skObj.kode] = quotaVal;
-        localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
-
-        // 3. Simpan ke Dexie IndexedDB (Offline DB)
-        if (this.dexie) {
-            await this.dexie.master_sk.put({
-                kode: skObj.kode,
-                nama: skObj.nama,
-                quota: quotaVal
-            });
-        }
-
-        // 4. Upsert / Simpan ke Supabase Cloud
+        // 1. Simpan/Upsert ke Supabase Cloud jika Online
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase
                     .from('master_sk')
-                    .upsert([
-                        {
-                            kode: skObj.kode,
-                            nama: skObj.nama,
-                            quota: quotaVal
-                        }
-                    ], { onConflict: 'kode' });
+                    .upsert([payload], { onConflict: 'kode' })
+                    .select();
 
                 if (error) {
-                    console.error("Gagal Simpan", error);
-                    alert(`Gagal simpan ke Supabase: ${error.message}`);
+                    console.error("Gagal simpan master_sk ke Supabase:", error);
+                    alert(`[Supabase Error] Gagal simpan ke Supabase: ${error.message} (Code: ${error.code})`);
+                    return false;
                 } else {
-                    console.log("Berhasil Tersimpan", data);
+                    console.log("Berhasil tersimpan di Supabase master_sk:", data);
                 }
             } catch (err) {
-                console.error("Error jaringan", err);
+                console.error("Error jaringan ke Supabase:", err);
+                alert(`[Error Jaringan] Gagal terhubung ke Supabase: ${err.message}`);
+                return false;
             }
         }
+
+        // 2. Simpan ke LocalStorage & Dexie
+        const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+        const idx = customSK.findIndex(item => item.kode === skObj.kode);
+        if (idx >= 0) {
+            customSK[idx] = payload;
+        } else {
+            customSK.push(payload);
+        }
+        localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+
+        const quotas = JSON.parse(localStorage.getItem('sppd_sk_quotas') || '{}');
+        quotas[skObj.kode] = quotaVal;
+        localStorage.setItem('sppd_sk_quotas', JSON.stringify(quotas));
+
+        if (this.dexie) {
+            await this.dexie.master_sk.put(payload);
+        }
+
+        return true;
     },
 
     // --------------------------------------
