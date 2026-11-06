@@ -37,11 +37,9 @@ const AppDB = {
         if (!this.isOnline() || !this.supabase || !this.dexie) return;
 
         try {
-            // Ambil data lokal yang belum tersinkron ke server database
             const unsyncedRecords = await this.dexie.riwayat_perdin.where('sinkron').equals(0).toArray();
             if (unsyncedRecords.length > 0) {
                 console.log(`[Sync Engine] Mengunggah ${unsyncedRecords.length} data offline ke Supabase...`);
-                
                 const localRecords = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
                 
                 for (const item of unsyncedRecords) {
@@ -90,39 +88,31 @@ const AppDB = {
     // MANAJEMEN MASTER SUB KEGIATAN (SK)
     // ----------------------------------------------------
     async getMasterSK() {
-        let skList = [];
+        const saved = localStorage.getItem('sppd_custom_sk_list');
+        let skList = saved ? JSON.parse(saved) : [];
+
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase.from('master_sk').select('*').order('created_at', { ascending: true });
                 if (!error && data && data.length > 0) {
                     skList = data;
+                    localStorage.setItem('sppd_custom_sk_list', JSON.stringify(skList));
                     if (this.dexie) {
                         await this.dexie.master_sk.clear();
                         await this.dexie.master_sk.bulkPut(data.map(i => ({ kode: i.kode, nama: i.nama, quota: i.quota || 50 })));
                     }
-                    localStorage.setItem('sppd_custom_sk_list', JSON.stringify(skList));
-                    return skList;
                 }
             } catch (e) { console.warn("Fetch Supabase gagal, menggunakan cache lokal", e); }
+        } else if (skList.length === 0 && this.dexie) {
+            skList = await this.dexie.master_sk.toArray();
         }
 
-        const saved = localStorage.getItem('sppd_custom_sk_list');
-        if (saved) {
-            try { return JSON.parse(saved); } catch (e) { console.error(e); }
-        }
-        if (this.dexie) skList = await this.dexie.master_sk.toArray();
         return skList;
     },
 
     async saveMasterSK(skObj) {
         const quotaVal = parseInt(skObj.quota) || 50;
         const payload = { kode: skObj.kode, nama: skObj.nama, quota: quotaVal };
-
-        if (this.isOnline() && this.supabase) {
-            try {
-                await this.supabase.from('master_sk').upsert([payload], { onConflict: 'kode' });
-            } catch (err) { console.error("Gagal simpan ke Supabase:", err); }
-        }
 
         const customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
         const idx = customSK.findIndex(item => item.kode === skObj.kode);
@@ -131,34 +121,51 @@ const AppDB = {
         
         localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
         if (this.dexie) await this.dexie.master_sk.put(payload);
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_sk').upsert([payload], { onConflict: 'kode' });
+            } catch (err) { console.error("Gagal simpan ke Supabase:", err); }
+        }
+
         return true;
     },
 
+    async deleteMasterSK(kodeSK) {
+        let customSK = JSON.parse(localStorage.getItem('sppd_custom_sk_list') || '[]');
+        customSK = customSK.filter(item => item.kode !== kodeSK);
+        localStorage.setItem('sppd_custom_sk_list', JSON.stringify(customSK));
+
+        if (this.dexie) await this.dexie.master_sk.delete(kodeSK);
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_sk').delete().eq('kode', kodeSK);
+            } catch (err) { console.error("Gagal hapus SK di Supabase:", err); }
+        }
+    },
+
     // ----------------------------------------------------
-    // MANAJEMEN RIWAYAT PERDIN (OFFLINE & ONLINE STORAGE)
+    // MANAJEMEN RIWAYAT PERDIN
     // ----------------------------------------------------
     async getAllRecords() {
-        let records = [];
+        const saved = localStorage.getItem('sppd_records_tabundung');
+        let records = saved ? JSON.parse(saved) : [];
+
         if (this.isOnline() && this.supabase) {
             try {
                 const { data, error } = await this.supabase.from('riwayat_perdin').select('*').order('createdAt', { ascending: false });
                 if (!error && data && data.length > 0) {
                     records = data;
                     localStorage.setItem('sppd_records_tabundung', JSON.stringify(records));
-                    return records;
                 }
             } catch (err) { console.warn("Fallback ke penyimpanan lokal:", err); }
         }
 
-        const saved = localStorage.getItem('sppd_records_tabundung');
-        if (saved) {
-            try { return JSON.parse(saved); } catch (e) { console.error(e); }
-        }
         return records;
     },
 
     async saveRecord(record) {
-        // 1. Simpan Sementara di Local Storage & IndexedDB (Selalu Berhasil Offline/Online)
         const existing = JSON.parse(localStorage.getItem('sppd_records_tabundung') || '[]');
         existing.unshift(record);
         localStorage.setItem('sppd_records_tabundung', JSON.stringify(existing));
@@ -179,7 +186,6 @@ const AppDB = {
             });
         }
 
-        // 2. Jika Online, Langsung Kirim ke Database Server
         if (isOnlineNow && this.supabase) {
             try {
                 await this.supabase.from('riwayat_perdin').insert([record]);
