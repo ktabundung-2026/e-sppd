@@ -55,7 +55,7 @@ const AppDB = {
     },
 
     // ----------------------------------------------------
-    // MANAJEMEN MASTER PELAKSANA / ASN (TABEL: master_pelaksana)
+    // MANAJEMEN MASTER PELAKSANA / ASN (HURUF KAPITAL UNTUK NAMA)
     // ----------------------------------------------------
     async getMasterAsn() {
         let asnList = [];
@@ -70,7 +70,7 @@ const AppDB = {
                 if (!error && data && data.length > 0) {
                     asnList = data.map(item => ({
                         id: item.id,
-                        nama: item.nama_pelaksana,
+                        nama: item.nama_pelaksana ? item.nama_pelaksana.toUpperCase() : '',
                         nip: item.nip,
                         jabatan: item.jabatan,
                         pangkat: item.pangkat || '-'
@@ -87,7 +87,7 @@ const AppDB = {
             if (localList && localList.length > 0) {
                 asnList = localList.map(item => ({
                     id: item.id,
-                    nama: item.nama_pelaksana,
+                    nama: item.nama_pelaksana ? item.nama_pelaksana.toUpperCase() : '',
                     nip: item.nip,
                     jabatan: item.jabatan,
                     pangkat: item.pangkat || '-'
@@ -100,7 +100,7 @@ const AppDB = {
 
     async saveMasterAsn(asnObj) {
         const payload = {
-            nama_pelaksana: asnObj.nama,
+            nama_pelaksana: asnObj.nama ? asnObj.nama.toUpperCase() : '',
             nip: asnObj.nip,
             jabatan: asnObj.jabatan,
             pangkat: asnObj.pangkat || '-'
@@ -108,8 +108,8 @@ const AppDB = {
 
         const currentList = JSON.parse(localStorage.getItem('sppd_master_asn') || '[]');
         const existingIdx = currentList.findIndex(a => a.nip === asnObj.nip);
-        if (existingIdx >= 0) currentList[existingIdx] = asnObj;
-        else currentList.push(asnObj);
+        if (existingIdx >= 0) currentList[existingIdx] = { ...asnObj, nama: payload.nama_pelaksana };
+        else currentList.push({ ...asnObj, nama: payload.nama_pelaksana });
 
         localStorage.setItem('sppd_master_asn', JSON.stringify(currentList));
         if (this.dexie) await this.dexie.master_pelaksana.put(payload);
@@ -124,13 +124,18 @@ const AppDB = {
 
     async bulkSaveMasterAsn(asnArray) {
         const payload = asnArray.map(a => ({
-            nama_pelaksana: a.nama,
+            nama_pelaksana: a.nama ? a.nama.toUpperCase() : '',
             nip: a.nip,
             jabatan: a.jabatan,
             pangkat: a.pangkat || '-'
         }));
 
-        localStorage.setItem('sppd_master_asn', JSON.stringify(asnArray));
+        const formattedList = asnArray.map(a => ({
+            ...a,
+            nama: a.nama ? a.nama.toUpperCase() : ''
+        }));
+
+        localStorage.setItem('sppd_master_asn', JSON.stringify(formattedList));
         if (this.dexie) {
             await this.dexie.master_pelaksana.clear();
             await this.dexie.master_pelaksana.bulkPut(payload);
