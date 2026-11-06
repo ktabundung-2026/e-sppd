@@ -42,7 +42,7 @@ function updateOnlineStatus() {
 }
 
 // ----------------------------------------------------
-// LOGIKA MODAL MASTER ASN / PELAKSANA
+// LOGIKA MODAL MASTER ASN / PELAKSANA (NAMA KAPITAL)
 // ----------------------------------------------------
 function openModalAsn() {
     const modal = document.getElementById('modalAsn');
@@ -63,7 +63,7 @@ function closeModalAsn() {
 
 async function saveAsnMaster(e) {
     e.preventDefault();
-    const nama = toCapitalCase(document.getElementById('addAsnNama')?.value.trim());
+    const nama = document.getElementById('addAsnNama')?.value.trim().toUpperCase();
     const nip = document.getElementById('addAsnNip')?.value.trim();
     const jabatan = toCapitalCase(document.getElementById('addAsnJabatan')?.value.trim());
     const pangkat = toCapitalCase(document.getElementById('addAsnPangkat')?.value.trim()) || '-';
@@ -116,7 +116,7 @@ function renderAsnTable(filterText = '') {
     tbody.innerHTML = filtered.map(a => `
         <tr class="hover:bg-slate-50 transition border-b">
             <td class="p-2.5">
-                <div class="font-bold text-slate-800">${toCapitalCase(a.nama)}</div>
+                <div class="font-bold text-slate-800 tracking-wide uppercase">${a.nama.toUpperCase()}</div>
                 <div class="text-[10px] font-mono text-slate-500">NIP. ${a.nip || '-'}</div>
             </td>
             <td class="p-2.5 font-semibold text-slate-700">${toCapitalCase(a.jabatan || '-')}</td>
@@ -165,7 +165,7 @@ async function importAsnFromCsv() {
                 const cols = line.split(',');
                 if (cols.length >= 3) {
                     imported.push({
-                        nama: toCapitalCase(cols[0].trim().replace(/"/g, '')),
+                        nama: cols[0].trim().replace(/"/g, '').toUpperCase(),
                         nip: cols[1].trim().replace(/"/g, ''),
                         jabatan: toCapitalCase(cols[2].trim().replace(/"/g, '')),
                         pangkat: cols[3] ? toCapitalCase(cols[3].trim().replace(/"/g, '')) : '-'
@@ -334,12 +334,12 @@ function populatePelaksanaDropdowns() {
     const selectPelaksana = document.getElementById('namaPelaksana');
     const selectBendahara = document.getElementById('selectBendahara');
 
-    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${toCapitalCase(a.nama)}</option>`).join('');
+    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama.toUpperCase()}">${a.nama.toUpperCase()}</option>`).join('');
 
     if (selectPelaksana) {
         selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>' + optionsHTML;
         if (masterAsnList.length > 0) {
-            selectPelaksana.value = masterAsnList[0].nama;
+            selectPelaksana.value = masterAsnList[0].nama.toUpperCase();
             onNamaInputChanged('Pelaksana', selectPelaksana.value);
         }
     }
@@ -348,14 +348,14 @@ function populatePelaksanaDropdowns() {
         selectBendahara.innerHTML = '<option value="">-- Pilih Bendahara --</option>' + optionsHTML;
         const defaultBendahara = masterAsnList.find(a => a.jabatan && a.jabatan.toLowerCase().includes('bendahara')) || masterAsnList[0];
         if (defaultBendahara) {
-            selectBendahara.value = defaultBendahara.nama;
+            selectBendahara.value = defaultBendahara.nama.toUpperCase();
             onBendaharaSelected(defaultBendahara.nama);
         }
     }
 }
 
 function onNamaInputChanged(type, selectedNama) {
-    const match = masterAsnList.find(a => a.nama === selectedNama);
+    const match = masterAsnList.find(a => a.nama.toUpperCase() === selectedNama.toUpperCase());
     if (type === 'Pelaksana') {
         document.getElementById('nipPelaksana').value = match ? (match.nip || '-') : '';
         document.getElementById('jabatanPelaksana').value = match ? toCapitalCase(match.jabatan || '-') : '';
@@ -364,7 +364,7 @@ function onNamaInputChanged(type, selectedNama) {
 }
 
 function onBendaharaSelected(selectedNama) {
-    const match = masterAsnList.find(a => a.nama === selectedNama);
+    const match = masterAsnList.find(a => a.nama.toUpperCase() === selectedNama.toUpperCase());
     document.getElementById('nipBendahara').value = match ? (match.nip || '-') : '';
 }
 
@@ -378,10 +378,10 @@ function addPengikutRow() {
     const row = document.createElement('div');
     row.className = "flex flex-col sm:flex-row gap-2 items-center bg-white p-2.5 rounded-lg border border-slate-200 mt-2";
     row.id = `pengikutRow_${idx}`;
-    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${toCapitalCase(a.nama)}</option>`).join('');
+    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama.toUpperCase()}">${a.nama.toUpperCase()}</option>`).join('');
 
     row.innerHTML = `
-        <select onchange="updatePengikutSelect(${idx}, this.value)" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold capitalize-input">
+        <select onchange="updatePengikutSelect(${idx}, this.value)" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold uppercase-input">
             <option value="">-- Pilih Anggota Tim --</option>${optionsHTML}
         </select>
         <input type="text" id="pengikutNip_${idx}" placeholder="NIP" class="w-full sm:w-1/3 p-2 text-xs border rounded font-mono bg-slate-50" readonly>
@@ -393,9 +393,13 @@ function addPengikutRow() {
 }
 
 function updatePengikutSelect(idx, nama) {
-    const match = masterAsnList.find(a => a.nama === nama);
+    const match = masterAsnList.find(a => a.nama.toUpperCase() === nama.toUpperCase());
     if (currentPengikut[idx]) {
-        currentPengikut[idx] = { nama: nama, nip: match ? match.nip : '', jabatan: match ? match.jabatan : '' };
+        currentPengikut[idx] = { 
+            nama: nama.toUpperCase(), 
+            nip: match ? match.nip : '', 
+            jabatan: match ? toCapitalCase(match.jabatan) : '' 
+        };
         document.getElementById(`pengikutNip_${idx}`).value = match ? (match.nip || '-') : '';
         document.getElementById(`pengikutJabatan_${idx}`).value = match ? toCapitalCase(match.jabatan || '-') : '';
     }
@@ -513,11 +517,11 @@ async function handleFormSubmit(e) {
         maksudTujuan: toCapitalCase(document.getElementById('maksudTujuan')?.value || ''),
         laporanHasil: toCapitalCase(document.getElementById('laporanHasil')?.value || ''),
         
-        namaPelaksana: toCapitalCase(document.getElementById('namaPelaksana')?.value || ''),
+        namaPelaksana: (document.getElementById('namaPelaksana')?.value || '').toUpperCase(),
         nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
-        pangkatPelaksana: (masterAsnList.find(a => a.nama === document.getElementById('namaPelaksana')?.value)?.pangkat) || '-',
+        pangkatPelaksana: (masterAsnList.find(a => a.nama.toUpperCase() === (document.getElementById('namaPelaksana')?.value || '').toUpperCase())?.pangkat) || '-',
         jabatanPelaksana: toCapitalCase(document.getElementById('jabatanPelaksana')?.value || ''),
-        pengikut: activePengikut.map(p => ({ ...p, nama: toCapitalCase(p.nama), jabatan: toCapitalCase(p.jabatan) })),
+        pengikut: activePengikut.map(p => ({ ...p, nama: p.nama.toUpperCase(), jabatan: toCapitalCase(p.jabatan) })),
 
         tempatBerangkat: toCapitalCase(document.getElementById('tempatBerangkat')?.value || ''),
         tempatTujuan: toCapitalCase(document.getElementById('tempatTujuan')?.value || ''),
@@ -527,12 +531,12 @@ async function handleFormSubmit(e) {
         biayaPerOrang: rate,
         totalBiaya: totalBiaya,
 
-        namaPejabatTujuan: toCapitalCase(document.getElementById('namaPejabatTujuan')?.value || ''),
+        namaPejabatTujuan: (document.getElementById('namaPejabatTujuan')?.value || '').toUpperCase(),
         jabatanPejabatTujuan: toCapitalCase(document.getElementById('jabatanPejabatTujuan')?.value || 'Kepala Desa'),
 
-        namaCamat: toCapitalCase(document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST'),
+        namaCamat: (document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST').toUpperCase(),
         nipCamat: document.getElementById('nipPenggunaAnggaran')?.value || '197205212006041008',
-        namaBendahara: toCapitalCase(document.getElementById('selectBendahara')?.value || ''),
+        namaBendahara: (document.getElementById('selectBendahara')?.value || '').toUpperCase(),
         nipBendahara: document.getElementById('nipBendahara')?.value || '',
         createdAt: new Date().toISOString()
     };
@@ -556,7 +560,7 @@ async function renderHistoryTable() {
         <tr class="border-b hover:bg-slate-50 text-xs">
             <td class="p-3"><span class="font-bold text-gov-800">${r.noSuratTugas || '-'}</span></td>
             <td class="p-3"><span class="font-mono font-bold">${r.kodeSK || '-'}</span></td>
-            <td class="p-3 font-semibold">${toCapitalCase(r.namaPelaksana || '-')}</td>
+            <td class="p-3 font-bold uppercase text-slate-800">${(r.namaPelaksana || '-').toUpperCase()}</td>
             <td class="p-3">${toCapitalCase(r.tempatTujuan || '-')}</td>
             <td class="p-3 font-extrabold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
             <td class="p-3 text-center">
