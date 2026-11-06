@@ -34,7 +34,7 @@
                 background: white !important; 
                 color: black !important; 
                 font-family: 'Tinos', Georgia, serif !important; 
-                padding: 10mm; 
+                padding: 5mm; 
             }
             .no-print, header, footer, button, .no-print-area { 
                 display: none !important; 
@@ -51,17 +51,18 @@
             .print-table { 
                 width: 100% !important; 
                 border-collapse: collapse !important; 
-                font-size: 9pt !important; 
+                font-size: 8.5pt !important; 
+                margin-bottom: 15px;
             }
             .print-table th, .print-table td { 
                 border: 1px solid #000 !important; 
-                padding: 6px !important; 
+                padding: 4px 6px !important; 
             }
             .print-footer { 
                 display: flex !important; 
                 justify-content: flex-end; 
-                margin-top: 30px; 
-                font-size: 10pt; 
+                margin-top: 20px; 
+                font-size: 9.5pt; 
             }
         }
         .print-header, .print-footer { display: none; }
@@ -97,7 +98,7 @@
             <h3 class="font-bold text-base uppercase">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
             <h2 class="font-bold text-xl uppercase">KECAMATAN TABUNDUNG</h2>
             <p class="text-xs italic">Malahar - Desa Billa, Sumba Timur</p>
-            <h4 class="font-bold text-sm uppercase underline mt-2">LAPORAN REKAPITULASI REALISASI PERJALANAN DINAS</h4>
+            <h4 class="font-bold text-sm uppercase underline mt-2">Cetak/Simpan Rekapan SPPD</h4>
         </div>
     </div>
 
@@ -137,13 +138,15 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 no-print">
+        <!-- STATUS KUOTA & SERAPAN SUB KEGIATAN -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h2 class="text-base font-bold text-slate-900 border-b pb-3 mb-4 flex items-center justify-between">
                 <span><i class="fa-solid fa-chart-pie text-gov-700 mr-2"></i> Status Kuota & Serapan Sub Kegiatan</span>
             </h2>
             <div class="flex flex-col space-y-3 w-full" id="skQuotaCardsContainer"></div>
         </div>
 
+        <!-- REKAPITULASI LAPORAN PERJALANAN DINAS -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4 gap-2 no-print">
                 <div>
@@ -152,28 +155,11 @@
                     </h2>
                 </div>
                 <button onclick="window.print()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-1.5 shadow-md transition">
-                    <i class="fa-solid fa-file-pdf"></i> Cetak / Simpan Ringkasan PDF
+                    <i class="fa-solid fa-file-pdf"></i> Cetak/Simpan Rekapan SPPD
                 </button>
             </div>
 
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-left text-xs border-collapse print-table">
-                    <thead>
-                        <tr class="bg-slate-100 border-b text-slate-700 font-bold uppercase">
-                            <th class="p-3 text-center">No</th>
-                            <th class="p-3">No. ST / SPPD</th>
-                            <th class="p-3">Kode SK & Sumber</th>
-                            <th class="p-3">Tim Pelaksana</th>
-                            <th class="p-3">Tujuan</th>
-                            <th class="p-3">Tgl Mulai / Selesai</th>
-                            <th class="p-3 text-center">Beban OH</th>
-                            <th class="p-3 text-right">Total Biaya (Rp)</th>
-                            <th class="p-3 text-center print:hidden no-print">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rekapTableBody" class="divide-y divide-slate-200"></tbody>
-                </table>
-            </div>
+            <div class="overflow-x-auto w-full" id="groupedRekapContainer"></div>
         </div>
 
     </main>
