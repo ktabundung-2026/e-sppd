@@ -56,7 +56,7 @@ async function loadCustomSKList() {
     masterSKList.forEach(sk => {
         const opt = document.createElement('option');
         opt.value = sk.kode;
-        opt.innerText = `${sk.kode} - ${sk.nama}`;
+        opt.innerText = `${sk.kode} - ${toCapitalCase(sk.nama)}`;
         selectSK.appendChild(opt);
     });
 }
@@ -72,7 +72,7 @@ function openModalSK(isEdit = false, kode = '', nama = '', quota = 50) {
         if (isEdit) {
             if (isEditMode) isEditMode.value = "true";
             if (inputKode) { inputKode.value = kode; inputKode.readOnly = true; }
-            if (inputNama) inputNama.value = nama;
+            if (inputNama) inputNama.value = toCapitalCase(nama);
             if (inputQuota) inputQuota.value = quota;
         } else {
             if (isEditMode) isEditMode.value = "false";
@@ -96,7 +96,7 @@ function closeModalSK() {
 async function saveNewSK(e) {
     e.preventDefault();
     const kode = document.getElementById('newKodeSK')?.value.trim();
-    const nama = document.getElementById('newNamaSK')?.value.trim();
+    const nama = toCapitalCase(document.getElementById('newNamaSK')?.value.trim());
     const quota = parseInt(document.getElementById('newQuotaSK')?.value) || 50;
 
     if (!kode || !nama) {
@@ -144,13 +144,27 @@ async function renderManageSKTable() {
     tbody.innerHTML = masterSKList.map(sk => `
         <tr class="hover:bg-slate-50 transition border-b">
             <td class="p-2.5 font-mono font-bold text-gov-800">${sk.kode}</td>
-            <td class="p-2.5 font-semibold text-slate-700">${sk.nama}</td>
+            <td class="p-2.5 font-semibold text-slate-700">${toCapitalCase(sk.nama)}</td>
             <td class="p-2.5 text-center font-bold text-emerald-700">${sk.quota || 50} OH</td>
             <td class="p-2.5 text-center">
-                <button type="button" onclick="openModalSK(true, '${sk.kode}', '${sk.nama}', ${sk.quota || 50})" class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-[11px] font-bold">Edit</button>
+                <div class="flex items-center justify-center gap-1.5">
+                    <button type="button" onclick="openModalSK(true, '${sk.kode}', '${sk.nama}', ${sk.quota || 50})" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-[11px] font-bold">Edit</button>
+                    <button type="button" onclick="deleteSKRecord('${sk.kode}')" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-2 py-1 rounded text-[11px] font-bold">Hapus</button>
+                </div>
             </td>
         </tr>
     `).join('');
+}
+
+async function deleteSKRecord(kodeSK) {
+    if (confirm(`Apakah Anda yakin ingin menghapus Sub Kegiatan (${kodeSK})?`)) {
+        if (window.AppDB && typeof window.AppDB.deleteMasterSK === 'function') {
+            await window.AppDB.deleteMasterSK(kodeSK);
+        }
+        await renderManageSKTable();
+        await loadCustomSKList();
+        updateSKQuotaInfo();
+    }
 }
 
 async function loadMasterAsn() {
@@ -168,7 +182,7 @@ function populatePelaksanaDropdowns() {
     const selectPelaksana = document.getElementById('namaPelaksana');
     const selectBendahara = document.getElementById('selectBendahara');
 
-    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${a.nama}</option>`).join('');
+    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${toCapitalCase(a.nama)}</option>`).join('');
 
     if (selectPelaksana) {
         selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>' + optionsHTML;
@@ -192,7 +206,7 @@ function onNamaInputChanged(type, selectedNama) {
     const match = masterAsnList.find(a => a.nama === selectedNama);
     if (type === 'Pelaksana') {
         document.getElementById('nipPelaksana').value = match ? (match.nip || '-') : '';
-        document.getElementById('jabatanPelaksana').value = match ? (match.jabatan || '-') : '';
+        document.getElementById('jabatanPelaksana').value = match ? toCapitalCase(match.jabatan || '-') : '';
     }
     updateSKQuotaInfo();
 }
@@ -212,14 +226,14 @@ function addPengikutRow() {
     const row = document.createElement('div');
     row.className = "flex flex-col sm:flex-row gap-2 items-center bg-white p-2.5 rounded-lg border border-slate-200 mt-2";
     row.id = `pengikutRow_${idx}`;
-    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${a.nama}</option>`).join('');
+    const optionsHTML = masterAsnList.map(a => `<option value="${a.nama}">${toCapitalCase(a.nama)}</option>`).join('');
 
     row.innerHTML = `
-        <select onchange="updatePengikutSelect(${idx}, this.value)" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold">
+        <select onchange="updatePengikutSelect(${idx}, this.value)" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold capitalize-input">
             <option value="">-- Pilih Anggota Tim --</option>${optionsHTML}
         </select>
         <input type="text" id="pengikutNip_${idx}" placeholder="NIP" class="w-full sm:w-1/3 p-2 text-xs border rounded font-mono bg-slate-50" readonly>
-        <input type="text" id="pengikutJabatan_${idx}" placeholder="Jabatan" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold bg-slate-50" readonly>
+        <input type="text" id="pengikutJabatan_${idx}" placeholder="Jabatan" class="w-full sm:w-1/3 p-2 text-xs border rounded font-semibold bg-slate-50 capitalize-input" readonly>
         <button type="button" onclick="removePengikutRow(${idx})" class="text-rose-600 p-1.5"><i class="fa-solid fa-xmark"></i></button>
     `;
     container.appendChild(row);
@@ -231,7 +245,7 @@ function updatePengikutSelect(idx, nama) {
     if (currentPengikut[idx]) {
         currentPengikut[idx] = { nama: nama, nip: match ? match.nip : '', jabatan: match ? match.jabatan : '' };
         document.getElementById(`pengikutNip_${idx}`).value = match ? (match.nip || '-') : '';
-        document.getElementById(`pengikutJabatan_${idx}`).value = match ? (match.jabatan || '-') : '';
+        document.getElementById(`pengikutJabatan_${idx}`).value = match ? toCapitalCase(match.jabatan || '-') : '';
     }
     updateSKQuotaInfo();
 }
@@ -270,7 +284,7 @@ function updateSKQuotaInfo() {
 
 function syncTujuanPerdin(val) {
     const destInput = document.getElementById('tempatTujuan');
-    if (destInput) destInput.value = val ? val.toUpperCase() : '';
+    if (destInput) destInput.value = val ? toCapitalCase(val) : '';
 }
 
 function calculateTotalBiaya(daysParam, personilParam) {
@@ -287,7 +301,32 @@ function switchStep(stepNumber) {
     currentStep = stepNumber;
     [1, 2, 3].forEach(s => {
         document.getElementById(`step-content-${s}`)?.classList.add('hidden');
+        
+        const btnIcon = document.getElementById(`step-icon-${s}`);
+        const btnLabel = document.getElementById(`step-label-${s}`);
+        const btnBadge = document.getElementById(`step-badge-${s}`);
+
+        if (s === stepNumber) {
+            btnIcon?.classList.remove('bg-slate-200', 'text-slate-600');
+            btnIcon?.classList.add('bg-gov-700', 'text-white', 'shadow-md');
+            btnLabel?.classList.remove('text-slate-500', 'font-medium');
+            btnLabel?.classList.add('text-gov-800', 'font-bold');
+            if (btnBadge) {
+                btnBadge.innerText = 'Aktif';
+                btnBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-emerald-100 text-emerald-800';
+            }
+        } else {
+            btnIcon?.classList.remove('bg-gov-700', 'text-white', 'shadow-md');
+            btnIcon?.classList.add('bg-slate-200', 'text-slate-600');
+            btnLabel?.classList.remove('text-gov-800', 'font-bold');
+            btnLabel?.classList.add('text-slate-500', 'font-medium');
+            if (btnBadge) {
+                btnBadge.innerText = 'Tidak Aktif';
+                btnBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-slate-100 text-slate-500';
+            }
+        }
     });
+
     document.getElementById(`step-content-${stepNumber}`)?.classList.remove('hidden');
     if (stepNumber === 3) renderHistoryTable();
 }
@@ -328,26 +367,29 @@ async function handleFormSubmit(e) {
         noBku: 'BKU/' + Date.now().toString().slice(-4),
         kodeSK: document.getElementById('step1_kodeSK')?.value || '',
         sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
-        maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
-        laporanHasil: document.getElementById('laporanHasil')?.value || '',
+        maksudTujuan: toCapitalCase(document.getElementById('maksudTujuan')?.value || ''),
+        laporanHasil: toCapitalCase(document.getElementById('laporanHasil')?.value || ''),
         
-        namaPelaksana: (document.getElementById('namaPelaksana')?.value || '').toUpperCase(),
+        namaPelaksana: toCapitalCase(document.getElementById('namaPelaksana')?.value || ''),
         nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
         pangkatPelaksana: (masterAsnList.find(a => a.nama === document.getElementById('namaPelaksana')?.value)?.pangkat) || '-',
-        jabatanPelaksana: document.getElementById('jabatanPelaksana')?.value || '',
-        pengikut: activePengikut,
+        jabatanPelaksana: toCapitalCase(document.getElementById('jabatanPelaksana')?.value || ''),
+        pengikut: activePengikut.map(p => ({ ...p, nama: toCapitalCase(p.nama), jabatan: toCapitalCase(p.jabatan) })),
 
-        tempatBerangkat: document.getElementById('tempatBerangkat')?.value || 'Malahar',
-        tempatTujuan: document.getElementById('tempatTujuan')?.value || '',
+        tempatBerangkat: toCapitalCase(document.getElementById('tempatBerangkat')?.value || ''),
+        tempatTujuan: toCapitalCase(document.getElementById('tempatTujuan')?.value || ''),
         tglMulai: document.getElementById('tglMulai')?.value,
         tglSelesai: document.getElementById('tglKembali')?.value,
         lamaHari: days,
         biayaPerOrang: rate,
         totalBiaya: totalBiaya,
 
-        namaCamat: document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST',
+        namaPejabatTujuan: toCapitalCase(document.getElementById('namaPejabatTujuan')?.value || ''),
+        jabatanPejabatTujuan: toCapitalCase(document.getElementById('jabatanPejabatTujuan')?.value || 'Kepala Desa'),
+
+        namaCamat: toCapitalCase(document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST'),
         nipCamat: document.getElementById('nipPenggunaAnggaran')?.value || '197205212006041008',
-        namaBendahara: document.getElementById('selectBendahara')?.value || '',
+        namaBendahara: toCapitalCase(document.getElementById('selectBendahara')?.value || ''),
         nipBendahara: document.getElementById('nipBendahara')?.value || '',
         createdAt: new Date().toISOString()
     };
@@ -371,14 +413,19 @@ async function renderHistoryTable() {
         <tr class="border-b hover:bg-slate-50 text-xs">
             <td class="p-3"><span class="font-bold text-gov-800">${r.noSuratTugas || '-'}</span></td>
             <td class="p-3"><span class="font-mono font-bold">${r.kodeSK || '-'}</span></td>
-            <td class="p-3 font-semibold">${r.namaPelaksana || '-'}</td>
-            <td class="p-3">${r.tempatTujuan || '-'}</td>
+            <td class="p-3 font-semibold">${toCapitalCase(r.namaPelaksana || '-')}</td>
+            <td class="p-3">${toCapitalCase(r.tempatTujuan || '-')}</td>
             <td class="p-3 font-extrabold text-emerald-700">Rp ${(r.totalBiaya || 0).toLocaleString('id-ID')}</td>
             <td class="p-3 text-center">
                 <a href="cetak.html?id=${r.id}" class="bg-gov-700 text-white px-2 py-1 rounded text-[11px] font-bold">Cetak</a>
             </td>
         </tr>
     `).join('');
+}
+
+function toCapitalCase(str) {
+    if (!str) return '';
+    return str.toLowerCase().replace(/(?:^|\s|-)\S/g, function (a) { return a.toUpperCase(); });
 }
 
 function numberToWords(amount) {
