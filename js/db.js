@@ -5,7 +5,6 @@
 
 const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw';
-const DEFAULT_BUCKET = 'image';
 
 let supabaseClient = null;
 if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
@@ -15,9 +14,9 @@ if (typeof window !== 'undefined' && window.supabase && window.supabase.createCl
 let localDexieDB = null;
 if (typeof window !== 'undefined' && window.Dexie) {
     localDexieDB = new window.Dexie('PerdinTabundungDB');
-    localDexieDB.version(3).stores({
+    localDexieDB.version(4).stores({
         riwayat_perdin: 'id, no_sppd, tanggal, tujuan, pelaksana, sub_kegiatan, jumlah_oh, foto_bukti, sinkron',
-        master_asn: 'nip, nama, pangkat, jabatan',
+        master_pelaksana: '++id, nip, nama_pelaksana, pangkat, jabatan',
         master_sk: 'kode, nama, quota'
     });
 }
@@ -30,9 +29,6 @@ const AppDB = {
         return typeof navigator !== 'undefined' && navigator.onLine;
     },
 
-    // ----------------------------------------------------
-    // SINKRONISASI OTOMATIS SAAT KONEKSI ONLINE KEMBALI
-    // ----------------------------------------------------
     async syncOfflineData() {
         if (!this.isOnline() || !this.supabase || !this.dexie) return;
 
@@ -59,28 +55,109 @@ const AppDB = {
     },
 
     // ----------------------------------------------------
-    // MANAJEMEN MASTER DATA ASN
+    // MANAJEMEN MASTER PELAKSANA / ASN (TABEL: master_pelaksana)
     // ----------------------------------------------------
     async getMasterAsn() {
+        let asnList = [];
         const saved = localStorage.getItem('sppd_master_asn');
         if (saved) {
-            try { return JSON.parse(saved); } catch (e) { console.error(e); }
+            try { asnList = JSON.parse(saved); } catch (e) { asnList = []; }
         }
-        if (this.dexie) {
-            const list = await this.dexie.master_asn.toArray();
-            if (list && list.length > 0) {
-                localStorage.setItem('sppd_master_asn', JSON.stringify(list));
-                return list;
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                const { data, error } = await this.supabase.from('master_pelaksana').select('*').order('nama_pelaksana', { ascending: true });
+                if (!error && data && data.length > 0) {
+                    asnList = data.map(item => ({
+                        id: item.id,
+                        nama: item.nama_pelaksana,
+                        nip: item.nip,
+                        jabatan: item.jabatan,
+                        pangkat: item.pangkat || '-'
+                    }));
+                    localStorage.setItem('sppd_master_asn', JSON.stringify(asnList));
+                    if (this.dexie) {
+                        await this.dexie.master_pelaksana.clear();
+                        await this.dexie.master_pelaksana.bulkPut(data);
+                    }
+                }
+            } catch (e) { console.warn("Fetch master_pelaksana Supabase gagal, fallback lokal:", e); }
+        } else if (asnList.length === 0 && this.dexie) {
+            const localList = await this.dexie.master_pelaksana.toArray();
+            if (localList && localList.length > 0) {
+                asnList = localList.map(item => ({
+                    id: item.id,
+                    nama: item.nama_pelaksana,
+                    nip: item.nip,
+                    jabatan: item.jabatan,
+                    pangkat: item.pangkat || '-'
+                }));
             }
         }
-        return [];
+
+        return asnList;
     },
 
-    async saveMasterAsn(asnList) {
-        localStorage.setItem('sppd_master_asn', JSON.stringify(asnList));
+    async saveMasterAsn(asnObj) {
+        const payload = {
+            nama_pelaksana: asnObj.nama,
+            nip: asnObj.nip,
+            jabatan: asnObj.jabatan,
+            pangkat: asnObj.pangkat || '-'
+        };
+
+        const currentList = JSON.parse(localStorage.getItem('sppd_master_asn') || '[]');
+        const existingIdx = currentList.findIndex(a => a.nip === asnObj.nip);
+        if (existingIdx >= 0) currentList[existingIdx] = asnObj;
+        else currentList.push(asnObj);
+
+        localStorage.setItem('sppd_master_asn', JSON.stringify(currentList));
+        if (this.dexie) await this.dexie.master_pelaksana.put(payload);
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_pelaksana').upsert([payload], { onConflict: 'nip' });
+            } catch (err) { console.error("Gagal simpan master_pelaksana ke Supabase:", err); }
+        }
+        return true;
+    },
+
+    async bulkSaveMasterAsn(asnArray) {
+        const payload = asnArray.map(a => ({
+            nama_pelaksana: a.nama,
+            nip: a.nip,
+            jabatan: a.jabatan,
+            pangkat: a.pangkat || '-'
+        }));
+
+        localStorage.setItem('sppd_master_asn', JSON.stringify(asnArray));
         if (this.dexie) {
-            await this.dexie.master_asn.clear();
-            await this.dexie.master_asn.bulkAdd(asnList);
+            await this.dexie.master_pelaksana.clear();
+            await this.dexie.master_pelaksana.bulkPut(payload);
+        }
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_pelaksana').upsert(payload, { onConflict: 'nip' });
+            } catch (err) { console.error("Gagal bulk save ke Supabase:", err); }
+        }
+        return true;
+    },
+
+    async deleteMasterAsn(nip) {
+        let currentList = JSON.parse(localStorage.getItem('sppd_master_asn') || '[]');
+        currentList = currentList.filter(a => a.nip !== nip);
+        localStorage.setItem('sppd_master_asn', JSON.stringify(currentList));
+
+        if (this.dexie) {
+            const match = await this.dexie.master_pelaksana.where('nip').equals(nip).first();
+            if (match) await this.dexie.master_pelaksana.delete(match.id);
+        }
+
+        if (this.isOnline() && this.supabase) {
+            try {
+                await this.supabase.from('master_pelaksana').delete().eq('nip', nip);
+            } catch (err) { console.error("Gagal hapus di Supabase:", err); }
         }
     },
 
