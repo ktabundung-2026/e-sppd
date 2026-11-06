@@ -41,6 +41,158 @@ function updateOnlineStatus() {
     }
 }
 
+// ----------------------------------------------------
+// LOGIKA MODAL MASTER ASN / PELAKSANA
+// ----------------------------------------------------
+function openModalAsn() {
+    const modal = document.getElementById('modalAsn');
+    if (modal) {
+        renderAsnTable();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModalAsn() {
+    const modal = document.getElementById('modalAsn');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+async function saveAsnMaster(e) {
+    e.preventDefault();
+    const nama = toCapitalCase(document.getElementById('addAsnNama')?.value.trim());
+    const nip = document.getElementById('addAsnNip')?.value.trim();
+    const jabatan = toCapitalCase(document.getElementById('addAsnJabatan')?.value.trim());
+    const pangkat = toCapitalCase(document.getElementById('addAsnPangkat')?.value.trim()) || '-';
+
+    if (!nama || !nip || !jabatan) {
+        alert("Nama, NIP, dan Jabatan wajib diisi!");
+        return;
+    }
+
+    const asnObj = { nama, nip, jabatan, pangkat };
+    if (window.AppDB && typeof window.AppDB.saveMasterAsn === 'function') {
+        await window.AppDB.saveMasterAsn(asnObj);
+    }
+    
+    await loadMasterAsn();
+    renderAsnTable();
+
+    document.getElementById('formAddAsn')?.reset();
+    alert("Data Pelaksana berhasil disimpan.");
+}
+
+async function deleteAsnRecord(nip) {
+    if (confirm(`Hapus Pelaksana dengan NIP ${nip}?`)) {
+        if (window.AppDB && typeof window.AppDB.deleteMasterAsn === 'function') {
+            await window.AppDB.deleteMasterAsn(nip);
+        }
+        await loadMasterAsn();
+        renderAsnTable();
+    }
+}
+
+function renderAsnTable(filterText = '') {
+    const tbody = document.getElementById('asnTableBody');
+    const totalEl = document.getElementById('totalAsnCount');
+    if (!tbody) return;
+
+    let filtered = masterAsnList;
+    if (filterText) {
+        const q = filterText.toLowerCase();
+        filtered = masterAsnList.filter(a => a.nama.toLowerCase().includes(q) || a.nip.includes(q));
+    }
+
+    if (totalEl) totalEl.innerText = filtered.length;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400 italic">Data Pelaksana tidak ditemukan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(a => `
+        <tr class="hover:bg-slate-50 transition border-b">
+            <td class="p-2.5">
+                <div class="font-bold text-slate-800">${toCapitalCase(a.nama)}</div>
+                <div class="text-[10px] font-mono text-slate-500">NIP. ${a.nip || '-'}</div>
+            </td>
+            <td class="p-2.5 font-semibold text-slate-700">${toCapitalCase(a.jabatan || '-')}</td>
+            <td class="p-2.5 text-center">
+                <button type="button" onclick="deleteAsnRecord('${a.nip}')" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-2 py-1 rounded text-[11px] font-bold cursor-pointer">Hapus</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function filterAsnTable(val) {
+    renderAsnTable(val);
+}
+
+function downloadCsvTemplate() {
+    const csvContent = "data:text/csv;charset=utf-8,NAMA,NIP,JABATAN,PANGKAT\n" +
+        "RUDOLF UMBU RESI LOLY,197205212006041008,Camat Tabundung,Pembina (IV/a)\n" +
+        "DANIEL KAMBARU WINDI,197712312008011084,Bendahara Pengeluaran,Penata Tk. I (III/d)\n";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "template_master_pelaksana.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+async function importAsnFromCsv() {
+    const fileInput = document.getElementById('csvFileInput');
+    if (!fileInput || !fileInput.files.length) {
+        alert("Pilih file CSV terlebih dahulu!");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const imported = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line) {
+                const cols = line.split(',');
+                if (cols.length >= 3) {
+                    imported.push({
+                        nama: toCapitalCase(cols[0].trim().replace(/"/g, '')),
+                        nip: cols[1].trim().replace(/"/g, ''),
+                        jabatan: toCapitalCase(cols[2].trim().replace(/"/g, '')),
+                        pangkat: cols[3] ? toCapitalCase(cols[3].trim().replace(/"/g, '')) : '-'
+                    });
+                }
+            }
+        }
+
+        if (imported.length > 0) {
+            if (window.AppDB && typeof window.AppDB.bulkSaveMasterAsn === 'function') {
+                await window.AppDB.bulkSaveMasterAsn(imported);
+            }
+            await loadMasterAsn();
+            renderAsnTable();
+            alert(`Berhasil mengimpor ${imported.length} data Pelaksana!`);
+            fileInput.value = '';
+        } else {
+            alert("Format CSV tidak valid atau data kosong!");
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+// ----------------------------------------------------
+// LOGIKA MASTER SUB KEGIATAN (SK)
+// ----------------------------------------------------
 async function loadCustomSKList() {
     const selectSK = document.getElementById('step1_kodeSK');
     if (!selectSK) return;
@@ -304,26 +456,17 @@ function switchStep(stepNumber) {
         
         const btnIcon = document.getElementById(`step-icon-${s}`);
         const btnLabel = document.getElementById(`step-label-${s}`);
-        const btnBadge = document.getElementById(`step-badge-${s}`);
 
         if (s === stepNumber) {
             btnIcon?.classList.remove('bg-slate-200', 'text-slate-600');
             btnIcon?.classList.add('bg-gov-700', 'text-white', 'shadow-md');
             btnLabel?.classList.remove('text-slate-500', 'font-medium');
             btnLabel?.classList.add('text-gov-800', 'font-bold');
-            if (btnBadge) {
-                btnBadge.innerText = 'Aktif';
-                btnBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-emerald-100 text-emerald-800';
-            }
         } else {
             btnIcon?.classList.remove('bg-gov-700', 'text-white', 'shadow-md');
             btnIcon?.classList.add('bg-slate-200', 'text-slate-600');
             btnLabel?.classList.remove('text-gov-800', 'font-bold');
             btnLabel?.classList.add('text-slate-500', 'font-medium');
-            if (btnBadge) {
-                btnBadge.innerText = 'Tidak Aktif';
-                btnBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-slate-100 text-slate-500';
-            }
         }
     });
 
