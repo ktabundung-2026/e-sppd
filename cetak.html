@@ -333,6 +333,7 @@
                                 </div>
                             </td>
                         </tr>
+                        <!-- BARIS II DENGAN DUKUNGAN NAMA PENANDATANGAN DARI STEP 1 -->
                         <tr class="border-b border-black row-signature-cell">
                             <td class="p-2 border-r border-black align-top relative h-[44mm]">
                                 <table class="w-full">
@@ -365,11 +366,13 @@
                             <td class="p-2 align-top"><table class="w-full"><tr><td class="w-28">Berangkat</td><td>: </td></tr></table></td>
                         </tr>
                         <tr class="border-b border-black">
-                            <td class="border-r border-black align-top p-1.5"><p class="font-bold text-[9.5pt]">Catatan Lain-lain :</p></td>
                             <td class="p-1.5 align-top">
                                 <table class="w-full">
                                     <tr><td class="w-32">IV. Tiba Kembali</td><td>: <span class="data-fillable">Malahar</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglAkhir">-</span></td></tr>
+                                    <p class="font-mono text-[9pt]">Telah diperiksa dengan keterangan bahwa perjalanan dinas tersebut</p>
+                                    <p>di atas benar dilakukan atas perintahnya dan semata-mata untuk</p>
+                                    <p>kepentingan jabatan dalam waktu yang sesingkat-singkatnya</p>
                                 </table>
                                 <div class="mt-1 text-center">
                                     <p class="font-bold" id="bktCamatJabatanLabel">Camat Tabundung,</p>
@@ -381,9 +384,14 @@
                             </td>
                         </tr>
                         <tr>
+                        <td colspan="2" class="border-r border-black align-top p-1.5" ><p class="font-bold text-[9.5pt]">Catatan Lain-lain :</p></td>
+                        </tr>    
+                        <tr>
                             <td colspan="2" class="p-1.5 font-official text-[8.5pt]">
                                 <p class="font-bold uppercase underline">PERHATIAN:</p>
-                                <p>Pejabat yang berwenang menerbitkan SPPD bertanggungjawab berdasarkan peraturan keuangan negara.</p>
+                                <p>Pejabat yang berwenang menerbitkan SPPD Pegawai yang melakukan perjalanan dinas para pejabat yang mengesahkan tanggal</p>
+                                <p>berangkat/tiba serta bendaharawan bertanggungjawab berdasarkan peraturan-peraturan keuangan negara apabila negara mendapat rugi</p>
+                                <p>akibat kesalahan, kealpaannya.</p>
                             </td>
                         </tr>
                     </tbody>
@@ -416,22 +424,17 @@
                         </table>
                     </div>
 
-                    <!-- PENUTUP LAPORAN DENGAN JARAK w-6 (mb-6) SEBAGAIMANA DIMINTA -->
                     <div class="mt-4 mb-6 font-official text-sm leading-relaxed sppd-table-fixed">
                         <p>Demikian Laporan Hasil Perjalanan Dinas ini dibuat untuk dipergunakan seperlunya.</p>
                     </div>
 
-                    <!-- JUDUL TIM PELAKSANA TEPAT DI BAWAH TULISAN DEMIKIAN -->
                     <div class="font-official text-sm sppd-table-fixed mb-3">
                         <p class="font-bold">Yang Melakukan Perjalanan Dinas :</p>
                     </div>
 
-                    <!-- TABEL/GRID NAMA DENGAN KOLOM TANDA TANGAN DI SEBELAHNYA (RATA KIRI) -->
                     <div class="font-official text-xs sppd-table-fixed">
                         <table class="w-full text-left font-official border-none">
-                            <tbody id="lapDaftarTtd">
-                                <!-- Render Dinamis via JS -->
-                            </tbody>
+                            <tbody id="lapDaftarTtd"></tbody>
                         </table>
                     </div>
                 </div>
@@ -448,7 +451,6 @@
                     </div>
                 </div>
 
-                <!-- JUDUL & INFORMASI BKU -->
                 <div class="flex justify-between items-start sppd-table-fixed mb-2">
                     <div></div>
                     <div class="text-right text-xs font-official leading-tight">
@@ -471,7 +473,6 @@
 
                 <div class="text-center font-bold text-xs uppercase mb-2">Dengan Rincian sebagai berikut:</div>
 
-                <!-- TABEL RINCIAN -->
                 <table class="sppd-table-fixed border-collapse border border-black text-[9pt] font-official mb-3">
                     <thead>
                         <tr class="bg-slate-100 border-b border-black text-center font-bold">
@@ -490,7 +491,6 @@
                     <tbody id="kwiTabelRincian"></tbody>
                 </table>
 
-                <!-- TANDA TANGAN SEJAJAR -->
                 <div class="flex justify-between items-start text-xs font-official sppd-table-fixed mt-4">
                     <div class="w-1/2 text-center pr-4">
                         <p class="font-bold">Mengetahui / Menyetujui,</p>
@@ -614,7 +614,7 @@
             document.getElementById('sppdTujuan').innerText = record.tempatTujuan || '-';
             document.getElementById('sppdLama').innerText = `: ${record.lamaHari || 1} Hari`;
             document.getElementById('sppdTglMulai').innerText = ': ' + formatDate(record.tglMulai);
-            document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai);
+            document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai || record.tglKembali);
             document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
             document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
             document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
@@ -640,8 +640,8 @@
             document.getElementById('bktTglTiba1').innerText = formatDate(record.tglMulai);
             document.getElementById('bktBerangkat1').innerText = record.tempatTujuan || '-';
             document.getElementById('bktKeTujuan1').innerText = record.tempatBerangkat || 'Malahar';
-            document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai);
-            document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai);
+            document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai || record.tglKembali);
+            document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai || record.tglKembali);
 
             const namaTujuan = record.namaPejabatTujuan || '....................................';
             const jabatanTujuan = record.jabatanPejabatTujuan || 'KEPALA DESA';
@@ -655,6 +655,38 @@
             document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
             document.getElementById('bktKadesNipBerangkat1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
 
+            // Render TTD Baris II (Dari Input Langkah 1)
+            const namaTujuan2 = record.namaPejabatTujuan2 || '';
+            if (namaTujuan2) {
+                document.getElementById('bktTiba2').innerText = record.tempatTujuan || '-';
+                document.getElementById('bktTglTiba2').innerText = formatDate(record.tglMulai);
+                document.getElementById('bktBerangkat2').innerText = record.tempatTujuan || '-';
+                document.getElementById('bktKeTujuan2').innerText = record.tempatBerangkat || 'Malahar';
+                document.getElementById('bktTglBerangkat2').innerText = formatDate(record.tglSelesai || record.tglKembali);
+
+                document.getElementById('bktJabatanTujuan2').innerText = 'KEPALA DESA / PEJABAT';
+                document.getElementById('bktKadesNama2').innerText = namaTujuan2;
+                document.getElementById('bktKadesNip2').innerText = '';
+
+                document.getElementById('bktJabatanBerangkat2').innerText = 'KEPALA DESA / PEJABAT';
+                document.getElementById('bktKadesNamaBerangkat2').innerText = namaTujuan2;
+                document.getElementById('bktKadesNipBerangkat2').innerText = '';
+            } else {
+                document.getElementById('bktTiba2').innerText = '-';
+                document.getElementById('bktTglTiba2').innerText = '-';
+                document.getElementById('bktBerangkat2').innerText = '-';
+                document.getElementById('bktKeTujuan2').innerText = '-';
+                document.getElementById('bktTglBerangkat2').innerText = '-';
+
+                document.getElementById('bktJabatanTujuan2').innerText = '-';
+                document.getElementById('bktKadesNama2').innerText = '-';
+                document.getElementById('bktKadesNip2').innerText = '';
+
+                document.getElementById('bktJabatanBerangkat2').innerText = '-';
+                document.getElementById('bktKadesNamaBerangkat2').innerText = '-';
+                document.getElementById('bktKadesNipBerangkat2').innerText = '';
+            }
+
             document.getElementById('bktCamatNama').innerText = defaultCamatNama;
             document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
             document.getElementById('bktCamatNip').innerText = defaultCamatNip;
@@ -662,11 +694,10 @@
             // 4. Laporan Perjalanan Dinas
             document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
             document.getElementById('lapTujuan').innerText = record.tempatTujuan;
-            document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai)})`;
+            document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai || record.tglKembali)})`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
             document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
-            // Rata Kiri Nama Pelaksana + Kolom Tanda Tangan Di Sebelahnya
             let ttdLapHtml = `
                 <tr class="align-top">
                     <td class="py-2 pr-4 w-7/12">
@@ -706,7 +737,7 @@
             document.getElementById('kwiNoBku').innerText = record.noBku || '-';
             document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
             document.getElementById('kwiTerbilangNominal').innerText = 'Rp ' + total.toLocaleString('id-ID');
-            document.getElementById('kwiTglKwitansiSub').innerText = formatDate(record.tglSelesai || record.tglSurat);
+            document.getElementById('kwiTglKwitansiSub').innerText = formatDate(record.tglSelesai || record.tglKembali || record.tglSurat);
             document.getElementById('kwiCamatNama').innerText = defaultCamatNama;
             document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
             document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
