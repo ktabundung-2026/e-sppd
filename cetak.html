@@ -14,923 +14,923 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        official: ['Tinos', 'Georgia', 'serif'],
-                    },
-                    colors: {
-                        gov: {
-                            50: '#f0f7ff', 100: '#e0effe', 600: '#0284c7',
-                            700: '#0369a1', 800: '#075985', 900: '#0c4a6e',
-                        }
-                    }
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                official: ['Tinos', 'Georgia', 'serif'],
+            },
+            colors: {
+                gov: {
+                    50: '#f0f7ff', 100: '#e0effe', 600: '#0284c7',
+                    700: '#0369a1', 800: '#075985', 900: '#0c4a6e',
                 }
             }
         }
-    </script>
-    
-    <style>
-        @page { size: 215mm 330mm; margin: 0; }
-        
-        @media print {
-            body { background: white !important; margin: 0; padding: 0; }
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area {
-                position: absolute; left: 0; top: 0; width: 215mm; height: 330mm;
-                margin: 0; padding: 0; background: white !important;
-                color: black !important; font-family: 'Tinos', Georgia, serif !important;
-            }
-            .no-print { display: none !important; }
-            .document-paper { box-shadow: none !important; margin: 0 !important; width: 215mm !important; height: 330mm !important; }
-        }
-        
-        .document-paper {
-            background-color: white; 
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 215mm; 
-            height: 330mm; 
-            padding: 12mm 15mm 15mm 20mm; 
-            margin: auto; 
-            color: #000; 
-            font-family: 'Tinos', Georgia, serif; 
-            font-size: 10.5pt; 
-            line-height: 1.25; 
-            box-sizing: border-box; 
-            overflow: hidden;
-            position: relative;
-        }
+    }
+}
+</script>
 
-        .sppd-table-fixed { width: 180mm !important; table-layout: fixed; }
-        .sppd-back-table { width: 180mm !important; height: 290mm !important; table-layout: fixed; }
-        .sppd-front-table { width: 180mm !important; height: auto !important; table-layout: fixed; }
-        .row-signature-cell { height: 44mm !important; max-height: 44mm !important; overflow: hidden; box-sizing: border-box; }
-        .title-spacing { margin-top: 6mm !important; }
-        .data-fillable:empty::before { content: "\00a0"; }
+<style>
+@page { size: 215mm 330mm; margin: 0; }
 
-        @media (max-width: 640px) {
-            .document-paper { width: 100%; height: auto; padding: 10px; font-size: 8.5pt; }
-            .sppd-table-fixed, .sppd-back-table, .sppd-front-table { width: 100% !important; height: auto !important; }
-        }
-    </style>
+@media print {
+    body { background: white !important; margin: 0; padding: 0; }
+    body * { visibility: hidden; }
+    .print-area, .print-area * { visibility: visible; }
+    .print-area {
+        position: absolute; left: 0; top: 0; width: 215mm; height: 330mm;
+        margin: 0; padding: 0; background: white !important;
+        color: black !important; font-family: 'Tinos', Georgia, serif !important;
+    }
+    .no-print { display: none !important; }
+    .document-paper { box-shadow: none !important; margin: 0 !important; width: 215mm !important; height: 330mm !important; }
+}
+
+.document-paper {
+    background-color: white; 
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    width: 215mm; 
+    height: 330mm; 
+    padding: 12mm 15mm 15mm 20mm; 
+    margin: auto; 
+    color: #000; 
+    font-family: 'Tinos', Georgia, serif; 
+    font-size: 10.5pt; 
+    line-height: 1.25; 
+    box-sizing: border-box; 
+    overflow: hidden;
+    position: relative;
+}
+
+.sppd-table-fixed { width: 180mm !important; table-layout: fixed; }
+.sppd-back-table { width: 180mm !important; height: 290mm !important; table-layout: fixed; }
+.sppd-front-table { width: 180mm !important; height: auto !important; table-layout: fixed; }
+.row-signature-cell { height: 44mm !important; max-height: 44mm !important; overflow: hidden; box-sizing: border-box; }
+.title-spacing { margin-top: 6mm !important; }
+.data-fillable:empty::before { content: "\00a0"; }
+
+@media (max-width: 640px) {
+    .document-paper { width: 100%; height: auto; padding: 10px; font-size: 8.5pt; }
+    .sppd-table-fixed, .sppd-back-table, .sppd-front-table { width: 100% !important; height: auto !important; }
+}
+</style>
 </head>
 <body class="bg-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- HEADER / NAVIGATION (NO PRINT) -->
-    <header class="bg-slate-900 text-white p-3 sticky top-0 z-50 shadow-md no-print border-b border-slate-800">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center space-x-2">
-                <span class="text-amber-400 text-lg"><i class="fa-solid fa-print"></i></span>
-                <h3 class="font-bold text-sm sm:text-base">Modul Cetak Dokumen SPPD</h3>
-            </div>
+<!-- HEADER / NAVIGATION (NO PRINT) -->
+<header class="bg-slate-900 text-white p-3 sticky top-0 z-50 shadow-md no-print border-b border-slate-800">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center space-x-2">
+        <span class="text-amber-400 text-lg"><i class="fa-solid fa-print"></i></span>
+        <h3 class="font-bold text-sm sm:text-base">Modul Cetak Dokumen SPPD</h3>
+    </div>
 
-            <div class="flex flex-wrap items-center gap-1.5 bg-slate-800 p-1 rounded-lg">
-                <button onclick="switchDocView('st')" id="btnDocSt" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium bg-gov-700 text-white">Surat Tugas</button>
-                <button onclick="switchDocView('sppd-depan')" id="btnDocSppdDepan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Depan</button>
-                <button onclick="switchDocView('sppd-belakang')" id="btnDocSppdBelakang" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Belakang</button>
-                <button onclick="switchDocView('laporan')" id="btnDocLaporan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Laporan</button>
-                <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi & Rincian</button>
-            </div>
-            
-            <div class="flex items-center gap-2 sm:gap-3">
-                <div id="toggleBlangkoWrapper" class="hidden items-center gap-2 bg-amber-950/60 border border-amber-600/40 px-3 py-1 rounded-lg">
-                    <input type="checkbox" id="toggleBlangko" onchange="toggleBlangkoBelakangMode(this.checked)" class="w-4 h-4 text-amber-500 rounded focus:ring-0 cursor-pointer">
-                    <label for="toggleBlangko" class="text-xs font-semibold text-amber-200 cursor-pointer select-none">Cetak Blangko Kosong</label>
-                </div>
+    <div class="flex flex-wrap items-center gap-1.5 bg-slate-800 p-1 rounded-lg">
+        <button onclick="switchDocView('st')" id="btnDocSt" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium bg-gov-700 text-white">Surat Tugas</button>
+        <button onclick="switchDocView('sppd-depan')" id="btnDocSppdDepan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Depan</button>
+        <button onclick="switchDocView('sppd-belakang')" id="btnDocSppdBelakang" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">SPPD Belakang</button>
+        <button onclick="switchDocView('laporan')" id="btnDocLaporan" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Laporan</button>
+        <button onclick="switchDocView('kwitansi')" id="btnDocKwitansi" class="doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white">Kwitansi & Rincian</button>
+    </div>
+    
+    <div class="flex items-center gap-2 sm:gap-3">
+        <div id="toggleBlangkoWrapper" class="hidden items-center gap-2 bg-amber-950/60 border border-amber-600/40 px-3 py-1 rounded-lg">
+            <input type="checkbox" id="toggleBlangko" onchange="toggleBlangkoBelakangMode(this.checked)" class="w-4 h-4 text-amber-500 rounded focus:ring-0 cursor-pointer">
+            <label for="toggleBlangko" class="text-xs font-semibold text-amber-200 cursor-pointer select-none">Cetak Blangko Kosong</label>
+        </div>
 
-                <button onclick="goBackToForm()" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Form e-SPPD
-                </button>
+        <button onclick="goBackToForm()" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Form e-SPPD
+        </button>
 
-                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Cetak / Simpan PDF</span>
-                </button>
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Cetak / Simpan PDF</span>
+        </button>
+    </div>
+</div>
+</header>
+
+<!-- MAIN PRINT AREA -->
+<main class="flex-1 p-4 sm:p-8 overflow-y-auto flex justify-center items-start">
+<div id="printArea" class="print-area">
+    
+    <!-- 1. SURAT TUGAS -->
+    <div id="doc-st" class="document-paper mb-8 hidden">
+        <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
+            <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
+            <div class="text-center flex-1">
+                <h3 class="font-bold text-base sm:text-lg uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                <h2 class="font-bold text-lg sm:text-2xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                <h3 class="font-bold text-sm sm:text-base uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
             </div>
         </div>
-    </header>
 
-    <!-- MAIN PRINT AREA -->
-    <main class="flex-1 p-4 sm:p-8 overflow-y-auto flex justify-center items-start">
-        <div id="printArea" class="print-area">
-            
-            <!-- 1. SURAT TUGAS -->
-            <div id="doc-st" class="document-paper mb-8 hidden">
-                <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
-                    <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
-                    <div class="text-center flex-1">
-                        <h3 class="font-bold text-base sm:text-lg uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                        <h2 class="font-bold text-lg sm:text-2xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
-                        <h3 class="font-bold text-sm sm:text-base uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
-                    </div>
-                </div>
+        <div class="text-center title-spacing mb-6">
+            <h3 class="font-bold text-base underline uppercase tracking-widest">SURAT PERINTAH TUGAS</h3>
+            <p class="text-sm">NO. <span id="stNoSurat">-</span></p>
+        </div>
 
-                <div class="text-center title-spacing mb-6">
-                    <h3 class="font-bold text-base underline uppercase tracking-widest">SURAT PERINTAH TUGAS</h3>
-                    <p class="text-sm">NO. <span id="stNoSurat">-</span></p>
-                </div>
+        <table class="sppd-table-fixed font-official text-sm leading-relaxed mb-4">
+            <tr class="align-top">
+                <td class="w-24 font-bold">Dasar</td>
+                <td class="w-4">:</td>
+                <td id="stDasar">Atas Perintah Camat</td>
+            </tr>
+            <tr class="align-top">
+                <td class="font-bold pt-3">Kepada</td>
+                <td class="w-4 pt-3">:</td>
+                <td class="pt-3">
+                    <div id="stDaftarPersonil" class="space-y-3"></div>
+                </td>
+            </tr>
+            <tr class="align-top">
+                <td class="font-bold pt-4">Untuk</td>
+                <td class="w-4 pt-4">:</td>
+                <td class="pt-4" id="stUntuk">-</td>
+            </tr>
+        </table>
 
-                <table class="sppd-table-fixed font-official text-sm leading-relaxed mb-4">
-                    <tr class="align-top">
-                        <td class="w-24 font-bold">Dasar</td>
-                        <td class="w-4">:</td>
-                        <td id="stDasar">Atas Perintah Camat</td>
-                    </tr>
-                    <tr class="align-top">
-                        <td class="font-bold pt-3">Kepada</td>
-                        <td class="w-4 pt-3">:</td>
-                        <td class="pt-3">
-                            <div id="stDaftarPersonil" class="space-y-3"></div>
-                        </td>
-                    </tr>
-                    <tr class="align-top">
-                        <td class="font-bold pt-4">Untuk</td>
-                        <td class="w-4 pt-4">:</td>
-                        <td class="pt-4" id="stUntuk">-</td>
-                    </tr>
-                </table>
-
-                <div class="mt-12 flex justify-end font-official text-sm sppd-table-fixed">
-                    <div class="w-64 text-center">
-                        <p class="text-left">Dikeluarkan di : Malahar</p>
-                        <p class="text-left">Pada Tanggal : <span id="stTglSurat">-</span></p>
-                        <p class="font-bold mt-2" id="stJabatanPengutusHeader">Camat Tabundung,</p>
-                        <div class="h-20"></div>
-                        <p class="font-bold underline" id="stNamaCamat">-</p>
-                        <p id="stPangkatCamat">-</p>
-                        <p>NIP. <span id="stNipCamat">-</span></p>
-                    </div>
-                </div>
+        <div class="mt-12 flex justify-end font-official text-sm sppd-table-fixed">
+            <div class="w-64 text-center">
+                <p class="text-left">Dikeluarkan di : Malahar</p>
+                <p class="text-left">Pada Tanggal : <span id="stTglSurat">-</span></p>
+                <p class="font-bold mt-2" id="stJabatanPengutusHeader">Camat Tabundung,</p>
+                <div class="h-20"></div>
+                <p class="font-bold underline" id="stNamaCamat">-</p>
+                <p id="stPangkatCamat">-</p>
+                <p>NIP. <span id="stNipCamat">-</span></p>
             </div>
+        </div>
+    </div>
 
-            <!-- 2. SPPD HALAMAN DEPAN -->
-            <div id="doc-sppd-depan" class="document-paper mb-8 hidden">
-                <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
-                    <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
-                    <div class="text-center flex-1">
-                        <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                        <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
-                        <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
-                    </div>
-                </div>
+    <!-- 2. SPPD HALAMAN DEPAN -->
+    <div id="doc-sppd-depan" class="document-paper mb-8 hidden">
+        <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
+            <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
+            <div class="text-center flex-1">
+                <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
+            </div>
+        </div>
 
-                <div class="flex justify-between text-xs font-official mb-1 sppd-table-fixed">
-                    <div></div>
-                    <div class="w-64">
+        <div class="flex justify-between text-xs font-official mb-1 sppd-table-fixed">
+            <div></div>
+            <div class="w-64">
+                <table class="w-full">
+                    <tr><td class="w-24">Lembar Ke</td><td>:</td></tr>
+                    <tr><td>Nomor</td><td>: <span id="sppdNoSurat">-</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center font-bold text-sm underline uppercase mt-2 mb-3">
+            SURAT PERINTAH PERJALANAN DINAS<br>(SPPD)
+        </div>
+
+        <table class="sppd-front-table border-collapse border border-black font-official text-xs">
+            <tbody>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 w-6 text-center align-top">1.</td>
+                    <td class="border-r border-black p-1.5 w-1/2 align-top">Pejabat yang memberi perintah</td>
+                    <td class="p-1.5 align-top" id="sppdPejabatPengutus">: Camat Tabundung</td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">2.</td>
+                    <td class="border-r border-black p-1.5 align-top">
+                        Nama Pegawai yang diperintahkan<br>
+                        NIP<br>
+                        Pangkat dan Golongan<br>
+                        Jabatan<br>
+                        Tingkat Menurut Peraturan Perjalanan Dinas
+                    </td>
+                    <td class="p-1.5 align-top">
+                        : <span id="sppdNama" class="font-bold">-</span><br>
+                        : <span id="sppdNip">-</span><br>
+                        : <span id="sppdPangkat">-</span><br>
+                        : <span id="sppdJabatan">-</span><br>
+                        : -
+                    </td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">3.</td>
+                    <td class="border-r border-black p-1.5 align-top">Maksud Perjalanan Dinas</td>
+                    <td class="p-1.5 align-top" id="sppdMaksud">: -</td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">4.</td>
+                    <td class="border-r border-black p-1.5 align-top">Alat angkutan yang digunakan</td>
+                    <td class="p-1.5 align-top" id="sppdTransport">: -</td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">5.</td>
+                    <td class="border-r border-black p-1.5 align-top">
+                        a. Tempat Berangkat<br>
+                        b. Tempat Tujuan
+                    </td>
+                    <td class="p-1.5 align-top">
+                        : <span id="sppdBerangkat">Malahar</span><br>
+                        : <span id="sppdTujuan">-</span>
+                    </td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">6.</td>
+                    <td class="border-r border-black p-1.5 align-top">
+                        a. Lamanya Perjalanan Dinas<br>
+                        b. Tanggal Berangkat<br>
+                        c. Tanggal Tiba di Tempat Baru
+                    </td>
+                    <td class="p-1.5 align-top">
+                        : <span id="sppdLama">-</span><br>
+                        : <span id="sppdTglMulai">-</span><br>
+                        : <span id="sppdTglSelesai">-</span>
+                    </td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">7.</td>
+                    <td class="border-r border-black p-1.5 align-top">Pengikut:</td>
+                    <td class="p-1.5 align-top">
+                        <div id="sppdPengikutTabel" class="space-y-1"></div>
+                    </td>
+                </tr>
+                <tr class="border-b border-black">
+                    <td class="border-r border-black p-1.5 text-center align-top">8.</td>
+                    <td class="border-r border-black p-1.5 align-top">
+                        Pembebanan Anggaran<br>Instansi<br>Mata Anggaran
+                    </td>
+                    <td class="p-1.5 align-top">
+                        : Hanya Instansi yang dikuasainya<br>
+                        : Kecamatan Tabundung<br>
+                        : <span id="sppdMak">DPA Kec. Tabundung Tahun 2026</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border-r border-black p-1.5 text-center align-top">9.</td>
+                    <td class="border-r border-black p-1.5 align-top">Keterangan Lain-lain</td>
+                    <td class="p-1.5 align-top">: </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="mt-4 flex justify-between font-official text-xs sppd-table-fixed">
+            <div></div>
+            <div class="w-64 text-center">
+                <p>Dikeluarkan di : Malahar</p>
+                <p>Pada Tanggal : <span id="sppdTglSurat">-</span></p>
+                <p class="font-bold mt-1" id="sppdCamatJabatanLabel">Camat Tabundung,</p>
+                <div class="h-16"></div>
+                <p class="font-bold underline" id="sppdCamatNama">-</p>
+                <p id="sppdCamatPangkat">-</p>
+                <p>NIP. <span id="sppdCamatNip">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SPPD HALAMAN BELAKANG -->
+    <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
+        <table class="sppd-back-table border-collapse border border-black font-official text-[10pt]">
+            <tbody>
+                <!-- BARIS 1 -->
+                <tr class="border-b border-black">
+                    <td class="p-1.5 border-r border-black align-top"></td>
+                    <td class="p-1.5 align-top">
                         <table class="w-full">
-                            <tr><td class="w-24">Lembar Ke</td><td>:</td></tr>
-                            <tr><td>Nomor</td><td>: <span id="sppdNoSurat">-</span></td></tr>
+                            <tr><td class="w-28">SPPD Nomor</td><td>: <span class="data-fillable" id="bktNoSPPD">-</span></td></tr>
+                            <tr><td class="w-28 pt-0.5">Berangkat Dari</td><td class="pt-0.5">: <span class="data-fillable" id="bktBerangkatAwal">Malahar</span></td></tr>
+                            <tr><td colspan="2">(Tempat Kedudukan)</td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTgl1">-</span></td></tr>
+                            <tr><td>Ke</td><td>: <span class="data-fillable" id="bktTujuan1">-</span></td></tr>
                         </table>
-                    </div>
-                </div>
+                    </td>
+                </tr>
 
-                <div class="text-center font-bold text-sm underline uppercase mt-2 mb-3">
-                    SURAT PERINTAH PERJALANAN DINAS<br>(SPPD)
-                </div>
-
-                <table class="sppd-front-table border-collapse border border-black font-official text-xs">
-                    <tbody>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 w-6 text-center align-top">1.</td>
-                            <td class="border-r border-black p-1.5 w-1/2 align-top">Pejabat yang memberi perintah</td>
-                            <td class="p-1.5 align-top" id="sppdPejabatPengutus">: Camat Tabundung</td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">2.</td>
-                            <td class="border-r border-black p-1.5 align-top">
-                                Nama Pegawai yang diperintahkan<br>
-                                NIP<br>
-                                Pangkat dan Golongan<br>
-                                Jabatan<br>
-                                Tingkat Menurut Peraturan Perjalanan Dinas
-                            </td>
-                            <td class="p-1.5 align-top">
-                                : <span id="sppdNama" class="font-bold">-</span><br>
-                                : <span id="sppdNip">-</span><br>
-                                : <span id="sppdPangkat">-</span><br>
-                                : <span id="sppdJabatan">-</span><br>
-                                : -
-                            </td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">3.</td>
-                            <td class="border-r border-black p-1.5 align-top">Maksud Perjalanan Dinas</td>
-                            <td class="p-1.5 align-top" id="sppdMaksud">: -</td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">4.</td>
-                            <td class="border-r border-black p-1.5 align-top">Alat angkutan yang digunakan</td>
-                            <td class="p-1.5 align-top" id="sppdTransport">: -</td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">5.</td>
-                            <td class="border-r border-black p-1.5 align-top">
-                                a. Tempat Berangkat<br>
-                                b. Tempat Tujuan
-                            </td>
-                            <td class="p-1.5 align-top">
-                                : <span id="sppdBerangkat">Malahar</span><br>
-                                : <span id="sppdTujuan">-</span>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">6.</td>
-                            <td class="border-r border-black p-1.5 align-top">
-                                a. Lamanya Perjalanan Dinas<br>
-                                b. Tanggal Berangkat<br>
-                                c. Tanggal Tiba di Tempat Baru
-                            </td>
-                            <td class="p-1.5 align-top">
-                                : <span id="sppdLama">-</span><br>
-                                : <span id="sppdTglMulai">-</span><br>
-                                : <span id="sppdTglSelesai">-</span>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">7.</td>
-                            <td class="border-r border-black p-1.5 align-top">Pengikut:</td>
-                            <td class="p-1.5 align-top">
-                                <div id="sppdPengikutTabel" class="space-y-1"></div>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-black">
-                            <td class="border-r border-black p-1.5 text-center align-top">8.</td>
-                            <td class="border-r border-black p-1.5 align-top">
-                                Pembebanan Anggaran<br>Instansi<br>Mata Anggaran
-                            </td>
-                            <td class="p-1.5 align-top">
-                                : Hanya Instansi yang dikuasainya<br>
-                                : Kecamatan Tabundung<br>
-                                : <span id="sppdMak">DPA Kec. Tabundung Tahun 2026</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="border-r border-black p-1.5 text-center align-top">9.</td>
-                            <td class="border-r border-black p-1.5 align-top">Keterangan Lain-lain</td>
-                            <td class="p-1.5 align-top">: </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="mt-4 flex justify-between font-official text-xs sppd-table-fixed">
-                    <div></div>
-                    <div class="w-64 text-center">
-                        <p>Dikeluarkan di : Malahar</p>
-                        <p>Pada Tanggal : <span id="sppdTglSurat">-</span></p>
-                        <p class="font-bold mt-1" id="sppdCamatJabatanLabel">Camat Tabundung,</p>
-                        <div class="h-16"></div>
-                        <p class="font-bold underline" id="sppdCamatNama">-</p>
-                        <p id="sppdCamatPangkat">-</p>
-                        <p>NIP. <span id="sppdCamatNip">-</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. SPPD HALAMAN BELAKANG -->
-            <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
-                <table class="sppd-back-table border-collapse border border-black font-official text-[10pt]">
-                    <tbody>
-                        <!-- BARIS 1 -->
-                        <tr class="border-b border-black">
-                            <td class="p-1.5 border-r border-black align-top"></td>
-                            <td class="p-1.5 align-top">
-                                <table class="w-full">
-                                    <tr><td class="w-28">SPPD Nomor</td><td>: <span class="data-fillable" id="bktNoSPPD">-</span></td></tr>
-                                    <tr><td class="w-28 pt-0.5">Berangkat Dari</td><td class="pt-0.5">: <span class="data-fillable" id="bktBerangkatAwal">Malahar</span></td></tr>
-                                    <tr><td colspan="2">(Tempat Kedudukan)</td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTgl1">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktTujuan1">-</span></td></tr>
-                                </table>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 2 (I. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
-                        <tr class="border-b border-black row-signature-cell">
-                            <td class="p-2 border-r border-black align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan1">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama1">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNip1">-</p>
-                                </div>
-                            </td>
-                            <td class="p-2 align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan1">Malahar</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat1">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat1">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat1">-</p>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 3 (II. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
-                        <tr class="border-b border-black row-signature-cell">
-                            <td class="p-2 border-r border-black align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">II. Tiba di</td><td>: <span class="data-fillable" id="bktTiba2">-</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan2">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNip2">-</p>
-                                </div>
-                            </td>
-                            <td class="p-2 align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat2">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan2">Malahar</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat2">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat2">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat2">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat2">-</p>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 4 (III. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
-                        <tr class="border-b border-black row-signature-cell">
-                            <td class="p-2 border-r border-black align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">III. Tiba di</td><td>: <span class="data-fillable" id="bktTiba3">-</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba3">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan3">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama3">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNip3">-</p>
-                                </div>
-                            </td>
-                            <td class="p-2 align-top relative h-[44mm]">
-                                <table class="w-full">
-                                    <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat3">-</span></td></tr>
-                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan3">Malahar</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat3">-</span></td></tr>
-                                </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
-                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat3">-</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat3">-</p>
-                                    <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat3">-</p>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 5 (KOLOM 1 KOSONG, KOLOM 2 BERISI IV. TIBA KEMBALI DAN KETERANGAN PENERIKSAAN) -->
-                        <tr class="border-b border-black">
-                            <td class="p-2 border-r border-black align-top"></td>
-                            <td class="p-2 align-top">
-                                <table class="w-full">
-                                    <tr><td class="w-32">IV. Tiba Kembali</td><td>: <span class="data-fillable">Malahar</span></td></tr>
-                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglAkhir">-</span></td></tr>
-                                </table>
-                                <div class="mt-2 text-justify leading-snug">
-                                    <p>Telah diperiksa dengan keterangan bahwa perjalanan tersebut di atas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu sesingkat-singkatnya.</p>
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <p class="font-bold" id="bktCamatJabatanLabel">Camat Tabundung,</p>
-                                    <div class="h-14"></div>
-                                    <p class="font-bold underline" id="bktCamatNama">-</p>
-                                    <p id="bktCamatPangkat">-</p>
-                                    <p>NIP. <span id="bktCamatNip">-</span></p>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 6 (CATATAN LAIN-LAIN TERSENDIRI) -->
-                        <tr class="border-b border-black">
-                            <td colspan="2" class="p-2 align-top">
-                                <p class="font-bold">Catatan Lain-lain :</p>
-                            </td>
-                        </tr>
-
-                        <!-- BARIS 7 (PERHATIAN) -->
-                        <tr>
-                            <td colspan="2" class="p-2 font-official text-[10pt]">
-                                <p class="font-bold uppercase underline">PERHATIAN:</p>
-                                <p>Pejabat yang berwenang menerbitkan SPPD Pegawai yang melakukan perjalanan dinas para pejabat yang mengesahkan tanggal berangkat/tiba serta bendaharawan bertanggungjawab berdasarkan peraturan-peraturan keuangan negara apabila negara mendapat rugi akibat kesalahan, kealpaannya.</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 4. LAPORAN PERJALANAN DINAS -->
-            <div id="doc-laporan" class="document-paper mb-8 hidden flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
-                        <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
-                        <div class="text-center flex-1">
-                            <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                            <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
-                            <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
+                <!-- BARIS 2 (I. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
+                <tr class="border-b border-black row-signature-cell">
+                    <td class="p-2 border-r border-black align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
+                        </table>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan1">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNama1">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNip1">-</p>
                         </div>
-                    </div>
-
-                    <div class="text-center title-spacing mb-6">
-                        <h3 class="font-bold text-base underline uppercase tracking-wider">LAPORAN PERJALANAN DINAS</h3>
-                    </div>
-
-                    <div class="space-y-4 font-official text-sm leading-relaxed sppd-table-fixed">
-                        <table class="w-full border-separate border-spacing-y-3">
-                            <tr class="align-top"><td class="w-48 font-semibold">1. Dasar</td><td class="w-4">:</td><td id="lapDasar">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">2. Tujuan</td><td>:</td><td id="lapTujuan">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">3. Lama Perjalanan</td><td>:</td><td id="lapLama">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">4. Maksud Perjalanan Dinas</td><td>:</td><td id="lapMaksud">-</td></tr>
-                            <tr class="align-top"><td class="font-semibold">5. Hasil yang dicapai</td><td>:</td><td id="lapHasil" class="whitespace-pre-line">-</td></tr>
+                    </td>
+                    <td class="p-2 align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat1">-</span></td></tr>
+                            <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan1">Malahar</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                         </table>
-                    </div>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat1">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat1">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat1">-</p>
+                        </div>
+                    </td>
+                </tr>
 
-                    <div class="mt-4 mb-6 font-official text-sm leading-relaxed sppd-table-fixed">
-                        <p>Demikian Laporan Hasil Perjalanan Dinas ini dibuat untuk dipergunakan seperlunya.</p>
-                    </div>
-
-                    <div class="font-official text-sm sppd-table-fixed mb-3">
-                        <p class="font-bold">Yang Melakukan Perjalanan Dinas :</p>
-                    </div>
-
-                    <div class="font-official text-xs sppd-table-fixed">
-                        <table class="w-full text-left font-official border-none">
-                            <tbody id="lapDaftarTtd"></tbody>
+                <!-- BARIS 3 (II. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
+                <tr class="border-b border-black row-signature-cell">
+                    <td class="p-2 border-r border-black align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">II. Tiba di</td><td>: <span class="data-fillable" id="bktTiba2">-</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
                         </table>
-                    </div>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan2">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNip2">-</p>
+                        </div>
+                    </td>
+                    <td class="p-2 align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat2">-</span></td></tr>
+                            <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan2">Malahar</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat2">-</span></td></tr>
+                        </table>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat2">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat2">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat2">-</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- BARIS 4 (III. TIBA & BERANGKAT - SEJAJAR & DIBERI RUANG TTD) -->
+                <tr class="border-b border-black row-signature-cell">
+                    <td class="p-2 border-r border-black align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">III. Tiba di</td><td>: <span class="data-fillable" id="bktTiba3">-</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba3">-</span></td></tr>
+                        </table>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan3">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNama3">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNip3">-</p>
+                        </div>
+                    </td>
+                    <td class="p-2 align-top relative h-[44mm]">
+                        <table class="w-full">
+                            <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat3">-</span></td></tr>
+                            <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan3">Malahar</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat3">-</span></td></tr>
+                        </table>
+                        <div class="absolute bottom-1 left-0 right-0 text-center">
+                            <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat3">-</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat3">-</p>
+                            <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat3">-</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- BARIS 5 (KOLOM 1 KOSONG, KOLOM 2 BERISI IV. TIBA KEMBALI DAN KETERANGAN PENERIKSAAN) -->
+                <tr class="border-b border-black">
+                    <td class="p-2 border-r border-black align-top"></td>
+                    <td class="p-2 align-top">
+                        <table class="w-full">
+                            <tr><td class="w-32">IV. Tiba Kembali</td><td>: <span class="data-fillable">Malahar</span></td></tr>
+                            <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglAkhir">-</span></td></tr>
+                        </table>
+                        <div class="mt-2 text-justify leading-snug">
+                            <p>Telah diperiksa dengan keterangan bahwa perjalanan tersebut di atas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu sesingkat-singkatnya.</p>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <p class="font-bold" id="bktCamatJabatanLabel">Camat Tabundung,</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold underline" id="bktCamatNama">-</p>
+                            <p id="bktCamatPangkat">-</p>
+                            <p>NIP. <span id="bktCamatNip">-</span></p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- BARIS 6 (CATATAN LAIN-LAIN TERSENDIRI) -->
+                <tr class="border-b border-black">
+                    <td colspan="2" class="p-2 align-top">
+                        <p class="font-bold">Catatan Lain-lain :</p>
+                    </td>
+                </tr>
+
+                <!-- BARIS 7 (PERHATIAN) -->
+                <tr>
+                    <td colspan="2" class="p-2 font-official text-[10pt]">
+                        <p class="font-bold uppercase underline">PERHATIAN:</p>
+                        <p>Pejabat yang berwenang menerbitkan SPPD Pegawai yang melakukan perjalanan dinas para pejabat yang mengesahkan tanggal berangkat/tiba serta bendaharawan bertanggungjawab berdasarkan peraturan-peraturan keuangan negara apabila negara mendapat rugi akibat kesalahan, kealpaannya.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 4. LAPORAN PERJALANAN DINAS -->
+    <div id="doc-laporan" class="document-paper mb-8 hidden flex flex-col justify-between">
+        <div>
+            <div class="flex items-center border-b-4 border-double border-black pb-2 mb-4 sppd-table-fixed">
+                <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
+                <div class="text-center flex-1">
+                    <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                    <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                    <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
                 </div>
             </div>
 
-            <!-- 5. KWITANSI & RINCIAN -->
-            <div id="doc-kwitansi" class="document-paper mb-8 hidden">
-                <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
-                    <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
-                    <div class="text-center flex-1">
-                        <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
-                        <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
-                        <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-start sppd-table-fixed mb-2">
-                    <div></div>
-                    <div class="text-right text-xs font-official leading-tight">
-                        <table class="ml-auto">
-                            <tr><td class="text-left pr-2">No. BKU</td><td>: <span id="kwiNoBku">-</span></td></tr>
-                            <tr><td class="text-left pr-2">Tahun Anggaran</td><td>: 2026</td></tr>
-                            <tr><td class="text-left pr-2">Tanggal</td><td>: <span id="kwiTglKwitansiSub">-</span></td></tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="text-center font-bold text-base underline uppercase mb-2">KWITANSI</div>
-
-                <table class="sppd-table-fixed text-xs font-official mb-3 leading-relaxed">
-                    <tr class="align-top"><td class="w-36 font-semibold">Sudah Terima dari</td><td class="w-4">:</td><td>Pengguna Anggaran Kecamatan Tabundung</td></tr>
-                    <tr class="align-top"><td class="font-semibold">Uang Sejumlah</td><td class="w-4">:</td><td class="font-bold italic" id="kwiTerbilang">-</td></tr>
-                    <tr class="align-top"><td class="font-semibold">Untuk Keperluan</td><td class="w-4">:</td><td>Belanja Perjalanan Dinas Dalam Daerah</td></tr>
-                    <tr class="align-top"><td class="font-semibold">Terbilang (Rp)</td><td class="w-4">:</td><td class="font-bold font-mono bg-slate-100 p-1 rounded inline-block" id="kwiTerbilangNominal">-</td></tr>
-                </table>
-
-                <div class="text-center font-bold text-xs uppercase mb-2">Dengan Rincian sebagai berikut:</div>
-
-                <table class="sppd-table-fixed border-collapse border border-black text-[9pt] font-official mb-3">
-                    <thead>
-                        <tr class="bg-slate-100 border-b border-black text-center font-bold">
-                            <th class="border-r border-black p-1 w-28" rowspan="2">Kode Rekening</th>
-                            <th class="border-r border-black p-1" rowspan="2">Uraian / Rincian Perhitungan</th>
-                            <th class="border-r border-black p-1" colspan="3">Rincian Perhitungan</th>
-                            <th class="border-r border-black p-1 w-18" rowspan="2">Jumlah (Rp)</th>
-                            <th class="p-1 w-10" rowspan="2">Tanda Tangan</th>
-                        </tr>
-                        <tr class="bg-slate-100 border-b border-black text-center font-bold text-[8.5pt]">
-                            <th class="border-r border-black p-1 w-1.5">Vol</th>
-                            <th class="border-r border-black p-1 w-2">Harga Satuan (Rp)</th>
-                            <th class="border-r border-black p-1 w-1.5">Sat</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kwiTabelRincian"></tbody>
-                </table>
-
-                <div class="flex justify-between items-start text-xs font-official sppd-table-fixed mt-4">
-                    <div class="w-1/2 text-center pr-4">
-                        <p class="font-bold">Mengetahui / Menyetujui,</p>
-                        <p class="font-bold">Pengguna Anggaran,</p>
-                        <div class="h-14"></div>
-                        <p class="font-bold underline uppercase" id="kwiCamatNama">-</p>
-                        <p>NIP. <span id="kwiCamatNip">-</span></p>
-                    </div>
-                    <div class="w-1/2 text-center pl-4">
-                        <p>&nbsp;</p>
-                        <p class="font-bold">Bendahara Pengeluaran,</p>
-                        <div class="h-14"></div>
-                        <p class="font-bold underline uppercase" id="kwiBendaharaNama">-</p>
-                        <p>NIP. <span id="kwiBendaharaNip">-</span></p>
-                    </div>
-                </div>
+            <div class="text-center title-spacing mb-6">
+                <h3 class="font-bold text-base underline uppercase tracking-wider">LAPORAN PERJALANAN DINAS</h3>
             </div>
 
+            <div class="space-y-4 font-official text-sm leading-relaxed sppd-table-fixed">
+                <table class="w-full border-separate border-spacing-y-3">
+                    <tr class="align-top"><td class="w-48 font-semibold">1. Dasar</td><td class="w-4">:</td><td id="lapDasar">-</td></tr>
+                    <tr class="align-top"><td class="font-semibold">2. Tujuan</td><td>:</td><td id="lapTujuan">-</td></tr>
+                    <tr class="align-top"><td class="font-semibold">3. Lama Perjalanan</td><td>:</td><td id="lapLama">-</td></tr>
+                    <tr class="align-top"><td class="font-semibold">4. Maksud Perjalanan Dinas</td><td>:</td><td id="lapMaksud">-</td></tr>
+                    <tr class="align-top"><td class="font-semibold">5. Hasil yang dicapai</td><td>:</td><td id="lapHasil" class="whitespace-pre-line">-</td></tr>
+                </table>
+            </div>
+
+            <div class="mt-4 mb-6 font-official text-sm leading-relaxed sppd-table-fixed">
+                <p>Demikian Laporan Hasil Perjalanan Dinas ini dibuat untuk dipergunakan seperlunya.</p>
+            </div>
+
+            <div class="font-official text-sm sppd-table-fixed mb-3">
+                <p class="font-bold">Yang Melakukan Perjalanan Dinas :</p>
+            </div>
+
+            <div class="font-official text-xs sppd-table-fixed">
+                <table class="w-full text-left font-official border-none">
+                    <tbody id="lapDaftarTtd"></tbody>
+                </table>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <!-- SCRIPT CETAK LOGIC -->
-    <script>
-        window.onload = function() {
-            loadPrintData();
-        };
+    <!-- 5. KWITANSI & RINCIAN -->
+    <div id="doc-kwitansi" class="document-paper mb-8 hidden">
+        <div class="flex items-center border-b-4 border-double border-black pb-2 mb-2 sppd-table-fixed">
+            <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo Pemda Sumba Timur" class="w-16 h-20 object-contain mr-3">
+            <div class="text-center flex-1">
+                <h3 class="font-bold text-base uppercase font-official leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h3>
+                <h2 class="font-bold text-xl uppercase font-official leading-tight">KECAMATAN TABUNDUNG</h2>
+                <h3 class="font-bold text-sm uppercase font-official tracking-widest leading-tight">MALAHAR</h3>
+            </div>
+        </div>
 
-        function loadPrintData() {
-            let record = null;
-            const urlParams = new URLSearchParams(window.location.search);
-            const recordId = urlParams.get('id');
+        <div class="flex justify-between items-start sppd-table-fixed mb-2">
+            <div></div>
+            <div class="text-right text-xs font-official leading-tight">
+                <table class="ml-auto">
+                    <tr><td class="text-left pr-2">No. BKU</td><td>: <span id="kwiNoBku">-</span></td></tr>
+                    <tr><td class="text-left pr-2">Tahun Anggaran</td><td>: 2026</td></tr>
+                    <tr><td class="text-left pr-2">Tanggal</td><td>: <span id="kwiTglKwitansiSub">-</span></td></tr>
+                </table>
+            </div>
+        </div>
 
-            if (recordId) {
-                const savedRecords = localStorage.getItem('sppd_records_tabundung');
-                if (savedRecords) {
-                    try {
-                        const list = JSON.parse(savedRecords);
-                        record = list.find(r => r.id == recordId);
-                    } catch(e) { console.error(e); }
-                }
-            }
+        <div class="text-center font-bold text-base underline uppercase mb-2">KWITANSI</div>
 
-            if (!record) {
-                const sessionData = sessionStorage.getItem('sppd_print_current');
-                if (sessionData) {
-                    try { record = JSON.parse(sessionData); } catch(e) { console.error(e); }
-                }
-            }
+        <table class="sppd-table-fixed text-xs font-official mb-3 leading-relaxed">
+            <tr class="align-top"><td class="w-36 font-semibold">Sudah Terima dari</td><td class="w-4">:</td><td>Pengguna Anggaran Kecamatan Tabundung</td></tr>
+            <tr class="align-top"><td class="font-semibold">Uang Sejumlah</td><td class="w-4">:</td><td class="font-bold italic" id="kwiTerbilang">-</td></tr>
+            <tr class="align-top"><td class="font-semibold">Untuk Keperluan</td><td class="w-4">:</td><td>Belanja Perjalanan Dinas Dalam Daerah</td></tr>
+            <tr class="align-top"><td class="font-semibold">Terbilang (Rp)</td><td class="w-4">:</td><td class="font-bold font-mono bg-slate-100 p-1 rounded inline-block" id="kwiTerbilangNominal">-</td></tr>
+        </table>
 
-            if (!record) {
-                alert("Data dokumen SPPD tidak ditemukan!");
-                window.location.href = "sppd.html";
-                return;
-            }
+        <div class="text-center font-bold text-xs uppercase mb-2">Dengan Rincian sebagai berikut:</div>
 
-            renderDocument(record);
+        <table class="sppd-table-fixed border-collapse border border-black text-[9pt] font-official mb-3">
+            <thead>
+                <tr class="bg-slate-100 border-b border-black text-center font-bold">
+                    <th class="border-r border-black p-1 w-28" rowspan="2">Kode Rekening</th>
+                    <th class="border-r border-black p-1" rowspan="2">Uraian / Rincian Perhitungan</th>
+                    <th class="border-r border-black p-1" colspan="3">Rincian Perhitungan</th>
+                    <th class="border-r border-black p-1 w-18" rowspan="2">Jumlah (Rp)</th>
+                    <th class="p-1 w-10" rowspan="2">Tanda Tangan</th>
+                </tr>
+                <tr class="bg-slate-100 border-b border-black text-center font-bold text-[8.5pt]">
+                    <th class="border-r border-black p-1 w-1.5">Vol</th>
+                    <th class="border-r border-black p-1 w-2">Harga Satuan (Rp)</th>
+                    <th class="border-r border-black p-1 w-1.5">Sat</th>
+                </tr>
+            </thead>
+            <tbody id="kwiTabelRincian"></tbody>
+        </table>
+
+        <div class="flex justify-between items-start text-xs font-official sppd-table-fixed mt-4">
+            <div class="w-1/2 text-center pr-4">
+                <p class="font-bold">Mengetahui / Menyetujui,</p>
+                <p class="font-bold">Pengguna Anggaran,</p>
+                <div class="h-14"></div>
+                <p class="font-bold underline uppercase" id="kwiCamatNama">-</p>
+                <p>NIP. <span id="kwiCamatNip">-</span></p>
+            </div>
+            <div class="w-1/2 text-center pl-4">
+                <p>&nbsp;</p>
+                <p class="font-bold">Bendahara Pengeluaran,</p>
+                <div class="h-14"></div>
+                <p class="font-bold underline uppercase" id="kwiBendaharaNama">-</p>
+                <p>NIP. <span id="kwiBendaharaNip">-</span></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<!-- SCRIPT CETAK LOGIC -->
+<script>
+window.onload = function() {
+    loadPrintData();
+};
+
+function loadPrintData() {
+    let record = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const recordId = urlParams.get('id');
+
+    if (recordId) {
+        const savedRecords = localStorage.getItem('sppd_records_tabundung');
+        if (savedRecords) {
+            try {
+                const list = JSON.parse(savedRecords);
+                record = list.find(r => r.id == recordId);
+            } catch(e) { console.error(e); }
         }
+    }
 
-        function renderDocument(record) {
-            const formatDate = (str) => {
-                if(!str) return '-';
-                const parts = str.split('-');
-                if(parts.length === 3) {
-                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                    return `${parseInt(parts[2])} ${months[parseInt(parts[1])-1]} ${parts[0]}`;
-                }
-                return str;
-            };
+    if (!record) {
+        const sessionData = sessionStorage.getItem('sppd_print_current');
+        if (sessionData) {
+            try { record = JSON.parse(sessionData); } catch(e) { console.error(e); }
+        }
+    }
 
-            const defaultCamatNama = record.namaCamat || 'RUDOLF UMBU RESI LOLY, ST';
-            const defaultCamatNip = record.nipCamat || '197205212006041008';
-            const defaultCamatPangkat = record.pangkatCamat || 'Pembina (IV/a)';
-            const defaultBendaharaNama = record.namaBendahara || 'DANIEL KAMBARU WINDI';
-            const defaultBendaharaNip = record.nipBendahara || '197712312008011084';
+    if (!record) {
+        alert("Data dokumen SPPD tidak ditemukan!");
+        window.location.href = "sppd.html";
+        return;
+    }
 
-            // 1. Surat Tugas
-            document.getElementById('stNoSurat').innerText = record.noSuratTugas || '-';
-            document.getElementById('stDasar').innerText = record.dasarPelaksanaan || 'Atas Perintah Camat';
-            document.getElementById('stUntuk').innerText = record.maksudTujuan || '-';
-            document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
-            document.getElementById('stNamaCamat').innerText = defaultCamatNama;
-            document.getElementById('stPangkatCamat').innerText = defaultCamatPangkat;
-            document.getElementById('stNipCamat').innerText = defaultCamatNip;
+    renderDocument(record);
+}
 
-            const stDaftar = document.getElementById('stDaftarPersonil');
-            let personilHTML = `
-                <div>
-                    <p class="font-bold">1. ${record.namaPelaksana || '-'}</p>
+function renderDocument(record) {
+    const formatDate = (str) => {
+        if(!str) return '-';
+        const parts = str.split('-');
+        if(parts.length === 3) {
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            return `${parseInt(parts[2])} ${months[parseInt(parts[1])-1]} ${parts[0]}`;
+        }
+        return str;
+    };
+
+    const defaultCamatNama = record.namaCamat || 'RUDOLF UMBU RESI LOLY, ST';
+    const defaultCamatNip = record.nipCamat || '197205212006041008';
+    const defaultCamatPangkat = record.pangkatCamat || 'Pembina (IV/a)';
+    const defaultBendaharaNama = record.namaBendahara || 'DANIEL KAMBARU WINDI';
+    const defaultBendaharaNip = record.nipBendahara || '197712312008011084';
+
+    // 1. Surat Tugas
+    document.getElementById('stNoSurat').innerText = record.noSuratTugas || '-';
+    document.getElementById('stDasar').innerText = record.dasarPelaksanaan || 'Atas Perintah Camat';
+    document.getElementById('stUntuk').innerText = record.maksudTujuan || '-';
+    document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
+    document.getElementById('stNamaCamat').innerText = defaultCamatNama;
+    document.getElementById('stPangkatCamat').innerText = defaultCamatPangkat;
+    document.getElementById('stNipCamat').innerText = defaultCamatNip;
+
+    const stDaftar = document.getElementById('stDaftarPersonil');
+    let personilHTML = `
+        <div>
+            <p class="font-bold">1. ${record.namaPelaksana || '-'}</p>
+            <table class="w-full text-sm font-official border-none ml-4 mt-0.5">
+                <tr><td class="w-36">NIP</td><td class="w-3">:</td><td>${record.nipPelaksana || '-'}</td></tr>
+                <tr><td>Pangkat / Golongan</td><td>:</td><td>${record.pangkatPelaksana || '-'}</td></tr>
+                <tr><td>Jabatan</td><td>:</td><td>${record.jabatanPelaksana || '-'}</td></tr>
+            </table>
+        </div>
+    `;
+    if (record.pengikut && record.pengikut.length > 0) {
+        record.pengikut.forEach((p, idx) => {
+            personilHTML += `
+                <div class="mt-2">
+                    <p class="font-bold">${idx + 2}. ${p.nama || '-'}</p>
                     <table class="w-full text-sm font-official border-none ml-4 mt-0.5">
-                        <tr><td class="w-36">NIP</td><td class="w-3">:</td><td>${record.nipPelaksana || '-'}</td></tr>
-                        <tr><td>Pangkat / Golongan</td><td>:</td><td>${record.pangkatPelaksana || '-'}</td></tr>
-                        <tr><td>Jabatan</td><td>:</td><td>${record.jabatanPelaksana || '-'}</td></tr>
+                        <tr><td class="w-36">NIP</td><td class="w-3">:</td><td>${p.nip || '-'}</td></tr>
+                        <tr><td>Jabatan</td><td>:</td><td>${p.jabatan || '-'}</td></tr>
                     </table>
                 </div>
             `;
-            if (record.pengikut && record.pengikut.length > 0) {
-                record.pengikut.forEach((p, idx) => {
-                    personilHTML += `
-                        <div class="mt-2">
-                            <p class="font-bold">${idx + 2}. ${p.nama || '-'}</p>
-                            <table class="w-full text-sm font-official border-none ml-4 mt-0.5">
-                                <tr><td class="w-36">NIP</td><td class="w-3">:</td><td>${p.nip || '-'}</td></tr>
-                                <tr><td>Jabatan</td><td>:</td><td>${p.jabatan || '-'}</td></tr>
-                            </table>
-                        </div>
-                    `;
-                });
-            }
-            stDaftar.innerHTML = personilHTML;
+        });
+    }
+    stDaftar.innerHTML = personilHTML;
 
-            // 2. SPPD Depan
-            document.getElementById('sppdNoSurat').innerText = record.noSPPD || '-';
-            document.getElementById('sppdPejabatPengutus').innerText = `: Camat Tabundung`;
-            document.getElementById('sppdNama').innerText = record.namaPelaksana || '-';
-            document.getElementById('sppdNip').innerText = record.nipPelaksana || '-';
-            document.getElementById('sppdPangkat').innerText = record.pangkatPelaksana || '-';
-            document.getElementById('sppdJabatan').innerText = record.jabatanPelaksana || '-';
-            document.getElementById('sppdMaksud').innerText = ': ' + (record.maksudTujuan || '-');
-            document.getElementById('sppdTransport').innerText = ': ' + (record.alatAngkutan || '-');
-            document.getElementById('sppdBerangkat').innerText = record.tempatBerangkat || 'Malahar';
-            document.getElementById('sppdTujuan').innerText = record.tempatTujuan || '-';
-            document.getElementById('sppdLama').innerText = `: ${record.lamaHari || 1} Hari`;
-            document.getElementById('sppdTglMulai').innerText = ': ' + formatDate(record.tglMulai);
-            document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai || record.tglKembali);
-            document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
-            document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
-            document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
-            document.getElementById('sppdCamatNip').innerText = defaultCamatNip;
+    // 2. SPPD Depan
+    document.getElementById('sppdNoSurat').innerText = record.noSPPD || '-';
+    document.getElementById('sppdPejabatPengutus').innerText = `: Camat Tabundung`;
+    document.getElementById('sppdNama').innerText = record.namaPelaksana || '-';
+    document.getElementById('sppdNip').innerText = record.nipPelaksana || '-';
+    document.getElementById('sppdPangkat').innerText = record.pangkatPelaksana || '-';
+    document.getElementById('sppdJabatan').innerText = record.jabatanPelaksana || '-';
+    document.getElementById('sppdMaksud').innerText = ': ' + (record.maksudTujuan || '-');
+    document.getElementById('sppdTransport').innerText = ': ' + (record.alatAngkutan || '-');
+    document.getElementById('sppdBerangkat').innerText = record.tempatBerangkat || 'Malahar';
+    document.getElementById('sppdTujuan').innerText = record.tempatTujuan || '-';
+    document.getElementById('sppdLama').innerText = `: ${record.lamaHari || 1} Hari`;
+    document.getElementById('sppdTglMulai').innerText = ': ' + formatDate(record.tglMulai);
+    document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai || record.tglKembali);
+    document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
+    document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
+    document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
+    document.getElementById('sppdCamatNip').innerText = defaultCamatNip;
 
-            let sppdPengikutHtml = '';
-            if (record.pengikut && record.pengikut.length > 0) {
-                record.pengikut.forEach((p, i) => {
-                    sppdPengikutHtml += `<p>${i+1}. ${p.nama} (${p.jabatan || '-'})</p>`;
-                });
-            } else {
-                sppdPengikutHtml = '-';
-            }
-            document.getElementById('sppdPengikutTabel').innerHTML = sppdPengikutHtml;
+    let sppdPengikutHtml = '';
+    if (record.pengikut && record.pengikut.length > 0) {
+        record.pengikut.forEach((p, i) => {
+            sppdPengikutHtml += `<p>${i+1}. ${p.nama} (${p.jabatan || '-'})</p>`;
+        });
+    } else {
+        sppdPengikutHtml = '-';
+    }
+    document.getElementById('sppdPengikutTabel').innerHTML = sppdPengikutHtml;
 
-            // 3. SPPD Belakang
-            document.getElementById('bktNoSPPD').innerText = record.noSPPD || '-';
-            document.getElementById('bktBerangkatAwal').innerText = record.tempatBerangkat || 'Malahar';
-            document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
-            document.getElementById('bktTujuan1').innerText = record.tempatTujuan || '-';
-            
-            document.getElementById('bktTiba1').innerText = record.tempatTujuan || '-';
-            document.getElementById('bktTglTiba1').innerText = formatDate(record.tglMulai);
-            document.getElementById('bktBerangkat1').innerText = record.tempatTujuan || '-';
-            document.getElementById('bktKeTujuan1').innerText = record.tempatBerangkat || 'Malahar';
-            document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai || record.tglKembali);
-            document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai || record.tglKembali);
+    // 3. SPPD Belakang
+    document.getElementById('bktNoSPPD').innerText = record.noSPPD || '-';
+    document.getElementById('bktBerangkatAwal').innerText = record.tempatBerangkat || 'Malahar';
+    document.getElementById('bktTgl1').innerText = formatDate(record.tglMulai);
+    document.getElementById('bktTujuan1').innerText = record.tempatTujuan || '-';
+    
+    document.getElementById('bktTiba1').innerText = record.tempatTujuan || '-';
+    document.getElementById('bktTglTiba1').innerText = formatDate(record.tglMulai);
+    document.getElementById('bktBerangkat1').innerText = record.tempatTujuan || '-';
+    document.getElementById('bktKeTujuan1').innerText = record.tempatBerangkat || 'Malahar';
+    document.getElementById('bktTglBerangkat1').innerText = formatDate(record.tglSelesai || record.tglKembali);
+    document.getElementById('bktTglAkhir').innerText = formatDate(record.tglSelesai || record.tglKembali);
 
-            const namaTujuan = record.namaPejabatTujuan || '....................................';
-            const jabatanTujuan = record.jabatanPejabatTujuan || 'KEPALA DESA';
-            const nipTujuan = record.nipPejabatTujuan || '-';
+    const namaTujuan = record.namaPejabatTujuan || '....................................';
+    const jabatanTujuan = record.jabatanPejabatTujuan || 'KEPALA DESA';
+    const nipTujuan = record.nipPejabatTujuan || '-';
 
-            document.getElementById('bktJabatanTujuan1').innerText = jabatanTujuan;
-            document.getElementById('bktKadesNama1').innerText = namaTujuan;
-            document.getElementById('bktKadesNip1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
+    document.getElementById('bktJabatanTujuan1').innerText = jabatanTujuan;
+    document.getElementById('bktKadesNama1').innerText = namaTujuan;
+    document.getElementById('bktKadesNip1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
 
-            document.getElementById('bktJabatanBerangkat1').innerText = jabatanTujuan;
-            document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
-            document.getElementById('bktKadesNipBerangkat1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
+    document.getElementById('bktJabatanBerangkat1').innerText = jabatanTujuan;
+    document.getElementById('bktKadesNamaBerangkat1').innerText = namaTujuan;
+    document.getElementById('bktKadesNipBerangkat1').innerText = (nipTujuan && nipTujuan !== '-') ? `NIP/NIAP. ${nipTujuan}` : '';
 
-            // Render TTD Baris II
-            const namaTujuan2 = record.namaPejabatTujuan2 || '';
-            if (namaTujuan2) {
-                document.getElementById('bktTiba2').innerText = record.tempatTujuan || '-';
-                document.getElementById('bktTglTiba2').innerText = formatDate(record.tglMulai);
-                document.getElementById('bktBerangkat2').innerText = record.tempatTujuan || '-';
-                document.getElementById('bktKeTujuan2').innerText = record.tempatBerangkat || 'Malahar';
-                document.getElementById('bktTglBerangkat2').innerText = formatDate(record.tglSelesai || record.tglKembali);
+    // Render TTD Baris II
+    const namaTujuan2 = record.namaPejabatTujuan2 || '';
+    if (namaTujuan2) {
+        document.getElementById('bktTiba2').innerText = record.tempatTujuan || '-';
+        document.getElementById('bktTglTiba2').innerText = formatDate(record.tglMulai);
+        document.getElementById('bktBerangkat2').innerText = record.tempatTujuan || '-';
+        document.getElementById('bktKeTujuan2').innerText = record.tempatBerangkat || 'Malahar';
+        document.getElementById('bktTglBerangkat2').innerText = formatDate(record.tglSelesai || record.tglKembali);
 
-                document.getElementById('bktJabatanTujuan2').innerText = 'KEPALA DESA / PEJABAT';
-                document.getElementById('bktKadesNama2').innerText = namaTujuan2;
-                document.getElementById('bktKadesNip2').innerText = '';
+        document.getElementById('bktJabatanTujuan2').innerText = 'KEPALA DESA / PEJABAT';
+        document.getElementById('bktKadesNama2').innerText = namaTujuan2;
+        document.getElementById('bktKadesNip2').innerText = '';
 
-                document.getElementById('bktJabatanBerangkat2').innerText = 'KEPALA DESA / PEJABAT';
-                document.getElementById('bktKadesNamaBerangkat2').innerText = namaTujuan2;
-                document.getElementById('bktKadesNipBerangkat2').innerText = '';
-            } else {
-                document.getElementById('bktTiba2').innerText = '-';
-                document.getElementById('bktTglTiba2').innerText = '-';
-                document.getElementById('bktBerangkat2').innerText = '-';
-                document.getElementById('bktKeTujuan2').innerText = '-';
-                document.getElementById('bktTglBerangkat2').innerText = '-';
+        document.getElementById('bktJabatanBerangkat2').innerText = 'KEPALA DESA / PEJABAT';
+        document.getElementById('bktKadesNamaBerangkat2').innerText = namaTujuan2;
+        document.getElementById('bktKadesNipBerangkat2').innerText = '';
+    } else {
+        document.getElementById('bktTiba2').innerText = '-';
+        document.getElementById('bktTglTiba2').innerText = '-';
+        document.getElementById('bktBerangkat2').innerText = '-';
+        document.getElementById('bktKeTujuan2').innerText = '-';
+        document.getElementById('bktTglBerangkat2').innerText = '-';
 
-                document.getElementById('bktJabatanTujuan2').innerText = '-';
-                document.getElementById('bktKadesNama2').innerText = '-';
-                document.getElementById('bktKadesNip2').innerText = '';
+        document.getElementById('bktJabatanTujuan2').innerText = '-';
+        document.getElementById('bktKadesNama2').innerText = '-';
+        document.getElementById('bktKadesNip2').innerText = '';
 
-                document.getElementById('bktJabatanBerangkat2').innerText = '-';
-                document.getElementById('bktKadesNamaBerangkat2').innerText = '-';
-                document.getElementById('bktKadesNipBerangkat2').innerText = '';
-            }
+        document.getElementById('bktJabatanBerangkat2').innerText = '-';
+        document.getElementById('bktKadesNamaBerangkat2').innerText = '-';
+        document.getElementById('bktKadesNipBerangkat2').innerText = '';
+    }
 
-            // Default nilai kosong untuk Baris III
-            document.getElementById('bktTiba3').innerText = '-';
-            document.getElementById('bktTglTiba3').innerText = '-';
-            document.getElementById('bktBerangkat3').innerText = '-';
-            document.getElementById('bktKeTujuan3').innerText = '-';
-            document.getElementById('bktTglBerangkat3').innerText = '-';
+    // Default nilai kosong untuk Baris III
+    document.getElementById('bktTiba3').innerText = '-';
+    document.getElementById('bktTglTiba3').innerText = '-';
+    document.getElementById('bktBerangkat3').innerText = '-';
+    document.getElementById('bktKeTujuan3').innerText = '-';
+    document.getElementById('bktTglBerangkat3').innerText = '-';
 
-            document.getElementById('bktJabatanTujuan3').innerText = '-';
-            document.getElementById('bktKadesNama3').innerText = '-';
-            document.getElementById('bktKadesNip3').innerText = '';
+    document.getElementById('bktJabatanTujuan3').innerText = '-';
+    document.getElementById('bktKadesNama3').innerText = '-';
+    document.getElementById('bktKadesNip3').innerText = '';
 
-            document.getElementById('bktJabatanBerangkat3').innerText = '-';
-            document.getElementById('bktKadesNamaBerangkat3').innerText = '-';
-            document.getElementById('bktKadesNipBerangkat3').innerText = '';
+    document.getElementById('bktJabatanBerangkat3').innerText = '-';
+    document.getElementById('bktKadesNamaBerangkat3').innerText = '-';
+    document.getElementById('bktKadesNipBerangkat3').innerText = '';
 
-            document.getElementById('bktCamatNama').innerText = defaultCamatNama;
-            document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat; // Menampilkan Pangkat Camat
-            document.getElementById('bktCamatNip').innerText = defaultCamatNip;
+    document.getElementById('bktCamatNama').innerText = defaultCamatNama;
+    document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat; // Menampilkan Pangkat Camat
+    document.getElementById('bktCamatNip').innerText = defaultCamatNip;
 
-            // 4. Laporan Perjalanan Dinas
-            document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
-            document.getElementById('lapTujuan').innerText = record.tempatTujuan;
-            document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai || record.tglKembali)})`;
-            document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
-            document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
+    // 4. Laporan Perjalanan Dinas
+    document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
+    document.getElementById('lapTujuan').innerText = record.tempatTujuan;
+    document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai || record.tglKembali)})`;
+    document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
+    document.getElementById('lapHasil').innerText = record.laporanHasil || '-';
 
-            let ttdLapHtml = `
+    let ttdLapHtml = `
+        <tr class="align-top">
+            <td class="py-2 pr-4 w-7/12">
+                <p class="font-bold">1. ${record.namaPelaksana}</p>
+                <p class="text-xs">NIP. ${record.nipPelaksana || '-'}</p>
+            </td>
+            <td class="py-2 pl-4 w-5/12 border-b border-dotted border-slate-400 text-slate-400 text-right font-mono">
+                1. ................................
+            </td>
+        </tr>
+    `;
+    if (record.pengikut && record.pengikut.length > 0) {
+        record.pengikut.forEach((p, i) => {
+            const no = i + 2;
+            const alignClass = no % 2 === 0 ? 'text-left pl-6' : 'text-right';
+            ttdLapHtml += `
                 <tr class="align-top">
-                    <td class="py-2 pr-4 w-7/12">
-                        <p class="font-bold">1. ${record.namaPelaksana}</p>
-                        <p class="text-xs">NIP. ${record.nipPelaksana || '-'}</p>
+                    <td class="py-2 pr-4">
+                        <p class="font-bold">${no}. ${p.nama}</p>
+                        <p class="text-xs">NIP. ${p.nip || '-'}</p>
                     </td>
-                    <td class="py-2 pl-4 w-5/12 border-b border-dotted border-slate-400 text-slate-400 text-right font-mono">
-                        1. ................................
+                    <td class="py-2 pl-4 border-b border-dotted border-slate-400 text-slate-400 ${alignClass} font-mono">
+                        ${no}. ................................
                     </td>
                 </tr>
             `;
-            if (record.pengikut && record.pengikut.length > 0) {
-                record.pengikut.forEach((p, i) => {
-                    const no = i + 2;
-                    const alignClass = no % 2 === 0 ? 'text-left pl-6' : 'text-right';
-                    ttdLapHtml += `
-                        <tr class="align-top">
-                            <td class="py-2 pr-4">
-                                <p class="font-bold">${no}. ${p.nama}</p>
-                                <p class="text-xs">NIP. ${p.nip || '-'}</p>
-                            </td>
-                            <td class="py-2 pl-4 border-b border-dotted border-slate-400 text-slate-400 ${alignClass} font-mono">
-                                ${no}. ................................
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-            document.getElementById('lapDaftarTtd').innerHTML = ttdLapHtml;
+        });
+    }
+    document.getElementById('lapDaftarTtd').innerHTML = ttdLapHtml;
 
-            // 5. Kwitansi & Rincian
-            const total = record.totalBiaya || 0;
-            const jumlahOrang = 1 + (record.pengikut?.length || 0);
-            const days = record.lamaHari || 1;
-            const rate = record.biayaPerOrang || (total / (jumlahOrang * days));
+    // 5. Kwitansi & Rincian
+    const total = record.totalBiaya || 0;
+    const jumlahOrang = 1 + (record.pengikut?.length || 0);
+    const days = record.lamaHari || 1;
+    const rate = record.biayaPerOrang || (total / (jumlahOrang * days));
 
-            document.getElementById('kwiNoBku').innerText = record.noBku || '-';
-            document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
-            document.getElementById('kwiTerbilangNominal').innerText = 'Rp ' + total.toLocaleString('id-ID');
-            document.getElementById('kwiTglKwitansiSub').innerText = formatDate(record.tglSelesai || record.tglKembali || record.tglSurat);
-            document.getElementById('kwiCamatNama').innerText = defaultCamatNama;
-            document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
-            document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
-            document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip;
+    document.getElementById('kwiNoBku').innerText = record.noBku || '-';
+    document.getElementById('kwiTerbilang').innerText = numberToWords(total) + ' Rupiah';
+    document.getElementById('kwiTerbilangNominal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+    document.getElementById('kwiTglKwitansiSub').innerText = formatDate(record.tglSelesai || record.tglKembali || record.tglSurat);
+    document.getElementById('kwiCamatNama').innerText = defaultCamatNama;
+    document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
+    document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
+    document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip;
 
-            const kodeSKVal = record.kodeSK || '7.01.01.2.01.0003';
+    const kodeSKVal = record.kodeSK || '7.01.01.2.01.0003';
 
-            let rincianHTML = `
-                <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1</td>
-                    <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA LANGSUNG</td>
-                    <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-center"></td>
-                </tr>
-                <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1.02</td>
-                    <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA PEGAWAI</td>
-                    <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-center"></td>
-                </tr>
-                <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">5.1.02.04</td>
-                    <td class="border-r border-black p-1 font-bold" colspan="4">Belanja Perjalanan Dinas</td>
-                    <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-center"></td>
-                </tr>
-                <tr class="border-b border-black align-top">
-                    <td class="border-r border-black p-1 font-mono text-left">${kodeSKVal}</td>
-                    <td class="border-r border-black p-1" colspan="4">
-                        <b>Belanja Perjalanan Dinas Dalam Daerah (${record.sumberDana || 'DAU'})</b><br>
-                        Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
-                        Dalam rangka ${record.maksudTujuan || '-'}<br>
-                        Di ${record.tempatTujuan || '-'} Selama ${days} Hari<br>
-                        Pada Tanggal ${formatDate(record.tglMulai)}
-                    </td>
-                    <td class="border-r border-black p-1 text-right"></td>
-                    <td class="p-1 text-center"></td>
-                </tr>
+    let rincianHTML = `
+        <tr class="border-b border-black align-top">
+            <td class="border-r border-black p-1 font-mono text-left">5.1</td>
+            <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA LANGSUNG</td>
+            <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
+            <td class="p-1 text-center"></td>
+        </tr>
+        <tr class="border-b border-black align-top">
+            <td class="border-r border-black p-1 font-mono text-left">5.1.02</td>
+            <td class="border-r border-black p-1 font-bold" colspan="4">BELANJA PEGAWAI</td>
+            <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
+            <td class="p-1 text-center"></td>
+        </tr>
+        <tr class="border-b border-black align-top">
+            <td class="border-r border-black p-1 font-mono text-left">5.1.02.04</td>
+            <td class="border-r border-black p-1 font-bold" colspan="4">Belanja Perjalanan Dinas</td>
+            <td class="border-r border-black p-1 text-right font-bold">${total.toLocaleString('id-ID')}</td>
+            <td class="p-1 text-center"></td>
+        </tr>
+        <tr class="border-b border-black align-top">
+            <td class="border-r border-black p-1 font-mono text-left">${kodeSKVal}</td>
+            <td class="border-r border-black p-1" colspan="4">
+                <b>Belanja Perjalanan Dinas Dalam Daerah (${record.sumberDana || 'DAU'})</b><br>
+                Bayar Biaya Perjalanan Dinas Dalam Daerah<br>
+                Dalam rangka ${record.maksudTujuan || '-'}<br>
+                Di ${record.tempatTujuan || '-'} Selama ${days} Hari<br>
+                Pada Tanggal ${formatDate(record.tglMulai)}
+            </td>
+            <td class="border-r border-black p-1 text-right"></td>
+            <td class="p-1 text-center"></td>
+        </tr>
+        <tr class="border-b border-black align-top">
+            <td class="border-r border-black p-1 font-mono text-left"></td>
+            <td class="border-r border-black p-1">
+                1. ${record.namaPelaksana || '-'}
+            </td>
+            <td class="border-r border-black p-1 text-center">${days}</td>
+            <td class="border-r border-black p-1 text-right">${rate.toLocaleString('id-ID')}</td>
+            <td class="border-r border-black p-1 text-center">OH</td>
+            <td class="border-r border-black p-1 text-right">${(days * rate).toLocaleString('id-ID')}</td>
+            <td class="p-1 text-center font-bold">1.</td>
+        </tr>
+    `;
+
+    if (record.pengikut && Array.isArray(record.pengikut)) {
+        record.pengikut.forEach((p, index) => {
+            const subtotal = days * rate;
+            rincianHTML += `
                 <tr class="border-b border-black align-top">
                     <td class="border-r border-black p-1 font-mono text-left"></td>
                     <td class="border-r border-black p-1">
-                        1. ${record.namaPelaksana || '-'}
+                        ${index + 2}. ${p.nama || '-'}
                     </td>
                     <td class="border-r border-black p-1 text-center">${days}</td>
                     <td class="border-r border-black p-1 text-right">${rate.toLocaleString('id-ID')}</td>
                     <td class="border-r border-black p-1 text-center">OH</td>
-                    <td class="border-r border-black p-1 text-right">${(days * rate).toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-center font-bold">1.</td>
+                    <td class="border-r border-black p-1 text-right">${subtotal.toLocaleString('id-ID')}</td>
+                    <td class="p-1 text-center font-bold">${index + 2}.</td>
                 </tr>
             `;
+        });
+    }
 
-            if (record.pengikut && Array.isArray(record.pengikut)) {
-                record.pengikut.forEach((p, index) => {
-                    const subtotal = days * rate;
-                    rincianHTML += `
-                        <tr class="border-b border-black align-top">
-                            <td class="border-r border-black p-1 font-mono text-left"></td>
-                            <td class="border-r border-black p-1">
-                                ${index + 2}. ${p.nama || '-'}
-                            </td>
-                            <td class="border-r border-black p-1 text-center">${days}</td>
-                            <td class="border-r border-black p-1 text-right">${rate.toLocaleString('id-ID')}</td>
-                            <td class="border-r border-black p-1 text-center">OH</td>
-                            <td class="border-r border-black p-1 text-right">${subtotal.toLocaleString('id-ID')}</td>
-                            <td class="p-1 text-center font-bold">${index + 2}.</td>
-                        </tr>
-                    `;
-                });
-            }
+    rincianHTML += `
+        <tr class="font-bold bg-slate-50">
+            <td class="border-r border-black p-1 text-right" colspan="5">JUMLAH TERIMA</td>
+            <td class="border-r border-black p-1 text-right">${total.toLocaleString('id-ID')}</td>
+            <td class="p-1 text-right">${total.toLocaleString('id-ID')}</td>
+        </tr>
+    `;
 
-            rincianHTML += `
-                <tr class="font-bold bg-slate-50">
-                    <td class="border-r border-black p-1 text-right" colspan="5">JUMLAH TERIMA</td>
-                    <td class="border-r border-black p-1 text-right">${total.toLocaleString('id-ID')}</td>
-                    <td class="p-1 text-right">${total.toLocaleString('id-ID')}</td>
-                </tr>
-            `;
+    document.getElementById('kwiTabelRincian').innerHTML = rincianHTML;
+    switchDocView('st');
+}
 
-            document.getElementById('kwiTabelRincian').innerHTML = rincianHTML;
-            switchDocView('st');
+function switchDocView(docType) {
+    ['st', 'sppd-depan', 'sppd-belakang', 'laporan', 'kwitansi'].forEach(d => {
+        const el = document.getElementById(`doc-${d}`);
+        if (el) el.classList.add('hidden');
+    });
+    document.getElementById(`doc-${docType}`).classList.remove('hidden');
+
+    const toggleWrapper = document.getElementById('toggleBlangkoWrapper');
+    if (docType === 'sppd-belakang') {
+        toggleWrapper.classList.remove('hidden');
+        toggleWrapper.classList.add('flex');
+    } else {
+        toggleWrapper.classList.add('hidden');
+        toggleWrapper.classList.remove('flex');
+    }
+
+    document.querySelectorAll('.doc-tab-btn').forEach(btn => {
+        btn.className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white";
+    });
+    
+    let btnId = 'btnDocSt';
+    if(docType === 'sppd-depan') btnId = 'btnDocSppdDepan';
+    if(docType === 'sppd-belakang') btnId = 'btnDocSppdBelakang';
+    if(docType === 'laporan') btnId = 'btnDocLaporan';
+    if(docType === 'kwitansi') btnId = 'btnDocKwitansi';
+    document.getElementById(btnId).className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium bg-gov-700 text-white";
+}
+
+function toggleBlangkoBelakangMode(isBlangko) {
+    const documentBelakang = document.getElementById('doc-sppd-belakang');
+    documentBelakang.querySelectorAll('.data-fillable').forEach(el => {
+        if (isBlangko) {
+            el.setAttribute('data-original', el.innerText);
+            el.innerText = '';
+        } else if (el.hasAttribute('data-original')) {
+            el.innerText = el.getAttribute('data-original');
         }
+    });
+}
 
-        function switchDocView(docType) {
-            ['st', 'sppd-depan', 'sppd-belakang', 'laporan', 'kwitansi'].forEach(d => {
-                const el = document.getElementById(`doc-${d}`);
-                if (el) el.classList.add('hidden');
-            });
-            document.getElementById(`doc-${docType}`).classList.remove('hidden');
+function goBackToForm() { 
+    window.location.href = "sppd.html"; 
+}
 
-            const toggleWrapper = document.getElementById('toggleBlangkoWrapper');
-            if (docType === 'sppd-belakang') {
-                toggleWrapper.classList.remove('hidden');
-                toggleWrapper.classList.add('flex');
-            } else {
-                toggleWrapper.classList.add('hidden');
-                toggleWrapper.classList.remove('flex');
-            }
-
-            document.querySelectorAll('.doc-tab-btn').forEach(btn => {
-                btn.className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium text-slate-300 hover:text-white";
-            });
-            
-            let btnId = 'btnDocSt';
-            if(docType === 'sppd-depan') btnId = 'btnDocSppdDepan';
-            if(docType === 'sppd-belakang') btnId = 'btnDocSppdBelakang';
-            if(docType === 'laporan') btnId = 'btnDocLaporan';
-            if(docType === 'kwitansi') btnId = 'btnDocKwitansi';
-            document.getElementById(btnId).className = "doc-tab-btn text-xs py-1.5 px-3 rounded font-medium bg-gov-700 text-white";
-        }
-
-        function toggleBlangkoBelakangMode(isBlangko) {
-            const documentBelakang = document.getElementById('doc-sppd-belakang');
-            documentBelakang.querySelectorAll('.data-fillable').forEach(el => {
-                if (isBlangko) {
-                    el.setAttribute('data-original', el.innerText);
-                    el.innerText = '';
-                } else if (el.hasAttribute('data-original')) {
-                    el.innerText = el.getAttribute('data-original');
-                }
-            });
-        }
-
-        function goBackToForm() { 
-            window.location.href = "sppd.html"; 
-        }
-
-        function numberToWords(amount) {
-            const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            let num = Math.floor(Math.abs(amount));
-            if (num === 0) return "Nol";
-            function convert(n) {
-                if (n < 12) return words[n];
-                if (n < 20) return convert(n - 10) + " Belas";
-                if (n < 100) return convert(Math.floor(n / 10)) + " Puluh " + convert(n % 10);
-                if (n < 1000) return convert(Math.floor(n / 100)) + " Ratus " + convert(n % 100);
-                if (n < 2000) return "Seribu " + convert(n - 1000);
-                if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
-                if (n < 1000000000) return convert(Math.floor(n / 1000000)) + " Juta " + convert(n % 1000000);
-                return n.toString();
-            }
-            return convert(num).replace(/\s+/g, ' ').trim();
-        }
-    </script>
+function numberToWords(amount) {
+    const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    let num = Math.floor(Math.abs(amount));
+    if (num === 0) return "Nol";
+    function convert(n) {
+        if (n < 12) return words[n];
+        if (n < 20) return convert(n - 10) + " Belas";
+        if (n < 100) return convert(Math.floor(n / 10)) + " Puluh " + convert(n % 10);
+        if (n < 1000) return convert(Math.floor(n / 100)) + " Ratus " + convert(n % 100);
+        if (n < 2000) return "Seribu " + convert(n - 1000);
+        if (n < 1000000) return convert(Math.floor(n / 1000)) + " Ribu " + convert(n % 1000);
+        if (n < 1000000000) return convert(Math.floor(n / 1000000)) + " Juta " + convert(n % 1000000);
+        return n.toString();
+    }
+    return convert(num).replace(/\s+/g, ' ').trim();
+}
+</script>
 </body>
 </html>
