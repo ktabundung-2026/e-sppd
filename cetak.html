@@ -294,13 +294,13 @@
             <div id="doc-sppd-belakang" class="document-paper mb-8 hidden">
                 <table class="sppd-back-table border-collapse border border-black font-official text-[10pt]">
                     <tbody>
-                        <!-- BARIS 1 -->
+                        <!-- BARIS 1 (DENGAN PADDING LEBIH RAPAT DENGAN TUJUAN) -->
                         <tr class="border-b border-black">
-                            <td class="p-2 w-1/2 border-r border-black align-top"></td>
-                            <td class="p-2 w-1/2 align-top">
+                            <td class="p-1.5 border-r border-black align-top"></td>
+                            <td class="p-1.5 align-top">
                                 <table class="w-full">
                                     <tr><td class="w-28">SPPD Nomor</td><td>: <span class="data-fillable" id="bktNoSPPD">-</span></td></tr>
-                                    <tr><td class="w-28 pt-1">Berangkat Dari</td><td class="pt-1">: <span class="data-fillable" id="bktBerangkatAwal">Malahar</span></td></tr>
+                                    <tr><td class="w-28 pt-0.5">Berangkat Dari</td><td class="pt-0.5">: <span class="data-fillable" id="bktBerangkatAwal">Malahar</span></td></tr>
                                     <tr><td colspan="2">(Tempat Kedudukan)</td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTgl1">-</span></td></tr>
                                     <tr><td>Ke</td><td>: <span class="data-fillable" id="bktTujuan1">-</span></td></tr>
@@ -308,14 +308,14 @@
                             </td>
                         </tr>
 
-                        <!-- BARIS 2 (I. TIBA & BERANGKAT) -->
+                        <!-- BARIS 2 (I. TIBA & BERANGKAT - JABATAN DEKAT DENGAN TANGGAL) -->
                         <tr class="border-b border-black row-signature-cell">
                             <td class="p-2 border-r border-black align-top relative h-[44mm]">
                                 <table class="w-full">
                                     <tr><td class="w-28">I. Tiba di</td><td>: <span class="data-fillable" id="bktTiba1">-</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba1">-</span></td></tr>
                                 </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
+                                <div class="mt-1 text-center">
                                     <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan1">-</p>
                                     <div class="h-6"></div>
                                     <p class="font-bold underline uppercase data-fillable" id="bktKadesNama1">-</p>
@@ -328,7 +328,7 @@
                                     <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan1">Malahar</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat1">-</span></td></tr>
                                 </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
+                                <div class="mt-1 text-center">
                                     <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat1">-</p>
                                     <div class="h-6"></div>
                                     <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat1">-</p>
@@ -344,7 +344,7 @@
                                     <tr><td class="w-28">II. Tiba di</td><td>: <span class="data-fillable" id="bktTiba2">-</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba2">-</span></td></tr>
                                 </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
+                                <div class="mt-1 text-center">
                                     <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan2">-</p>
                                     <div class="h-6"></div>
                                     <p class="font-bold underline uppercase data-fillable" id="bktKadesNama2">-</p>
@@ -357,7 +357,7 @@
                                     <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan2">Malahar</span></td></tr>
                                     <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat2">-</span></td></tr>
                                 </table>
-                                <div class="absolute bottom-1 left-0 right-0 text-center">
+                                <div class="mt-1 text-center">
                                     <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat2">-</p>
                                     <div class="h-6"></div>
                                     <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat2">-</p>
@@ -366,10 +366,33 @@
                             </td>
                         </tr>
 
-                        <!-- BARIS 4 (III. TIBA & BERANGKAT) -->
+                        <!-- BARIS 4 (III. TIBA & BERANGKAT - STRUKTUR ISIAN LENGKAP SAMA DENGAN BARIS 2 & 3) -->
                         <tr class="border-b border-black row-signature-cell">
-                            <td class="p-2 border-r border-black align-top"><table class="w-full"><tr><td class="w-28">III. Tiba di</td><td>: </td></tr></table></td>
-                            <td class="p-2 align-top"><table class="w-full"><tr><td class="w-28">Berangkat</td><td>: </td></tr></table></td>
+                            <td class="p-2 border-r border-black align-top relative h-[44mm]">
+                                <table class="w-full">
+                                    <tr><td class="w-28">III. Tiba di</td><td>: <span class="data-fillable" id="bktTiba3">-</span></td></tr>
+                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglTiba3">-</span></td></tr>
+                                </table>
+                                <div class="mt-1 text-center">
+                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanTujuan3">-</p>
+                                    <div class="h-6"></div>
+                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNama3">-</p>
+                                    <p class="font-mono text-[9pt]" id="bktKadesNip3">-</p>
+                                </div>
+                            </td>
+                            <td class="p-2 align-top relative h-[44mm]">
+                                <table class="w-full">
+                                    <tr><td class="w-28">Berangkat dari</td><td>: <span class="data-fillable" id="bktBerangkat3">-</span></td></tr>
+                                    <tr><td>Ke</td><td>: <span class="data-fillable" id="bktKeTujuan3">Malahar</span></td></tr>
+                                    <tr><td>Pada Tanggal</td><td>: <span class="data-fillable" id="bktTglBerangkat3">-</span></td></tr>
+                                </table>
+                                <div class="mt-1 text-center">
+                                    <p class="font-semibold uppercase data-fillable" id="bktJabatanBerangkat3">-</p>
+                                    <div class="h-6"></div>
+                                    <p class="font-bold underline uppercase data-fillable" id="bktKadesNamaBerangkat3">-</p>
+                                    <p class="font-mono text-[9pt]" id="bktKadesNipBerangkat3">-</p>
+                                </div>
+                            </td>
                         </tr>
 
                         <!-- BARIS 5 (KOLOM 1 KOSONG, KOLOM 2 BERISI IV. TIBA KEMBALI DAN KETERANGAN PENERIKSAAN) -->
@@ -400,11 +423,11 @@
                             </td>
                         </tr>
 
-                        <!-- BARIS 7 (PERHATIAN) -->
+                        <!-- BARIS 7 (PERHATIAN - TEKS BARU YANG DISESUAIKAN) -->
                         <tr>
                             <td colspan="2" class="p-2 font-official text-[10pt]">
                                 <p class="font-bold uppercase underline">PERHATIAN:</p>
-                                <p>Pejabat yang berwenang menerbitkan SPPD bertanggungjawab berdasarkan peraturan keuangan negara.</p>
+                                <p>Pejabat yang berwenang menerbitkan SPPD Pegawai yang melakukan perjalanan dinas para pejabat yang mengesahkan tanggal berangkat/tiba serta bendaharawan bertanggungjawab berdasarkan peraturan-peraturan keuangan negara apabila negara mendapat rugi akibat kesalahan, kealpaannya.</p>
                             </td>
                         </tr>
                     </tbody>
@@ -699,6 +722,21 @@
                 document.getElementById('bktKadesNamaBerangkat2').innerText = '-';
                 document.getElementById('bktKadesNipBerangkat2').innerText = '';
             }
+
+            // Default nilai kosong untuk Baris III
+            document.getElementById('bktTiba3').innerText = '-';
+            document.getElementById('bktTglTiba3').innerText = '-';
+            document.getElementById('bktBerangkat3').innerText = '-';
+            document.getElementById('bktKeTujuan3').innerText = '-';
+            document.getElementById('bktTglBerangkat3').innerText = '-';
+
+            document.getElementById('bktJabatanTujuan3').innerText = '-';
+            document.getElementById('bktKadesNama3').innerText = '-';
+            document.getElementById('bktKadesNip3').innerText = '';
+
+            document.getElementById('bktJabatanBerangkat3').innerText = '-';
+            document.getElementById('bktKadesNamaBerangkat3').innerText = '-';
+            document.getElementById('bktKadesNipBerangkat3').innerText = '';
 
             document.getElementById('bktCamatNama').innerText = defaultCamatNama;
             document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
