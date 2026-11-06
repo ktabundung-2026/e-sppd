@@ -29,6 +29,11 @@
             }
         };
     </script>
+    <style>
+        .capitalize-input {
+            text-transform: capitalize;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -65,20 +70,27 @@
 
         <!-- STEPPER NAVIGATION STATUS -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <div class="flex items-center justify-between max-w-2xl mx-auto">
+            <div class="flex items-center justify-between max-w-3xl mx-auto">
                 <button type="button" id="step-btn-1" onclick="switchStep(1)" class="flex flex-col items-center group cursor-pointer">
-                    <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md">1</div>
-                    <span class="step-label text-xs font-bold text-gov-800 mt-1">1. Alokasi Kuota SK</span>
+                    <div id="step-icon-1" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md transition-all">1</div>
+                    <span id="step-label-1" class="text-xs font-bold text-gov-800 mt-1">1. Alokasi Kuota SK</span>
+                    <span id="step-badge-1" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-emerald-100 text-emerald-800">Aktif</span>
                 </button>
+                
                 <div class="h-0.5 flex-1 bg-slate-200 mx-4"></div>
+                
                 <button type="button" id="step-btn-2" onclick="switchStep(2)" class="flex flex-col items-center group cursor-pointer">
-                    <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600">2</div>
-                    <span class="step-label text-xs font-medium text-slate-500 mt-1">2. Input Form SPPD</span>
+                    <div id="step-icon-2" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all">2</div>
+                    <span id="step-label-2" class="text-xs font-medium text-slate-500 mt-1">2. Input Form SPPD</span>
+                    <span id="step-badge-2" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-slate-100 text-slate-500">Tidak Aktif</span>
                 </button>
+                
                 <div class="h-0.5 flex-1 bg-slate-200 mx-4"></div>
+                
                 <button type="button" id="step-btn-3" onclick="switchStep(3)" class="flex flex-col items-center group cursor-pointer">
-                    <div class="step-icon w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600">3</div>
-                    <span class="step-label text-xs font-medium text-slate-500 mt-1">3. Riwayat Tersimpan</span>
+                    <div id="step-icon-3" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all">3</div>
+                    <span id="step-label-3" class="text-xs font-medium text-slate-500 mt-1">3. Riwayat dan Cetak SPPD</span>
+                    <span id="step-badge-3" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full mt-0.5 bg-slate-100 text-slate-500">Tidak Aktif</span>
                 </button>
             </div>
         </div>
@@ -121,7 +133,7 @@
                     <!-- TUJUAN PERDIN -->
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih Tujuan Perjalanan Dinas</label>
-                        <input type="text" id="step1_selectDesa" oninput="syncTujuanPerdin(this.value)" placeholder="Isi Tujuan Perdin" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white uppercase">
+                        <input type="text" id="step1_selectDesa" oninput="syncTujuanPerdin(this.value)" placeholder="Isi Tujuan Perdin" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white capitalize-input">
                     </div>
                     <div class="flex justify-end">
                         <button type="button" onclick="proceedToStep2()" class="bg-gov-700 hover:bg-gov-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm">
@@ -140,16 +152,16 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. Surat Tugas</label>
-                            <input type="text" id="noSuratTugas" value="000.1.2.3/ /KEC.TB/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi No Surat Tugas</label>
+                            <input type="text" id="noSuratTugas" placeholder="Isi No Surat Tugas" value="000.1.2.3/ /KEC.TB/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. SPPD</label>
-                            <input type="text" id="noSPPD" value="000.1.2.3/ /KEC.TB/SPPD/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi No. SPPD</label>
+                            <input type="text" id="noSPPD" placeholder="Isi No. SPPD" value="000.1.2.3/ /KEC.TB/SPPD/2026" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
-                            <input type="text" id="maksudTujuan" placeholder="Contoh: Monitoring PBB-P2 dan Pendataan Ternak" class="w-full p-2 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi maksud Perjalanan Dinas</label>
+                            <input type="text" id="maksudTujuan" placeholder="Isi maksud Perjalanan Dinas" class="w-full p-2 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 capitalize-input">
                         </div>
                     </div>
 
@@ -159,7 +171,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pegawai</label>
-                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase"></select>
+                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input"></select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP Pegawai</label>
@@ -167,7 +179,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Jabatan</label>
-                                <input type="text" id="jabatanPelaksana" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
+                                <input type="text" id="jabatanPelaksana" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100 capitalize-input">
                             </div>
                         </div>
                     </div>
@@ -183,15 +195,15 @@
                         <div id="pengikutContainer"></div>
                     </div>
 
-                    <!-- LOKASI & TANGGAL PELAKSANAAN (DENGAN TGL MULAI & TGL KEMBALI) -->
+                    <!-- LOKASI & TANGGAL PELAKSANAAN -->
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-4 border-t pt-4">
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Berangkat</label>
-                            <input type="text" id="tempatBerangkat" value="Malahar - Desa Billa" class="w-full p-2 text-xs border rounded-lg border-slate-300">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi Tempat Berangkat</label>
+                            <input type="text" id="tempatBerangkat" placeholder="Isi Tempat Berangkat" value="" class="w-full p-2 text-xs border rounded-lg border-slate-300 capitalize-input">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Tujuan</label>
-                            <input type="text" id="tempatTujuan" placeholder="Terisi Otomatis Dari Langkah 1" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold bg-slate-50 uppercase">
+                            <input type="text" id="tempatTujuan" placeholder="Terisi Otomatis Dari Langkah 1" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold bg-slate-50 capitalize-input">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tgl. Berangkat (Mulai)</label>
@@ -213,8 +225,8 @@
 
                     <!-- INPUT HASIL YANG DICAPAI -->
                     <div class="border-t pt-4">
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hasil yang Dicapai / Laporan Ringkas</label>
-                        <textarea id="laporanHasil" rows="3" placeholder="Tuliskan poin-poin hasil pelaksanaan penugasan di lapangan..." class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi hasil yang dicapai / Laporan Ringkas</label>
+                        <textarea id="laporanHasil" rows="3" placeholder="Isi hasil yang dicapai / Laporan Ringkas" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 capitalize-input"></textarea>
                     </div>
 
                     <!-- INPUT PEJABAT PENANDATANGAN & BENDAHARA -->
@@ -222,14 +234,26 @@
                         <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Pejabat Penandatangan & Pengelola Keuangan</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna Anggaran (Otomatis Camat)</label>
-                                <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna</label>
+                                <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100 capitalize-input">
                                 <input type="hidden" id="nipPenggunaAnggaran" value="197205212006041008">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bendahara Pengeluaran (Pilih dari Master ASN)</label>
-                                <select id="selectBendahara" onchange="onBendaharaSelected(this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white"></select>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bendahara Pengeluaran</label>
+                                <select id="selectBendahara" onchange="onBendaharaSelected(this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input"></select>
                                 <input type="hidden" id="nipBendahara" value="">
+                            </div>
+                        </div>
+
+                        <!-- MENU INPUT PEJABAT TEMPAT TUJUAN -->
+                        <div class="border-t pt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama yang Menandatangani SPPD di Tempat Tujuan</label>
+                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan Pejabat Tempat Tujuan</label>
+                                <input type="text" id="jabatanPejabatTujuan" value="Kepala Desa" placeholder="Contoh: Kepala Desa / Sekretaris Desa" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input">
                             </div>
                         </div>
                     </div>
@@ -241,7 +265,7 @@
                             <input type="text" id="totalBiayaFormatted" readonly class="p-2 text-xs font-extrabold border rounded text-emerald-800 bg-white w-48 text-right">
                         </div>
                         <div>
-                            <input type="text" id="terbilang" readonly class="w-full p-1.5 text-xs border rounded font-semibold italic bg-white text-slate-600">
+                            <input type="text" id="terbilang" readonly class="w-full p-1.5 text-xs border rounded font-semibold italic bg-white text-slate-600 capitalize-input">
                         </div>
                     </div>
 
@@ -262,12 +286,9 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <div class="flex items-center justify-between border-b pb-4 mb-4">
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">Riwayat Terbit Surat Tugas & SPPD</h2>
+                            <h2 class="text-base font-bold text-slate-900">Daftar Perjalanan Dinas</h2>
                             <p class="text-xs text-slate-500">Daftar dokumen perjalanan dinas yang tersimpan secara lokal dan online.</p>
                         </div>
-                        <a href="rekap.html" class="bg-gov-700 hover:bg-gov-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-table-list"></i> Buka Rekap Laporan Full
-                        </a>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -327,7 +348,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP TAMBAH SUB KEGIATAN BARU (SUPABASE INTEGRATED) -->
+    <!-- MODAL POPUP TAMBAH SUB KEGIATAN BARU -->
     <div id="modalSK" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="bg-gov-900 text-white px-6 py-4 flex items-center justify-between">
@@ -344,7 +365,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Sub Kegiatan</label>
-                    <input type="text" id="newNamaSK" placeholder="(Isi Nama Sub Kegiatan)" required class="w-full p-2 text-xs border rounded">
+                    <input type="text" id="newNamaSK" placeholder="(Isi Nama Sub Kegiatan)" required class="w-full p-2 text-xs border rounded capitalize-input">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Batas Kuota Alokasi (OH)</label>
@@ -394,10 +415,10 @@
                 <form id="formAddAsn" onsubmit="saveAsnMaster(event)" class="border-t pt-4 space-y-3">
                     <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Tambah ASN Secara Manual</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="addAsnNama" placeholder="NAMA ASN LENGKAP" required class="p-2 text-xs border rounded uppercase font-semibold">
+                        <input type="text" id="addAsnNama" placeholder="NAMA ASN LENGKAP" required class="p-2 text-xs border rounded capitalize-input font-semibold">
                         <input type="text" id="addAsnNip" placeholder="NIP (18 Digit)" class="p-2 text-xs border rounded font-mono">
-                        <input type="text" id="addAsnPangkat" placeholder="Pangkat / Golongan" class="p-2 text-xs border rounded">
-                        <input type="text" id="addAsnJabatan" placeholder="Jabatan Kedinasan" class="p-2 text-xs border rounded">
+                        <input type="text" id="addAsnPangkat" placeholder="Pangkat / Golongan" class="p-2 text-xs border rounded capitalize-input">
+                        <input type="text" id="addAsnJabatan" placeholder="Jabatan Kedinasan" class="p-2 text-xs border rounded capitalize-input">
                     </div>
                     <div class="flex justify-end">
                         <button type="submit" class="bg-gov-700 hover:bg-gov-800 text-white px-4 py-1.5 rounded text-xs font-bold transition flex items-center gap-1">
