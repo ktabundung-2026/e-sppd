@@ -31,6 +31,7 @@
     </script>
     <style>
         .capitalize-input { text-transform: capitalize; }
+        .uppercase-input { text-transform: uppercase; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
@@ -66,7 +67,7 @@
     <!-- MAIN CONTENT CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- STEPPER NAVIGATION STATUS (TANPA TULISAN AKTIF/TIDAK AKTIF) -->
+        <!-- STEPPER NAVIGATION STATUS -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
             <div class="flex items-center justify-between max-w-3xl mx-auto">
                 <button type="button" id="step-btn-1" onclick="switchStep(1)" class="flex flex-col items-center group cursor-pointer">
@@ -159,13 +160,13 @@
                         </div>
                     </div>
 
-                    <!-- PELAKSANA UTAMA -->
+                    <!-- PELAKSANA UTAMA (NAMA PELAKSANA: UPPERCASE) -->
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                         <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Data Pelaksana Utama (Pegawai Terperintah)</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pegawai</label>
-                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input"></select>
+                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input"></select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP Pegawai</label>
@@ -229,12 +230,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna</label>
-                                <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100 capitalize-input">
+                                <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100 uppercase-input">
                                 <input type="hidden" id="nipPenggunaAnggaran" value="197205212006041008">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bendahara Pengeluaran</label>
-                                <select id="selectBendahara" onchange="onBendaharaSelected(this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input"></select>
+                                <select id="selectBendahara" onchange="onBendaharaSelected(this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input"></select>
                                 <input type="hidden" id="nipBendahara" value="">
                             </div>
                         </div>
@@ -243,7 +244,7 @@
                         <div class="border-t pt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama yang Menandatangani SPPD di Tempat Tujuan</label>
-                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input">
+                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan Pejabat Tempat Tujuan</label>
@@ -375,7 +376,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP KELOLA MASTER ASN (PELAKSANA) -->
+    <!-- MODAL POPUP KELOLA MASTER ASN (PELAKSANA KAPITAL) -->
     <div id="modalAsn" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-gov-900 text-white px-6 py-4 flex items-center justify-between">
@@ -407,11 +408,11 @@
                     </div>
                 </div>
 
-                <!-- FORM TAMBAH MANUAL -->
+                <!-- FORM TAMBAH MANUAL (NAMA HAKIKI HURUF KAPITAL) -->
                 <form id="formAddAsn" onsubmit="saveAsnMaster(event)" class="border-t pt-4 space-y-3">
                     <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Tambah Pelaksana Secara Manual</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="addAsnNama" placeholder="Nama Pelaksana Lengkap" required class="p-2 text-xs border rounded capitalize-input font-semibold">
+                        <input type="text" id="addAsnNama" placeholder="NAMA PELAKSANA LENGKAP" required class="p-2 text-xs border rounded uppercase-input font-bold">
                         <input type="text" id="addAsnNip" placeholder="NIP (18 Digit)" required class="p-2 text-xs border rounded font-mono">
                         <input type="text" id="addAsnJabatan" placeholder="Jabatan Kedinasan" required class="p-2 text-xs border rounded capitalize-input">
                         <input type="text" id="addAsnPangkat" placeholder="Pangkat / Golongan" class="p-2 text-xs border rounded capitalize-input">
@@ -427,7 +428,7 @@
                 <div class="border-t pt-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Pelaksana Tersimpan (<span id="totalAsnCount">0</span>)</span>
-                        <input type="text" id="searchAsnInput" oninput="filterAsnTable(this.value)" placeholder="Cari nama / NIP..." class="p-1.5 text-xs border rounded-lg w-40 font-medium">
+                        <input type="text" id="searchAsnInput" oninput="filterAsnTable(this.value)" placeholder="Cari nama / NIP..." class="p-1.5 text-xs border rounded-lg w-40 font-medium uppercase-input">
                     </div>
                     <div class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto bg-white">
                         <table class="w-full text-left text-xs">
