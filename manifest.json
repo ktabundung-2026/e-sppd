@@ -1,14 +1,3 @@
-/**
-  ====================================================================================
-  Nama Aplikasi : Sistem e - SPPD Terpadu - Kecamatan Tabundung
-  Hosting       : GitHub Pages (Murni Single Page Application / SPA)
-  Backend / DB  : Supabase REST API & Supabase Storage
-  Nama Halaman  : manifest.json
-  Fungsi Halaman: Berkas konfigurasi Progressive Web App (PWA) yang menyimpan 
-                  metadata aplikasi (title "e - SPPD Terpadu - Kecamatan Tabundung", 
-                  icon logo_st.png, warna tema, mode tampilan standalone, dan shortcut).
-  ====================================================================================
-*/
 {
   "short_name": "e-SPPD",
   "name": "e - SPPD Terpadu - Kecamatan Tabundung",
