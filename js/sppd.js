@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ----------------------------------------------------
-// STEPPER NAVIGATION (Step 1, 2, 3)
+// STEPPER NAVIGATION (Step 1, 2, 3) - DIPERBAIKI
 // ----------------------------------------------------
 function switchStep(stepNumber) {
-    // Sembunyikan semua kontainer step
+    // Sembunyikan semua kontainer step (step-content-1, 2, 3)
     [1, 2, 3].forEach(num => {
         const content = document.getElementById(`step-content-${num}`);
         const icon = document.getElementById(`step-icon-${num}`);
@@ -43,13 +43,13 @@ function switchStep(stepNumber) {
         }
     });
 
-    // Tampilkan step yang aktif
+    // Tampilkan step yang dipilih
     const activeContent = document.getElementById(`step-content-${stepNumber}`);
     if (activeContent) {
         activeContent.classList.remove('hidden');
     }
 
-    // Scroll ke atas dengan mulus
+    // Scroll halus ke atas
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -76,7 +76,7 @@ function calculateLamaHariFromDates() {
 
         if (dKembali >= dMulai) {
             const diffTime = Math.abs(dKembali - dMulai);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
             inputLamaHari.value = diffDays;
         } else {
             alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai!");
@@ -91,8 +91,9 @@ function updateSKQuotaInfo() {
     const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
     const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
     
-    // Hitung pengikut + 1 pelaksana utama
-    const totalOrang = 1 + document.querySelectorAll('#pengikutContainer .pengikut-row').length;
+    // Hitung total orang (1 Pelaksana Utama + Jumlah Pengikut)
+    const totalPengikut = document.querySelectorAll('#pengikutContainer .pengikut-row').length;
+    const totalOrang = 1 + totalPengikut;
     const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
 
     const totalBiayaFormatted = document.getElementById('totalBiayaFormatted');
@@ -114,7 +115,7 @@ function syncTujuanPerdin(val) {
 }
 
 // ----------------------------------------------------
-// LOAD MASTER DATA (ASN & SK)
+// LOAD DATA MASTER (ASN & SK)
 // ----------------------------------------------------
 async function loadInitialMasterData() {
     if (window.AppDB) {
@@ -187,7 +188,7 @@ function onBendaharaSelected(nip) {
 }
 
 // ----------------------------------------------------
-// PENGIKUT DYNAMIC ROWS
+// BARIS PENGIKUT DINAMIS
 // ----------------------------------------------------
 function addPengikutRow() {
     const container = document.getElementById('pengikutContainer');
@@ -244,7 +245,7 @@ function removePengikutRow(rowId) {
 }
 
 // ----------------------------------------------------
-// SIMPAN FORM & CETAK
+// PENYIMPANAN FORM & CETAK
 // ----------------------------------------------------
 async function handleFormSubmit(event) {
     event.preventDefault();
