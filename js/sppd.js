@@ -6,7 +6,7 @@
  *  - master_sk        : id - kode - nama - quota - created_at
  * ==================================================================================== */
 
-// Global state untuk menyimpan data lokal / terisi
+// Global state untuk menyimpan data lokal
 let currentSKList = [];
 let currentAsnList = [];
 
@@ -26,7 +26,7 @@ function switchStep(stepNumber) {
     document.getElementById('step-content-2')?.classList.add('hidden');
     document.getElementById('step-content-3')?.classList.add('hidden');
 
-    // Reset gaya tombol stepper
+    // Reset gaya indikator tombol stepper
     [1, 2, 3].forEach(i => {
         const icon = document.getElementById(`step-icon-${i}`);
         const label = document.getElementById(`step-label-${i}`);
@@ -41,7 +41,7 @@ function switchStep(stepNumber) {
         }
     });
 
-    // Tampilkan step content yang dipilih
+    // Tampilkan step content yang aktif
     const activeStepContent = document.getElementById(`step-content-${stepNumber}`);
     if (activeStepContent) {
         activeStepContent.classList.remove('hidden');
@@ -61,7 +61,7 @@ function proceedToStep2() {
         return;
     }
 
-    // Pindah ke step 2
+    // Lanjut ke Step 2
     switchStep(2);
 }
 
@@ -90,7 +90,7 @@ async function loadMasterSKData() {
         renderSKTable(currentSKList);
 
     } catch (err) {
-        console.warn('Gagal memuat data:', err.message);
+        console.warn('Gagal memuat master_sk dari Supabase:', err.message);
     }
 }
 
@@ -153,7 +153,7 @@ async function saveNewSK(event) {
         alert('Sub Kegiatan berhasil disimpan!');
         closeModalSK();
         
-        // Reset form modal SK
+        // Reset input modal SK
         document.getElementById('newKodeSK').value = '';
         document.getElementById('newNamaSK').value = '';
         document.getElementById('newQuotaSK').value = '50';
@@ -224,13 +224,13 @@ function formatPangkatGolongan(text) {
     if (!text) return '';
     let str = text.trim();
 
-    // 1. Kapitalisasi teks kata gelar
+    // 1. Teks Gelar/Pangkat utama menjadi Kapital di awal kata
     str = str.replace(/\b[a-zA-Z]+\b/g, function(txt) {
         if (/^(i|v|x|l|c|d|m)+$/i.test(txt)) return txt;
         return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
     });
 
-    // 2. Format pola Golongan/Ruang (Romawi = UPPERCASE, huruf setelah titik = lowercase)
+    // 2. Format Golongan/Ruang: Romawi = UPPERCASE, huruf setelah titik (.) = lowercase
     str = str.replace(/\b(I{1,3}|IV|V|VI{0,3}|IX|X|XI{0,3})\s*[\./\s]\s*([a-eA-E])\b/gi, function(match, romawi, ruang) {
         return romawi.toUpperCase() + '.' + ruang.toLowerCase();
     });
@@ -250,7 +250,7 @@ async function saveAsnMaster(event) {
         return;
     }
 
-    // Nama Pelaksana: HURUF KAPITAL
+    // Nama Pelaksana: HURUF KAPITAL ALL
     const namaKapital = namaInput.toUpperCase();
 
     // Payload SESUAI HEADER SUPABASE: id - nama_pelaksana - nip - jabatan - created_at
@@ -272,7 +272,7 @@ async function saveAsnMaster(event) {
         await loadAsnMasterData();
     } catch (err) {
         console.error('Gagal menyimpan data pelaksana:', err);
-        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error database'));
+        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error Supabase'));
     }
 }
 
@@ -328,7 +328,7 @@ async function importAsnFromCsv() {
 
             if (error) throw error;
 
-            alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Database`);
+            alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Supabase!`);
             fileInput.value = '';
             await loadAsnMasterData();
         } catch (err) {
@@ -460,7 +460,7 @@ function closeModalAsn() {
 }
 
 /* ====================================================================================
- * 4. LOGIKA HITUNG PERJALANAN DINAS & HASIL
+ * 4. LOGIKA PERHITUNGAN BIAYA & MANAJEMEN PENGIKUT
  * ==================================================================================== */
 
 function calculateLamaHariFromDates() {
@@ -487,7 +487,7 @@ function calculateTotalBiaya() {
     const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
     const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
     
-    // Hitung total orang (1 Pelaksana Utama + Jumlah Pengikut)
+    // Total orang = 1 Pelaksana Utama + Jumlah Row Pengikut
     const pengikutContainer = document.getElementById('pengikutContainer');
     const jumlahPengikut = pengikutContainer ? pengikutContainer.children.length : 0;
     const totalOrang = 1 + jumlahPengikut;
@@ -555,14 +555,44 @@ function removePengikutRow(rowId) {
     calculateTotalBiaya();
 }
 
+/* ====================================================================================
+ * 5. SUBMIT FORM SPPD
+ * ==================================================================================== */
+
 async function handleFormSubmit(event) {
     event.preventDefault();
+    
+    // Objek rekap data yang siap disimpan / dicetak
+    const formData = {
+        kode_sk: document.getElementById('step1_kodeSK')?.value || '',
+        sumber_dana: document.getElementById('sumberDana')?.value || '',
+        no_surat_tugas: document.getElementById('noSuratTugas')?.value || '',
+        no_sppd: document.getElementById('noSPPD')?.value || '',
+        maksud_tujuan: document.getElementById('maksudTujuan')?.value || '',
+        nama_pelaksana: document.getElementById('namaPelaksana')?.value || '',
+        nip_pelaksana: document.getElementById('nipPelaksana')?.value || '',
+        jabatan_pelaksana: document.getElementById('jabatanPelaksana')?.value || '',
+        tempat_berangkat: document.getElementById('tempatBerangkat')?.value || '',
+        tempat_tujuan: document.getElementById('tempatTujuan')?.value || '',
+        tempat_tujuan_2: document.getElementById('tempatTujuan2')?.value || '',
+        tempat_tujuan_3: document.getElementById('tempatTujuan3')?.value || '',
+        tgl_mulai: document.getElementById('tglMulai')?.value || '',
+        tgl_kembali: document.getElementById('tglKembali')?.value || '',
+        lama_hari: document.getElementById('lamaHari')?.value || 1,
+        biaya_per_orang: document.getElementById('biayaPerOrang')?.value || 0,
+        alat_angkut: document.getElementById('alatAngkut')?.value || '',
+        tingkat_perdin: document.getElementById('tingkatPerdin')?.value || '',
+        laporan_hasil: document.getElementById('laporanHasil')?.value || '',
+        nama_pejabat_tujuan: document.getElementById('namaPejabatTujuan')?.value || '',
+        jabatan_pejabat_tujuan: document.getElementById('jabatanPejabatTujuan')?.value || ''
+    };
+
     alert('Dokumen SPPD Berhasil Disimpan!');
     switchStep(3);
 }
 
 /* ====================================================================================
- * HELPER FUNCTIONS
+ * HELPER UTILITY FUNCTIONS
  * ==================================================================================== */
 
 function downloadCsvTemplate() {
