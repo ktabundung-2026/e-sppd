@@ -1,19 +1,29 @@
 /* ====================================================================================
  * Nama Modul  : Modul Master Pelaksana & SPPD - Kecamatan Tabundung
- * Deskripsi   : Integrasi Form SPPD, Stepper Navigation, Master SK, dan Master Pelaksana
+ * Deskripsi   : Integrasi Form SPPD, Stepper Navigation, Master SK, Master Pelaksana, 
+ *               dan Riwayat Perdin (Supabase: riwayat_perdin)
  * Skema Tabel Supabase: 
  *  - master_pelaksana : id - nama_pelaksana - nip - jabatan - created_at
  *  - master_sk        : id - kode - nama - quota - created_at
+ *  - riwayat_perdin   : id, noSuratTugas, noSPPD, noBku, kodeSK, sumberDana, 
+ *                       dasarPelaksanaan, maksudTujuan, namaPelaksana, nipPelaksana, 
+ *                       pangkatPelaksana, jabatanPelaksana, pengikut, tempatBerangkat, 
+ *                       tempatTujuan, alatAngkutan, tglMulai, tglSelesai, lamaHari, 
+ *                       biayaPerOrang, totalBiaya, namaPejabatTujuan, jabatanPejabatTujuan, 
+ *                       nipPejabatTujuan, namaCamat, nipCamat, pangkatCamat, 
+ *                       namaBendahara, nipBendahara, laporanHasil, createdAt
  * ==================================================================================== */
 
 // Global state untuk menyimpan data lokal
 let currentSKList = [];
 let currentAsnList = [];
+let sppdHistoryList = [];
 
 // Event listener saat dokumen HTML selesai dimuat
 document.addEventListener('DOMContentLoaded', async function() {
     await loadMasterSKData();
     await loadAsnMasterData();
+    await loadHistoryData();
 });
 
 /* ====================================================================================
@@ -45,6 +55,11 @@ function switchStep(stepNumber) {
     const activeStepContent = document.getElementById(`step-content-${stepNumber}`);
     if (activeStepContent) {
         activeStepContent.classList.remove('hidden');
+    }
+
+    // Jika masuk ke Step 3, refresh tabel riwayat perdin dari Supabase
+    if (stepNumber === 3) {
+        loadHistoryData();
     }
 }
 
@@ -136,7 +151,6 @@ async function saveNewSK(event) {
         return;
     }
 
-    // Payload SESUAI HEADER SUPABASE: id - kode - nama - quota - created_at
     const payload = {
         kode: kodeVal,
         nama: namaVal,
@@ -153,7 +167,6 @@ async function saveNewSK(event) {
         alert('Sub Kegiatan berhasil disimpan!');
         closeModalSK();
         
-        // Reset input modal SK
         document.getElementById('newKodeSK').value = '';
         document.getElementById('newNamaSK').value = '';
         document.getElementById('newQuotaSK').value = '50';
@@ -224,13 +237,11 @@ function formatPangkatGolongan(text) {
     if (!text) return '';
     let str = text.trim();
 
-    // 1. Teks Gelar/Pangkat utama menjadi Kapital di awal kata
     str = str.replace(/\b[a-zA-Z]+\b/g, function(txt) {
         if (/^(i|v|x|l|c|d|m)+$/i.test(txt)) return txt;
         return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
     });
 
-    // 2. Format Golongan/Ruang: Romawi = UPPERCASE, huruf setelah titik (.) = lowercase
     str = str.replace(/\b(I{1,3}|IV|V|VI{0,3}|IX|X|XI{0,3})\s*[\./\s]\s*([a-eA-E])\b/gi, function(match, romawi, ruang) {
         return romawi.toUpperCase() + '.' + ruang.toLowerCase();
     });
@@ -250,10 +261,7 @@ async function saveAsnMaster(event) {
         return;
     }
 
-    // Nama Pelaksana: HURUF KAPITAL ALL
     const namaKapital = namaInput.toUpperCase();
-
-    // Payload SESUAI HEADER SUPABASE: id - nama_pelaksana - nip - jabatan - created_at
     const payload = {
         nama_pelaksana: namaKapital,
         nip: nipInput,
@@ -487,7 +495,6 @@ function calculateTotalBiaya() {
     const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
     const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
     
-    // Total orang = 1 Pelaksana Utama + Jumlah Row Pengikut
     const pengikutContainer = document.getElementById('pengikutContainer');
     const jumlahPengikut = pengikutContainer ? pengikutContainer.children.length : 0;
     const totalOrang = 1 + jumlahPengikut;
@@ -512,7 +519,7 @@ function addPengikutRow() {
     const rowId = 'pengikut_' + Date.now();
     const div = document.createElement('div');
     div.id = rowId;
-    div.className = "grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 items-center";
+    div.className = "grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 items-center pengikut-row";
 
     let optionsHtml = '<option value="">-- Pilih Pengikut --</option>';
     currentAsnList.forEach(item => {
@@ -521,15 +528,15 @@ function addPengikutRow() {
 
     div.innerHTML = `
         <div>
-            <select onchange="onPengikutSelected('${rowId}', this.value)" class="w-full p-2 text-xs border rounded bg-white uppercase-input">
+            <select onchange="onPengikutSelected('${rowId}', this.value)" class="w-full p-2 text-xs border rounded bg-white uppercase-input pengikut-nama">
                 ${optionsHtml}
             </select>
         </div>
         <div>
-            <input type="text" id="${rowId}_nip" placeholder="NIP Pengikut" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
+            <input type="text" id="${rowId}_nip" placeholder="NIP Pengikut" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100 pengikut-nip">
         </div>
         <div class="flex items-center gap-2">
-            <input type="text" id="${rowId}_jabatan" placeholder="Jabatan Pengikut" readonly class="w-full p-2 text-xs border rounded bg-slate-100">
+            <input type="text" id="${rowId}_jabatan" placeholder="Jabatan Pengikut" readonly class="w-full p-2 text-xs border rounded bg-slate-100 pengikut-jabatan">
             <button type="button" onclick="removePengikutRow('${rowId}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold">
                 <i class="fa-solid fa-circle-xmark"></i>
             </button>
@@ -555,40 +562,174 @@ function removePengikutRow(rowId) {
     calculateTotalBiaya();
 }
 
+function getPengikutData() {
+    const pengikutRows = document.querySelectorAll('#pengikutContainer .pengikut-row');
+    const result = [];
+    pengikutRows.forEach(row => {
+        const nama = row.querySelector('.pengikut-nama')?.value;
+        const nip = row.querySelector('.pengikut-nip')?.value;
+        const jabatan = row.querySelector('.pengikut-jabatan')?.value;
+        if (nama) {
+            result.push({ nama, nip, jabatan });
+        }
+    });
+    return result;
+}
+
 /* ====================================================================================
- * 5. SUBMIT FORM SPPD
+ * 5. LOGIKA MODUL STEP 3: RIWAYAT DAN CETAK SPPD (Tabel: riwayat_perdin)
  * ==================================================================================== */
+
+async function loadHistoryData() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('riwayat_perdin')
+            .select('*')
+            .order('createdAt', { ascending: false });
+
+        if (error) throw error;
+
+        sppdHistoryList = data || [];
+        renderHistoryTable();
+
+    } catch (err) {
+        console.warn('Gagal memuat riwayat_perdin dari Supabase:', err.message);
+        const stored = localStorage.getItem('sppd_history_tabundung');
+        sppdHistoryList = stored ? JSON.parse(stored) : [];
+        renderHistoryTable();
+    }
+}
+
+function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+
+    if (sppdHistoryList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada riwayat dokumen perjalanan dinas tersimpan.</td>
+            </tr>`;
+        return;
+    }
+
+    tbody.innerHTML = sppdHistoryList.map(item => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="p-3">
+                <div class="font-bold text-slate-800">ST: ${escapeHtml(item.noSuratTugas || '-')}</div>
+                <div class="text-[11px] text-gov-700 font-mono">SPPD: ${escapeHtml(item.noSPPD || '-')}</div>
+            </td>
+            <td class="p-3 font-mono text-slate-600 font-semibold">${escapeHtml(item.kodeSK || '-')}</td>
+            <td class="p-3 font-bold text-slate-800 uppercase">${escapeHtml(item.namaPelaksana || '-')}</td>
+            <td class="p-3 text-slate-700 font-medium">${escapeHtml(item.tempatTujuan || '-')}</td>
+            <td class="p-3 font-bold text-emerald-700">Rp ${parseInt(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
+            <td class="p-3 text-center space-x-1">
+                <button type="button" onclick="printSPPD('${item.id}')" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs font-semibold" title="Cetak Dokumen">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                <button type="button" onclick="deleteHistoryItem('${item.id}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-1 rounded text-xs font-semibold" title="Hapus Riwayat">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
 
 async function handleFormSubmit(event) {
     event.preventDefault();
     
-    // Objek rekap data yang siap disimpan / dicetak
-    const formData = {
-        kode_sk: document.getElementById('step1_kodeSK')?.value || '',
-        sumber_dana: document.getElementById('sumberDana')?.value || '',
-        no_surat_tugas: document.getElementById('noSuratTugas')?.value || '',
-        no_sppd: document.getElementById('noSPPD')?.value || '',
-        maksud_tujuan: document.getElementById('maksudTujuan')?.value || '',
-        nama_pelaksana: document.getElementById('namaPelaksana')?.value || '',
-        nip_pelaksana: document.getElementById('nipPelaksana')?.value || '',
-        jabatan_pelaksana: document.getElementById('jabatanPelaksana')?.value || '',
-        tempat_berangkat: document.getElementById('tempatBerangkat')?.value || '',
-        tempat_tujuan: document.getElementById('tempatTujuan')?.value || '',
-        tempat_tujuan_2: document.getElementById('tempatTujuan2')?.value || '',
-        tempat_tujuan_3: document.getElementById('tempatTujuan3')?.value || '',
-        tgl_mulai: document.getElementById('tglMulai')?.value || '',
-        tgl_kembali: document.getElementById('tglKembali')?.value || '',
-        lama_hari: document.getElementById('lamaHari')?.value || 1,
-        biaya_per_orang: document.getElementById('biayaPerOrang')?.value || 0,
-        alat_angkut: document.getElementById('alatAngkut')?.value || '',
-        tingkat_perdin: document.getElementById('tingkatPerdin')?.value || '',
-        laporan_hasil: document.getElementById('laporanHasil')?.value || '',
-        nama_pejabat_tujuan: document.getElementById('namaPejabatTujuan')?.value || '',
-        jabatan_pejabat_tujuan: document.getElementById('jabatanPejabatTujuan')?.value || ''
+    const lamaHariVal = parseInt(document.getElementById('lamaHari')?.value) || 1;
+    const biayaPerOrangVal = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
+    const pengikutArr = getPengikutData();
+    const totalBiayaVal = lamaHariVal * biayaPerOrangVal * (1 + pengikutArr.length);
+
+    const tujuanUtama = document.getElementById('tempatTujuan')?.value || '';
+    const tujuan2 = document.getElementById('tempatTujuan2')?.value.trim();
+    const tujuan3 = document.getElementById('tempatTujuan3')?.value.trim();
+    
+    let lokasiTujuanGabungan = tujuanUtama;
+    if (tujuan2) lokasiTujuanGabungan += `, ${tujuan2.toUpperCase()}`;
+    if (tujuan3) lokasiTujuanGabungan += `, ${tujuan3.toUpperCase()}`;
+
+    // Payload SESUAI HEADER TABEL `riwayat_perdin` SUPABASE
+    const payload = {
+        noSuratTugas: document.getElementById('noSuratTugas')?.value || '',
+        noSPPD: document.getElementById('noSPPD')?.value || '',
+        noBku: '',
+        kodeSK: document.getElementById('step1_kodeSK')?.value || '',
+        sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
+        dasarPelaksanaan: document.getElementById('maksudTujuan')?.value || '',
+        maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
+        namaPelaksana: document.getElementById('namaPelaksana')?.value || '',
+        nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
+        pangkatPelaksana: '',
+        jabatanPelaksana: document.getElementById('jabatanPelaksana')?.value || '',
+        pengikut: JSON.stringify(pengikutArr),
+        tempatBerangkat: document.getElementById('tempatBerangkat')?.value || '',
+        tempatTujuan: lokasiTujuanGabungan,
+        alatAngkutan: document.getElementById('alatAngkut')?.value || '',
+        tglMulai: document.getElementById('tglMulai')?.value || null,
+        tglSelesai: document.getElementById('tglKembali')?.value || null,
+        lamaHari: lamaHariVal,
+        biayaPerOrang: biayaPerOrangVal,
+        totalBiaya: totalBiayaVal,
+        namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
+        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
+        nipPejabatTujuan: '',
+        namaCamat: document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST',
+        nipCamat: document.getElementById('nipPenggunaAnggaran')?.value || '197205212006041008',
+        pangkatCamat: 'Pembina (IV/a)',
+        namaBendahara: document.getElementById('selectBendahara')?.value || '',
+        nipBendahara: document.getElementById('nipBendahara')?.value || '',
+        laporanHasil: document.getElementById('laporanHasil')?.value || '',
+        createdAt: new Date().toISOString()
     };
 
-    alert('Dokumen SPPD Berhasil Disimpan!');
-    switchStep(3);
+    try {
+        const { data, error } = await supabaseClient
+            .from('riwayat_perdin')
+            .insert([payload])
+            .select();
+
+        if (error) throw error;
+
+        alert('Dokumen SPPD Berhasil Disimpan ke Database!');
+        
+        // Simpan cadangan ke LocalStorage
+        localStorage.setItem('sppd_history_tabundung', JSON.stringify(sppdHistoryList));
+
+        // Refresh & Pindah ke Step 3 (Riwayat dan Cetak SPPD)
+        await loadHistoryData();
+        switchStep(3);
+
+    } catch (err) {
+        console.error('Gagal menyimpan riwayat perdin ke Supabase:', err);
+        alert('Gagal menyimpan ke basis data online: ' + (err.message || 'Error Supabase'));
+    }
+}
+
+async function deleteHistoryItem(id) {
+    if (!confirm('Hapus riwayat perjalanan dinas ini dari database?')) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from('riwayat_perdin')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        alert('Riwayat berhasil dihapus.');
+        await loadHistoryData();
+    } catch (err) {
+        alert('Gagal menghapus riwayat: ' + err.message);
+    }
+}
+
+function printSPPD(id) {
+    const item = sppdHistoryList.find(s => String(s.id) === String(id));
+    if (!item) return;
+    alert(`Mencetak Dokumen SPPD No: ${item.noSPPD} untuk ${item.namaPelaksana}`);
+    window.print();
 }
 
 /* ====================================================================================
