@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Dokumen SPPD - Kecamatan Tabundung</title>
+    <title>e - SPPD Terpadu - Kecamatan Tabundung</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c4a6e">
@@ -138,7 +138,7 @@
                     <tr class="align-top">
                         <td class="w-24 font-bold">Dasar</td>
                         <td class="w-4">:</td>
-                        <td id="stDasar">Atas Perintah Camat</td>
+                        <td id="stDasar">-</td>
                     </tr>
                     <tr class="align-top">
                         <td class="font-bold pt-3">Kepada</td>
@@ -602,9 +602,18 @@
             const defaultBendaharaNama = record.namaBendahara || 'DANIEL KAMBARU WINDI';
             const defaultBendaharaNip = record.nipBendahara || '197712312008011084';
 
+            // Mengambil nilai dinamis untuk Nomor Sub Kegiatan dan Nama Sub Kegiatan
+            const kodeSKVal = record.kodeSK || '7.01.01.2.01.0003';
+            const namaSubKegiatanVal = record.namaSubKegiatan || record.maksudTujuan || '-';
+            
+            // Format Dasar Surat Tugas yang Dinamis
+            const dasarPelaksanaanDinamis = record.dasarPelaksanaan 
+                ? record.dasarPelaksanaan 
+                : `DPA Kecamatan Tabundung - Kabupaten Sumba Timur Tahun Anggaran 2026 Sub Kegiatan ${kodeSKVal} ${namaSubKegiatanVal}`;
+
             // 1. Surat Tugas
             document.getElementById('stNoSurat').innerText = record.noSuratTugas || '-';
-            document.getElementById('stDasar').innerText = record.dasarPelaksanaan || 'Atas Perintah Camat';
+            document.getElementById('stDasar').innerText = dasarPelaksanaanDinamis;
             document.getElementById('stUntuk').innerText = record.maksudTujuan || '-';
             document.getElementById('stTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
             document.getElementById('stNamaCamat').innerText = defaultCamatNama;
@@ -739,11 +748,11 @@
             document.getElementById('bktKadesNipBerangkat3').innerText = '';
 
             document.getElementById('bktCamatNama').innerText = defaultCamatNama;
-            document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat; // Menampilkan Pangkat Camat
+            document.getElementById('bktCamatPangkat').innerText = defaultCamatPangkat;
             document.getElementById('bktCamatNip').innerText = defaultCamatNip;
 
             // 4. Laporan Perjalanan Dinas
-            document.getElementById('lapDasar').innerText = record.dasarPelaksanaan || '-';
+            document.getElementById('lapDasar').innerText = dasarPelaksanaanDinamis;
             document.getElementById('lapTujuan').innerText = record.tempatTujuan;
             document.getElementById('lapLama').innerText = `${record.lamaHari || 1} Hari (${formatDate(record.tglMulai)} s/d ${formatDate(record.tglSelesai || record.tglKembali)})`;
             document.getElementById('lapMaksud').innerText = record.maksudTujuan || '-';
@@ -793,8 +802,6 @@
             document.getElementById('kwiCamatNip').innerText = defaultCamatNip;
             document.getElementById('kwiBendaharaNama').innerText = defaultBendaharaNama;
             document.getElementById('kwiBendaharaNip').innerText = defaultBendaharaNip;
-
-            const kodeSKVal = record.kodeSK || '7.01.01.2.01.0003';
 
             let rincianHTML = `
                 <tr class="border-b border-black align-top">
