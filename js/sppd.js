@@ -4,9 +4,9 @@
   Hosting       : GitHub Pages (Murni Single Page Application / SPA)
   Backend / DB  : Supabase REST API & Supabase Storage
   Nama Halaman  : js/sppd.js
-  Fungsi Halaman: Logika pemrosesan form, perhitungan otomatis Lama Hari dari selisih 
-                  tanggal, autofill ASN (NIP, Pangkat, Jabatan), perbaikan mapping 
-                  data tertukar, serta penyimpanan dan pengalihan ke cetak.html.
+  Fungsi Halaman: Logika pemrosesan form terpadu, penanganan navigasi stepper 1-2-3,
+                  autofill Jabatan Kedinasan (Camat, Sekcam, Kasi, dll.), 
+                  perhitungan otomatis Lama Hari & Estimasi Biaya, serta Riwayat.
   ====================================================================================
 */
 
@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ----------------------------------------------------
-// STEPPER NAVIGATION (Step 1, 2, 3) - DIPERBAIKI
+// 1. STEPPER NAVIGATION (Step 1, 2, 3 Bebas Akses)
 // ----------------------------------------------------
 function switchStep(stepNumber) {
-    // Sembunyikan semua kontainer step (step-content-1, 2, 3)
+    // Sembunyikan semua kontainer step
     [1, 2, 3].forEach(num => {
         const content = document.getElementById(`step-content-${num}`);
         const icon = document.getElementById(`step-icon-${num}`);
@@ -43,79 +43,23 @@ function switchStep(stepNumber) {
         }
     });
 
-    // Tampilkan step yang dipilih
+    // Tampilkan step yang diklik
     const activeContent = document.getElementById(`step-content-${stepNumber}`);
     if (activeContent) {
         activeContent.classList.remove('hidden');
     }
 
-    // Scroll halus ke atas
+    // Scroll halus ke atas halaman
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function proceedToStep2() {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value;
-    if (!kodeSK) {
-        alert('Silakan pilih Kode Sub Kegiatan (SK) terlebih dahulu!');
-        return;
-    }
+    // Dipanggil dari tombol "Lanjut Input Detail Form SPPD" di Step 1
     switchStep(2);
 }
 
 // ----------------------------------------------------
-// PERHITUNGAN OTOMATIS LAMA HARI & BIAYA
-// ----------------------------------------------------
-function calculateLamaHariFromDates() {
-    const tglMulaiVal = document.getElementById('tglMulai')?.value;
-    const tglKembaliVal = document.getElementById('tglKembali')?.value;
-    const inputLamaHari = document.getElementById('lamaHari');
-
-    if (tglMulaiVal && tglKembaliVal && inputLamaHari) {
-        const dMulai = new Date(tglMulaiVal);
-        const dKembali = new Date(tglKembaliVal);
-
-        if (dKembali >= dMulai) {
-            const diffTime = Math.abs(dKembali - dMulai);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
-            inputLamaHari.value = diffDays;
-        } else {
-            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai!");
-            document.getElementById('tglKembali').value = tglMulaiVal;
-            inputLamaHari.value = 1;
-        }
-    }
-    updateSKQuotaInfo();
-}
-
-function updateSKQuotaInfo() {
-    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
-    const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
-    
-    // Hitung total orang (1 Pelaksana Utama + Jumlah Pengikut)
-    const totalPengikut = document.querySelectorAll('#pengikutContainer .pengikut-row').length;
-    const totalOrang = 1 + totalPengikut;
-    const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
-
-    const totalBiayaFormatted = document.getElementById('totalBiayaFormatted');
-    if (totalBiayaFormatted) {
-        totalBiayaFormatted.value = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
-    }
-
-    const terbilangInput = document.getElementById('terbilang');
-    if (terbilangInput) {
-        terbilangInput.value = `${terbilang(totalBiaya)} Rupiah`;
-    }
-}
-
-function syncTujuanPerdin(val) {
-    const tempatTujuan = document.getElementById('tempatTujuan');
-    if (tempatTujuan) {
-        tempatTujuan.value = val;
-    }
-}
-
-// ----------------------------------------------------
-// LOAD DATA MASTER (ASN & SK)
+// 2. LOAD DATA MASTER & POPULATE DROPDOWN
 // ----------------------------------------------------
 async function loadInitialMasterData() {
     if (window.AppDB) {
@@ -125,6 +69,8 @@ async function loadInitialMasterData() {
 
     populateSKDropdown();
     populateASNDropdowns();
+    renderMasterSKTable();
+    renderMasterASNTable();
 }
 
 function populateSKDropdown() {
@@ -171,10 +117,14 @@ function populateASNDropdowns() {
     });
 }
 
+// ----------------------------------------------------
+// 3. AUTOFILL DATA PELAKSANA (Memastikan Jabatan Kedinasan)
+// ----------------------------------------------------
 function onNamaInputChanged(type, nip) {
     const matched = currentMasterASN.find(a => a.nip === nip);
     if (matched) {
         document.getElementById('nipPelaksana').value = matched.nip || '';
+        // Memastikan Jabatan terisi nama Jabatan Kedinasan (Camat, Sekcam, Kasi, dll.), BUKAN Pangkat
         document.getElementById('jabatanPelaksana').value = matched.jabatan || '';
     } else {
         document.getElementById('nipPelaksana').value = '';
@@ -188,7 +138,59 @@ function onBendaharaSelected(nip) {
 }
 
 // ----------------------------------------------------
-// BARIS PENGIKUT DINAMIS
+// 4. PERHITUNGAN OTOMATIS LAMA HARI & ESTIMASI BIAYA
+// ----------------------------------------------------
+function calculateLamaHariFromDates() {
+    const tglMulaiVal = document.getElementById('tglMulai')?.value;
+    const tglKembaliVal = document.getElementById('tglKembali')?.value;
+    const inputLamaHari = document.getElementById('lamaHari');
+
+    if (tglMulaiVal && tglKembaliVal && inputLamaHari) {
+        const dMulai = new Date(tglMulaiVal);
+        const dKembali = new Date(tglKembaliVal);
+
+        if (dKembali >= dMulai) {
+            const diffTime = Math.abs(dKembali - dMulai);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
+            inputLamaHari.value = diffDays;
+        } else {
+            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai!");
+            document.getElementById('tglKembali').value = tglMulaiVal;
+            inputLamaHari.value = 1;
+        }
+    }
+    updateSKQuotaInfo();
+}
+
+function updateSKQuotaInfo() {
+    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
+    const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
+    
+    // Total Orang = 1 Pelaksana Utama + Jumlah Pengikut
+    const totalPengikut = document.querySelectorAll('#pengikutContainer .pengikut-row').length;
+    const totalOrang = 1 + totalPengikut;
+    const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
+
+    const totalBiayaFormatted = document.getElementById('totalBiayaFormatted');
+    if (totalBiayaFormatted) {
+        totalBiayaFormatted.value = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+    }
+
+    const terbilangInput = document.getElementById('terbilang');
+    if (terbilangInput) {
+        terbilangInput.value = `${terbilang(totalBiaya)} Rupiah`;
+    }
+}
+
+function syncTujuanPerdin(val) {
+    const tempatTujuan = document.getElementById('tempatTujuan');
+    if (tempatTujuan) {
+        tempatTujuan.value = val;
+    }
+}
+
+// ----------------------------------------------------
+// 5. MANAJEMEN PENGIKUT DINAMIS
 // ----------------------------------------------------
 function addPengikutRow() {
     const container = document.getElementById('pengikutContainer');
@@ -234,6 +236,7 @@ function onPengikutSelected(rowId, nip) {
     const matched = currentMasterASN.find(a => a.nip === nip);
     if (matched) {
         document.getElementById(`pengikut-nip-${rowId}`).value = matched.nip || '';
+        // Autofill Jabatan Kedinasan Pengikut
         document.getElementById(`pengikut-jabatan-${rowId}`).value = matched.jabatan || '';
     }
 }
@@ -245,7 +248,7 @@ function removePengikutRow(rowId) {
 }
 
 // ----------------------------------------------------
-// PENYIMPANAN FORM & CETAK
+// 6. SUBMIT FORM & SIMPAN KE DATABASE
 // ----------------------------------------------------
 async function handleFormSubmit(event) {
     event.preventDefault();
@@ -287,7 +290,7 @@ async function handleFormSubmit(event) {
 }
 
 // ----------------------------------------------------
-// RIWAYAT SPPD (STEP 3)
+// 7. RIWAYAT SPPD (STEP 3)
 // ----------------------------------------------------
 async function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
@@ -325,7 +328,106 @@ async function renderHistoryTable() {
 }
 
 // ----------------------------------------------------
-// UTILITY TERBILANG
+// 8. KELOLA MASTER DATA (MODAL ASN & SK)
+// ----------------------------------------------------
+async function saveAsnMaster(event) {
+    event.preventDefault();
+    const nama = document.getElementById('addAsnNama').value.trim().toUpperCase();
+    const nip = document.getElementById('addAsnNip').value.trim();
+    const jabatan = document.getElementById('addAsnJabatan').value.trim();
+    const pangkat = document.getElementById('addAsnPangkat').value.trim();
+
+    if (!nama || !nip || !jabatan) {
+        alert('Mohon lengkapi Nama, NIP, dan Jabatan!');
+        return;
+    }
+
+    const asnObj = { nama, nip, jabatan, pangkat };
+    if (window.AppDB) {
+        await window.AppDB.saveMasterAsn(asnObj);
+    }
+    
+    document.getElementById('formAddAsn').reset();
+    await loadInitialMasterData();
+}
+
+function renderMasterASNTable() {
+    const tbody = document.getElementById('asnTableBody');
+    const totalCount = document.getElementById('totalAsnCount');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    if (totalCount) totalCount.textContent = currentMasterASN.length;
+
+    currentMasterASN.forEach(asn => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+            <td class="p-2.5">
+                <div class="font-bold text-slate-800 uppercase">${asn.nama}</div>
+                <div class="text-[11px] font-mono text-slate-500">${asn.nip}</div>
+            </td>
+            <td class="p-2.5 font-semibold text-slate-700">${asn.jabatan || '-'}</td>
+            <td class="p-2.5 text-center">
+                <button type="button" onclick="deleteAsnItem('${asn.nip}')" class="text-rose-600 hover:text-rose-800 text-xs font-bold">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function deleteAsnItem(nip) {
+    if (confirm(`Hapus data ASN dengan NIP ${nip}?`)) {
+        if (window.AppDB) await window.AppDB.deleteMasterAsn(nip);
+        await loadInitialMasterData();
+    }
+}
+
+function renderMasterSKTable() {
+    const tbody = document.getElementById('tableSKBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    currentMasterSK.forEach(sk => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+            <td class="p-2.5 font-mono font-bold text-slate-700">${sk.kode}</td>
+            <td class="p-2.5 font-medium">${sk.nama}</td>
+            <td class="p-2.5 text-center font-bold text-gov-800">${sk.quota || 50}</td>
+            <td class="p-2.5 text-center">
+                <button type="button" onclick="deleteSKItem('${sk.kode}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function deleteSKItem(kode) {
+    if (confirm(`Hapus Sub Kegiatan ${kode}?`)) {
+        if (window.AppDB) await window.AppDB.deleteMasterSK(kode);
+        await loadInitialMasterData();
+    }
+}
+
+async function saveNewSK(event) {
+    event.preventDefault();
+    const kode = document.getElementById('newKodeSK').value.trim();
+    const nama = document.getElementById('newNamaSK').value.trim();
+    const quota = parseInt(document.getElementById('newQuotaSK').value) || 50;
+
+    if (window.AppDB) {
+        await window.AppDB.saveMasterSK({ kode, nama, quota });
+    }
+
+    closeModalSK();
+    await loadInitialMasterData();
+}
+
+// ----------------------------------------------------
+// 9. UTILITY TERBILANG & MODAL TOGGLE HELPERS
 // ----------------------------------------------------
 function terbilang(n) {
     const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
@@ -340,7 +442,6 @@ function terbilang(n) {
     return "";
 }
 
-// Modal Toggle Helpers
 function openModalAsn() { document.getElementById('modalAsn')?.classList.remove('hidden'); document.getElementById('modalAsn')?.classList.add('flex'); }
 function closeModalAsn() { document.getElementById('modalAsn')?.classList.add('hidden'); document.getElementById('modalAsn')?.classList.remove('flex'); }
 function openModalSK() { document.getElementById('modalSK')?.classList.remove('hidden'); document.getElementById('modalSK')?.classList.add('flex'); }
