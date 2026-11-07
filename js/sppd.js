@@ -15,56 +15,106 @@ let currentMasterSK = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadInitialMasterData();
-    renderPengikutTable();
-    await renderRiwayatTable();
+    await renderHistoryTable();
 });
 
 // ----------------------------------------------------
-// SWITCH TAB NAVIGATION
+// STEPPER NAVIGATION (Step 1, 2, 3)
 // ----------------------------------------------------
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
-    document.querySelectorAll('.tab-link').forEach(btn => {
-        btn.classList.remove('bg-gov-800', 'text-white');
-        btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+function switchStep(stepNumber) {
+    // Sembunyikan semua kontainer step
+    [1, 2, 3].forEach(num => {
+        const content = document.getElementById(`step-content-${num}`);
+        const icon = document.getElementById(`step-icon-${num}`);
+        const label = document.getElementById(`step-label-${num}`);
+
+        if (content) {
+            content.classList.add('hidden');
+        }
+
+        if (icon && label) {
+            if (num === stepNumber) {
+                icon.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md transition-all';
+                label.className = 'text-xs font-bold text-gov-800 mt-1';
+            } else {
+                icon.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all';
+                label.className = 'text-xs font-medium text-slate-500 mt-1';
+            }
+        }
     });
 
-    const activePanel = document.getElementById(`tab-content-${tabId}`);
-    const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-
-    if (activePanel) activePanel.classList.remove('hidden');
-    if (activeBtn) {
-        activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
-        activeBtn.classList.add('bg-gov-800', 'text-white');
+    // Tampilkan step yang aktif
+    const activeContent = document.getElementById(`step-content-${stepNumber}`);
+    if (activeContent) {
+        activeContent.classList.remove('hidden');
     }
+
+    // Scroll ke atas dengan mulus
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function proceedToStep2() {
+    const kodeSK = document.getElementById('step1_kodeSK')?.value;
+    if (!kodeSK) {
+        alert('Silakan pilih Kode Sub Kegiatan (SK) terlebih dahulu!');
+        return;
+    }
+    switchStep(2);
 }
 
 // ----------------------------------------------------
-// PERHITUNGAN OTOMATIS LAMA HARI PERJALANAN
+// PERHITUNGAN OTOMATIS LAMA HARI & BIAYA
 // ----------------------------------------------------
-function hitungLamaHariOtomatis() {
-    const tglMulaiVal = document.getElementById('tglMulai').value;
-    const tglKembaliVal = document.getElementById('tglKembali').value;
+function calculateLamaHariFromDates() {
+    const tglMulaiVal = document.getElementById('tglMulai')?.value;
+    const tglKembaliVal = document.getElementById('tglKembali')?.value;
     const inputLamaHari = document.getElementById('lamaHari');
 
-    if (tglMulaiVal && tglKembaliVal) {
+    if (tglMulaiVal && tglKembaliVal && inputLamaHari) {
         const dMulai = new Date(tglMulaiVal);
         const dKembali = new Date(tglKembaliVal);
 
         if (dKembali >= dMulai) {
             const diffTime = Math.abs(dKembali - dMulai);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
             inputLamaHari.value = diffDays;
         } else {
-            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai Berangkat!");
+            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai!");
             document.getElementById('tglKembali').value = tglMulaiVal;
             inputLamaHari.value = 1;
         }
     }
+    updateSKQuotaInfo();
+}
+
+function updateSKQuotaInfo() {
+    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
+    const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
+    
+    // Hitung pengikut + 1 pelaksana utama
+    const totalOrang = 1 + document.querySelectorAll('#pengikutContainer .pengikut-row').length;
+    const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
+
+    const totalBiayaFormatted = document.getElementById('totalBiayaFormatted');
+    if (totalBiayaFormatted) {
+        totalBiayaFormatted.value = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+    }
+
+    const terbilangInput = document.getElementById('terbilang');
+    if (terbilangInput) {
+        terbilangInput.value = `${terbilang(totalBiaya)} Rupiah`;
+    }
+}
+
+function syncTujuanPerdin(val) {
+    const tempatTujuan = document.getElementById('tempatTujuan');
+    if (tempatTujuan) {
+        tempatTujuan.value = val;
+    }
 }
 
 // ----------------------------------------------------
-// LOAD DATA MASTER & PERBAIKAN PANGKAT VS JABATAN
+// LOAD MASTER DATA (ASN & SK)
 // ----------------------------------------------------
 async function loadInitialMasterData() {
     if (window.AppDB) {
@@ -74,13 +124,12 @@ async function loadInitialMasterData() {
 
     populateSKDropdown();
     populateASNDropdowns();
-    renderMasterTables();
 }
 
 function populateSKDropdown() {
-    const skSelect = document.getElementById('kodeSK');
+    const skSelect = document.getElementById('step1_kodeSK');
     if (!skSelect) return;
-    skSelect.innerHTML = '<option value="">-- Pilih Sub Kegiatan --</option>';
+    skSelect.innerHTML = '<option value="">Pilih Sub Kegiatan</option>';
 
     currentMasterSK.forEach(sk => {
         const opt = document.createElement('option');
@@ -91,18 +140,15 @@ function populateSKDropdown() {
 }
 
 function populateASNDropdowns() {
-    const selectPelaksana = document.getElementById('select-pelaksana-utama');
-    const selectCamat = document.getElementById('select-ttd-camat');
-    const selectSekcam = document.getElementById('select-sekcam');
+    const selectPelaksana = document.getElementById('namaPelaksana');
+    const selectBendahara = document.getElementById('selectBendahara');
 
-    if (selectPelaksana) selectPelaksana.innerHTML = '<option value="">-- Pilih dari Master ASN --</option>';
-    if (selectCamat) selectCamat.innerHTML = '<option value="">-- Pilih Camat / Plt --</option>';
-    if (selectSekcam) selectSekcam.innerHTML = '<option value="">-- Pilih Sekretaris Camat --</option>';
+    if (selectPelaksana) selectPelaksana.innerHTML = '<option value="">Pilih Pelaksana Utama</option>';
+    if (selectBendahara) selectBendahara.innerHTML = '<option value="">Pilih Bendahara</option>';
 
     currentMasterASN.forEach(asn => {
         const namaUpper = asn.nama ? asn.nama.toUpperCase() : '';
-        
-        // Option Pelaksana Utama
+
         if (selectPelaksana) {
             const opt = document.createElement('option');
             opt.value = asn.nip;
@@ -110,208 +156,123 @@ function populateASNDropdowns() {
             selectPelaksana.appendChild(opt);
         }
 
-        // Option Camat
-        if (selectCamat) {
-            const optC = document.createElement('option');
-            optC.value = JSON.stringify(asn);
-            optC.textContent = `${namaUpper} (${asn.jabatan || 'Camat'})`;
-            if (asn.jabatan && asn.jabatan.toLowerCase().includes('camat') && !asn.jabatan.toLowerCase().includes('sekretaris')) {
-                optC.selected = true;
+        if (selectBendahara) {
+            const optB = document.createElement('option');
+            optB.value = asn.nip;
+            optB.textContent = `${namaUpper} - NIP. ${asn.nip}`;
+            if (asn.jabatan && asn.jabatan.toLowerCase().includes('bendahara')) {
+                optB.selected = true;
+                const nipBendahara = document.getElementById('nipBendahara');
+                if (nipBendahara) nipBendahara.value = asn.nip;
             }
-            selectCamat.appendChild(optC);
-        }
-
-        // Option Sekretaris Camat
-        if (selectSekcam) {
-            const optS = document.createElement('option');
-            optS.value = JSON.stringify(asn);
-            optS.textContent = `${namaUpper} (${asn.jabatan || 'Sekretaris Camat'})`;
-            if (asn.jabatan && asn.jabatan.toLowerCase().includes('sekretaris')) {
-                optS.selected = true;
-            }
-            selectSekcam.appendChild(optS);
+            selectBendahara.appendChild(optB);
         }
     });
 }
 
-// ----------------------------------------------------
-// AUTOFILL PELAKSANA UTAMA (NIP, PANGKAT, JABATAN)
-// PERBAIKAN: Pemetaan Pangkat & Jabatan Terpasang Benar
-// ----------------------------------------------------
-function autoFillPelaksanaUtama() {
-    const nipVal = document.getElementById('select-pelaksana-utama').value;
-    const matched = currentMasterASN.find(a => a.nip === nipVal);
-
+function onNamaInputChanged(type, nip) {
+    const matched = currentMasterASN.find(a => a.nip === nip);
     if (matched) {
-        document.getElementById('nipPelaksana').value = matched.nip || '-';
-        // Dipastikan Pangkat mengisi Pangkat, Jabatan mengisi Jabatan
-        document.getElementById('pangkatPelaksana').value = matched.pangkat || '-';
-        document.getElementById('jabatanPelaksana').value = matched.jabatan || '-';
+        document.getElementById('nipPelaksana').value = matched.nip || '';
+        document.getElementById('jabatanPelaksana').value = matched.jabatan || '';
     } else {
         document.getElementById('nipPelaksana').value = '';
-        document.getElementById('pangkatPelaksana').value = '';
         document.getElementById('jabatanPelaksana').value = '';
     }
 }
 
-// ----------------------------------------------------
-// MANAJEMEN BARIS PENGIKUT
-// ----------------------------------------------------
-let pengikutCount = 0;
-function tambahRowPengikut() {
-    pengikutCount++;
-    const tbody = document.getElementById('tbody-pengikut');
-    const tr = document.createElement('tr');
-    tr.id = `row-pengikut-${pengikutCount}`;
-    tr.className = 'hover:bg-slate-50';
+function onBendaharaSelected(nip) {
+    const nipBendahara = document.getElementById('nipBendahara');
+    if (nipBendahara) nipBendahara.value = nip;
+}
 
-    let optionsAsn = '<option value="">-- Pilih ASN --</option>';
+// ----------------------------------------------------
+// PENGIKUT DYNAMIC ROWS
+// ----------------------------------------------------
+function addPengikutRow() {
+    const container = document.getElementById('pengikutContainer');
+    if (!container) return;
+
+    const rowId = Date.now();
+    let optionsAsn = '<option value="">Pilih ASN Pengikut</option>';
     currentMasterASN.forEach(a => {
         optionsAsn += `<option value="${a.nip}">${a.nama.toUpperCase()} - NIP. ${a.nip}</option>`;
     });
 
-    tr.innerHTML = `
-        <td class="p-2 text-center font-bold text-slate-500 row-index">${tbody.children.length + 1}</td>
-        <td class="p-2">
-            <select class="w-full text-xs p-1.5 border border-slate-300 rounded mb-1 select-pengikut-asn" onchange="autoFillRowPengikut(${pengikutCount}, this.value)">
+    const div = document.createElement('div');
+    div.id = `pengikut-row-${rowId}`;
+    div.className = 'pengikut-row grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200 relative mb-2';
+
+    div.innerHTML = `
+        <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pengikut</label>
+            <select onchange="onPengikutSelected('${rowId}', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input">
                 ${optionsAsn}
             </select>
-            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nama uppercase" placeholder="NAMA PENGIKUT">
-        </td>
-        <td class="p-2">
-            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nip font-mono" placeholder="NIP">
-        </td>
-        <td class="p-2 space-y-1">
-            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-pangkat" placeholder="Pangkat / Gol">
-            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-jabatan" placeholder="Jabatan">
-        </td>
-        <td class="p-2 text-center">
-            <button type="button" onclick="hapusRowPengikut(${pengikutCount})" class="text-rose-600 hover:text-rose-800 p-1">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP</label>
+            <input type="text" id="pengikut-nip-${rowId}" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="flex-1">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Jabatan</label>
+                <input type="text" id="pengikut-jabatan-${rowId}" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
+            </div>
+            <button type="button" onclick="removePengikutRow('${rowId}')" class="mt-4 p-2 text-rose-600 hover:text-rose-800">
                 <i class="fa-solid fa-trash"></i>
             </button>
-        </td>
+        </div>
     `;
-    tbody.appendChild(tr);
-    updatePengikutIndices();
+
+    container.appendChild(div);
+    updateSKQuotaInfo();
 }
 
-function autoFillRowPengikut(rowId, nip) {
-    const row = document.getElementById(`row-pengikut-${rowId}`);
-    if (!row) return;
+function onPengikutSelected(rowId, nip) {
     const matched = currentMasterASN.find(a => a.nip === nip);
     if (matched) {
-        row.querySelector('.input-pengikut-nama').value = matched.nama.toUpperCase();
-        row.querySelector('.input-pengikut-nip').value = matched.nip;
-        row.querySelector('.input-pengikut-pangkat').value = matched.pangkat;
-        row.querySelector('.input-pengikut-jabatan').value = matched.jabatan;
+        document.getElementById(`pengikut-nip-${rowId}`).value = matched.nip || '';
+        document.getElementById(`pengikut-jabatan-${rowId}`).value = matched.jabatan || '';
     }
 }
 
-function hapusRowPengikut(rowId) {
-    const row = document.getElementById(`row-pengikut-${rowId}`);
+function removePengikutRow(rowId) {
+    const row = document.getElementById(`pengikut-row-${rowId}`);
     if (row) row.remove();
-    updatePengikutIndices();
-}
-
-function updatePengikutIndices() {
-    const rows = document.querySelectorAll('#tbody-pengikut tr');
-    rows.forEach((r, idx) => {
-        r.querySelector('.row-index').textContent = idx + 1;
-    });
-}
-
-function renderPengikutTable() {
-    const tbody = document.getElementById('tbody-pengikut');
-    if (tbody && tbody.children.length === 0) {
-        tambahRowPengikut();
-    }
+    updateSKQuotaInfo();
 }
 
 // ----------------------------------------------------
-// NAVIGASI PENERBITAN & SIMPAN DOKUMEN SPPD
+// SIMPAN FORM & CETAK
 // ----------------------------------------------------
-function lanjutKeStep2() {
-    const formStep1 = document.getElementById('form-step1');
-    if (!formStep1.checkValidity()) {
-        formStep1.reportValidity();
-        return;
-    }
-    switchTab('step2');
-}
+async function handleFormSubmit(event) {
+    event.preventDefault();
 
-async function simpanDanCetakPerdin() {
-    const formStep2 = document.getElementById('form-step2');
-    if (!formStep2.checkValidity()) {
-        formStep2.reportValidity();
-        return;
-    }
-
-    const nipUtama = document.getElementById('select-pelaksana-utama').value;
+    const nipUtama = document.getElementById('namaPelaksana')?.value;
     const matchedPelaksana = currentMasterASN.find(a => a.nip === nipUtama);
-    const namaUtama = matchedPelaksana ? matchedPelaksana.nama.toUpperCase() : '';
-
-    // Ambil Data Pengikut
-    const pengikutList = [];
-    document.querySelectorAll('#tbody-pengikut tr').forEach(row => {
-        const nama = row.querySelector('.input-pengikut-nama')?.value;
-        if (nama && nama.trim() !== '') {
-            pengikutList.push({
-                nama: nama.toUpperCase(),
-                nip: row.querySelector('.input-pengikut-nip')?.value || '-',
-                pangkat: row.querySelector('.input-pengikut-pangkat')?.value || '-',
-                jabatan: row.querySelector('.input-pengikut-jabatan')?.value || '-'
-            });
-        }
-    });
-
-    const camatJson = document.getElementById('select-ttd-camat').value;
-    const sekcamJson = document.getElementById('select-sekcam').value;
 
     const recordData = {
         id: Date.now().toString(),
-        noSuratTugas: document.getElementById('noSuratTugas').value,
-        noSPPD: document.getElementById('noSPPD').value,
-        kodeSK: document.getElementById('kodeSK').value,
-        tglMulai: document.getElementById('tglMulai').value,
-        tglKembali: document.getElementById('tglKembali').value,
-        lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
-        maksudPerdin: document.getElementById('maksudPerdin').value,
-        tingkatanSPPD: document.getElementById('tingkatanSPPD').value,
-        alatAngkut: document.getElementById('alatAngkut').value,
-        
-        // Pelaksana Utama (Secara konsisten disimpan tepat sesuai atributnya)
-        namaPelaksana: namaUtama,
-        nipPelaksana: document.getElementById('nipPelaksana').value,
-        pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
-        jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
-        
-        // Rute Perjalanan
-        tempatBerangkat: document.getElementById('tempatBerangkat').value,
-        tempatTujuan: document.getElementById('tempatTujuan').value,
-        
-        // Rute II, III, IV
-        rute2: {
-            berangkat: document.getElementById('rute2_berangkat').value,
-            tujuan: document.getElementById('rute2_tujuan').value,
-            tgl: document.getElementById('rute2_tgl_berangkat').value,
-            ttd: document.getElementById('rute2_ttd').value
-        },
-        rute3: {
-            berangkat: document.getElementById('rute3_berangkat').value,
-            tujuan: document.getElementById('rute3_tujuan').value,
-            tgl: document.getElementById('rute3_tgl_berangkat').value,
-            ttd: document.getElementById('rute3_ttd').value
-        },
-        rute4: {
-            berangkat: document.getElementById('rute4_berangkat').value,
-            tujuan: document.getElementById('rute4_tujuan').value,
-            tgl: document.getElementById('rute4_tgl_berangkat').value,
-            ttd: document.getElementById('rute4_ttd').value
-        },
-
-        pengikut: pengikutList,
-        pejabatCamat: camatJson ? JSON.parse(camatJson) : null,
-        pejabatSekcam: sekcamJson ? JSON.parse(sekcamJson) : null,
+        kodeSK: document.getElementById('step1_kodeSK')?.value,
+        sumberDana: document.getElementById('sumberDana')?.value,
+        noSuratTugas: document.getElementById('noSuratTugas')?.value,
+        noSPPD: document.getElementById('noSPPD')?.value,
+        maksudTujuan: document.getElementById('maksudTujuan')?.value,
+        namaPelaksana: matchedPelaksana ? matchedPelaksana.nama.toUpperCase() : '',
+        nipPelaksana: matchedPelaksana ? matchedPelaksana.nip : '',
+        jabatanPelaksana: matchedPelaksana ? matchedPelaksana.jabatan : '',
+        tempatBerangkat: document.getElementById('tempatBerangkat')?.value,
+        tempatTujuan: document.getElementById('tempatTujuan')?.value,
+        tglMulai: document.getElementById('tglMulai')?.value,
+        tglKembali: document.getElementById('tglKembali')?.value,
+        lamaHari: parseInt(document.getElementById('lamaHari')?.value) || 1,
+        biayaPerOrang: parseInt(document.getElementById('biayaPerOrang')?.value) || 0,
+        laporanHasil: document.getElementById('laporanHasil')?.value,
+        namaPenggunaAnggaran: document.getElementById('namaPenggunaAnggaran')?.value,
+        nipPenggunaAnggaran: document.getElementById('nipPenggunaAnggaran')?.value,
+        namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value,
+        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value,
         createdAt: new Date().toISOString()
     };
 
@@ -319,48 +280,41 @@ async function simpanDanCetakPerdin() {
         await window.AppDB.saveRecord(recordData);
     }
 
-    window.location.href = `cetak.html?id=${recordData.id}`;
+    alert('Data SPPD Berhasil Disimpan!');
+    switchStep(3);
+    await renderHistoryTable();
 }
 
 // ----------------------------------------------------
-// TABEL RIWAYAT PERDIN DITERBITKAN
+// RIWAYAT SPPD (STEP 3)
 // ----------------------------------------------------
-async function renderRiwayatTable() {
-    const tbody = document.getElementById('tbody-riwayat');
+async function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
     if (!tbody) return;
-    
+
     let records = [];
     if (window.AppDB) records = await window.AppDB.getAllRecords();
 
-    const searchKeyword = (document.getElementById('search-riwayat')?.value || '').toLowerCase();
-    const filtered = records.filter(r => 
-        (r.namaPelaksana && r.namaPelaksana.toLowerCase().includes(searchKeyword)) ||
-        (r.noSPPD && r.noSPPD.toLowerCase().includes(searchKeyword))
-    );
-
     tbody.innerHTML = '';
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">Belum ada data riwayat perjalanan dinas.</td></tr>';
+    if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">Belum ada dokumen SPPD tersimpan.</td></tr>';
         return;
     }
 
-    filtered.forEach((r, idx) => {
+    records.forEach(r => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50';
+        tr.className = 'border-b hover:bg-slate-50';
         tr.innerHTML = `
-            <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
-            <td class="p-3">
-                <div class="font-bold text-gov-900">${r.noSPPD}</div>
-                <div class="text-[11px] text-slate-500">ST: ${r.noSuratTugas}</div>
+            <td class="p-3 font-semibold">
+                <div>ST: ${r.noSuratTugas || '-'}</div>
+                <div class="text-[11px] text-slate-500">SPPD: ${r.noSPPD || '-'}</div>
             </td>
-            <td class="p-3 font-semibold text-slate-800 uppercase">${r.namaPelaksana}</td>
-            <td class="p-3">
-                <div>${r.tempatTujuan}</div>
-                <div class="text-[11px] text-slate-500">${r.tglMulai} s/d ${r.tglKembali || r.tglMulai} (${r.lamaHari} Hari)</div>
-            </td>
-            <td class="p-3 font-mono text-[11px]">${r.kodeSK || '-'}</td>
+            <td class="p-3 font-mono text-xs">${r.kodeSK || '-'}</td>
+            <td class="p-3 uppercase font-bold">${r.namaPelaksana || '-'}</td>
+            <td class="p-3">${r.tempatTujuan || '-'}</td>
+            <td class="p-3 font-bold text-emerald-700">Rp ${((r.lamaHari || 1) * (r.biayaPerOrang || 0)).toLocaleString('id-ID')}</td>
             <td class="p-3 text-center">
-                <a href="cetak.html?id=${r.id}" target="_blank" class="px-2.5 py-1 bg-gov-800 hover:bg-gov-900 text-white rounded text-[11px] font-bold transition inline-flex items-center gap-1">
+                <a href="cetak.html?id=${r.id}" target="_blank" class="px-3 py-1 bg-gov-700 hover:bg-gov-800 text-white rounded text-xs font-bold inline-flex items-center gap-1">
                     <i class="fa-solid fa-print"></i> Cetak
                 </a>
             </td>
@@ -370,59 +324,25 @@ async function renderRiwayatTable() {
 }
 
 // ----------------------------------------------------
-// MANAJEMEN TABEL MASTER DATA (ASN & SK)
+// UTILITY TERBILANG
 // ----------------------------------------------------
-function renderMasterTables() {
-    // Master ASN
-    const tbodyAsn = document.getElementById('tbody-master-asn');
-    if (tbodyAsn) {
-        tbodyAsn.innerHTML = '';
-        currentMasterASN.forEach(asn => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-50';
-            tr.innerHTML = `
-                <td class="p-2 font-bold uppercase text-slate-800">${asn.nama}</td>
-                <td class="p-2 font-mono text-slate-600">${asn.nip}</td>
-                <td class="p-2">${asn.pangkat}</td>
-                <td class="p-2 text-slate-700">${asn.jabatan}</td>
-                <td class="p-2 text-center">
-                    <button onclick="hapusASN('${asn.nip}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            `;
-            tbodyAsn.appendChild(tr);
-        });
-    }
-
-    // Master SK
-    const tbodySk = document.getElementById('tbody-master-sk');
-    if (tbodySk) {
-        tbodySk.innerHTML = '';
-        currentMasterSK.forEach(sk => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-50';
-            tr.innerHTML = `
-                <td class="p-2 font-mono font-bold text-slate-700">${sk.kode}</td>
-                <td class="p-2 font-medium">${sk.nama}</td>
-                <td class="p-2 text-center font-bold text-gov-800">${sk.quota || 50}</td>
-                <td class="p-2 text-center">
-                    <button onclick="hapusSK('${sk.kode}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            `;
-            tbodySk.appendChild(tr);
-        });
-    }
+function terbilang(n) {
+    const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    if (n < 12) return angka[n];
+    if (n < 20) return terbilang(n - 10) + " Belas";
+    if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh " + terbilang(n % 10);
+    if (n < 200) return "Seratus " + terbilang(n - 100);
+    if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus " + terbilang(n % 100);
+    if (n < 2000) return "Seribu " + terbilang(n - 1000);
+    if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu " + terbilang(n % 1000);
+    if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta " + terbilang(n % 1000000);
+    return "";
 }
 
-async function hapusASN(nip) {
-    if (confirm(`Hapus ASN dengan NIP ${nip}?`)) {
-        await window.AppDB.deleteMasterAsn(nip);
-        await loadInitialMasterData();
-    }
-}
-
-async function hapusSK(kode) {
-    if (confirm(`Hapus Sub Kegiatan ${kode}?`)) {
-        await window.AppDB.deleteMasterSK(kode);
-        await loadInitialMasterData();
-    }
-}
+// Modal Toggle Helpers
+function openModalAsn() { document.getElementById('modalAsn')?.classList.remove('hidden'); document.getElementById('modalAsn')?.classList.add('flex'); }
+function closeModalAsn() { document.getElementById('modalAsn')?.classList.add('hidden'); document.getElementById('modalAsn')?.classList.remove('flex'); }
+function openModalSK() { document.getElementById('modalSK')?.classList.remove('hidden'); document.getElementById('modalSK')?.classList.add('flex'); }
+function closeModalSK() { document.getElementById('modalSK')?.classList.add('hidden'); document.getElementById('modalSK')?.classList.remove('flex'); }
+function openModalManageSK() { document.getElementById('modalManageSK')?.classList.remove('hidden'); document.getElementById('modalManageSK')?.classList.add('flex'); }
+function closeModalManageSK() { document.getElementById('modalManageSK')?.classList.add('hidden'); document.getElementById('modalManageSK')?.classList.remove('flex'); }
