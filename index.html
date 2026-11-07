@@ -1,8 +1,20 @@
+<!-- 
+  ====================================================================================
+  Nama Aplikasi : Sistem e - SPPD Terpadu - Kecamatan Tabundung
+  Hosting       : GitHub Pages (Murni Single Page Application / SPA)
+  Backend / DB  : Supabase REST API & Supabase Storage
+  Nama Halaman  : index.html
+  Fungsi Halaman: Halaman Landing / Portal Hub utama untuk memilih modul layanan 
+                  (Modul Rekapitulasi & Kuota OH atau Modul e-SPPD Terpadu) 
+                  serta pemantauan indikator status koneksi (Mode Online/Offline).
+  ====================================================================================
+-->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Poin 1: Mengganti semua title dengan "e - SPPD Terpadu - Kecamatan Tabundung" -->
     <title>e - SPPD Terpadu - Kecamatan Tabundung</title>
     
     <link rel="manifest" href="manifest.json">
@@ -35,7 +47,6 @@
         };
     </script>
 
-    <!-- CSS Internal -->
     <style>
         .bg-glow-1 {
             position: absolute; top: -8rem; left: -8rem; width: 24rem; height: 24rem;
@@ -67,16 +78,18 @@
     <!-- MAIN PORTAL CARD -->
     <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden relative z-10 my-8">
         
-        <!-- Header Branding -->
+        <!-- Header Branding (Poin 17: logo_st diletakkan agak dekat dengan tulisan Pemerintah Kabupaten Sumba Timur) -->
         <div class="bg-gov-900 px-6 py-8 text-center text-white relative">
-            <div class="inline-block p-3 bg-white/10 rounded-2xl mb-3 backdrop-blur-sm border border-white/20 shadow-inner">
+            <div class="flex items-center justify-center space-x-3 mb-2">
                 <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" 
-                     alt="Logo Sumba Timur" class="h-16 w-auto mx-auto object-contain drop-shadow-md">
+                     alt="Logo Sumba Timur" class="h-14 w-auto object-contain drop-shadow-md">
+                <div class="text-left">
+                    <h1 class="text-lg sm:text-xl font-extrabold tracking-wide uppercase text-white leading-tight">PEMERINTAH KABUPATEN SUMBA TIMUR</h1>
+                    <p class="text-xs text-sky-200 font-semibold">Kecamatan Tabundung - Sumba Timur</p>
+                </div>
             </div>
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide uppercase text-white">SISTEM PERJALANAN DINAS</h1>
-            <p class="text-xs text-sky-200 mt-1 font-semibold">Kecamatan Tabundung - Kabupaten Sumba Timur</p>
             
-            <div class="mt-3 flex justify-center">
+            <div class="mt-4 flex justify-center">
                 <div id="portal-network-badge" class="px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md"></div>
             </div>
         </div>
@@ -84,13 +97,14 @@
         <!-- Body Selection Hub -->
         <div class="p-6 sm:p-8 space-y-6 bg-white">
             <div class="text-center space-y-1">
+                <!-- Poin 4: Penggunaan capitalize word khusus untuk keterangan menu dan nama bagian -->
                 <h2 class="text-xl font-extrabold text-slate-900">Pilih Layanan Utama</h2>
-                <p class="text-xs text-slate-600 font-medium">Mulai perencanaan penugasan tim atau langsung buat dokumen SPPD.</p>
+                <p class="text-xs text-slate-600 font-medium">Mulai Perencanaan Penugasan Tim Atau Langsung Buat Dokumen SPPD.</p>
             </div>
 
             <div class="space-y-3.5" id="moduleOptionGroup">
                 
-                <!-- Opsi 1: Modul Rekapitulasi & Kuota OH (Linked to rekap.html) -->
+                <!-- Opsi 1: Modul Rekapitulasi & Kuota OH -->
                 <label for="optPerdin" class="module-card relative flex items-start p-4 rounded-xl border-2 border-slate-300 bg-white hover:border-indigo-600 transition-all cursor-pointer group shadow-sm">
                     <div class="flex items-center h-5 mt-0.5">
                         <input id="optPerdin" name="module_choice" type="radio" value="rekap.html" checked
@@ -99,7 +113,7 @@
                     <div class="ml-3.5 flex-1">
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-extrabold text-slate-900 group-hover:text-indigo-800 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line text-indigo-600 text-base"></i> Rekapitulasi & Kuota OH
+                                <i class="fa-solid fa-chart-line text-indigo-600 text-base"></i> Rekapitulasi Dan Kuota OH
                             </span>
                             <span class="text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-300 px-2.5 py-0.5 rounded-full">Monitoring SK</span>
                         </div>
@@ -133,7 +147,7 @@
             <!-- Tombol Aksi Utama -->
             <button type="button" onclick="navigateToSelectedModule()" 
                     class="w-full py-3.5 px-4 bg-gov-800 hover:bg-gov-900 text-white font-extrabold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2 group">
-                <span>Masuk ke Modul</span>
+                <span>Masuk Ke Modul</span>
                 <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
             </button>
 
