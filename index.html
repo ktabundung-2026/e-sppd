@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemeliharaan Sistem - e-SPPD Kecamatan Tabundung</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="icon" type="image/png" href="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gov: {
+                            50: '#f0f7ff', 100: '#e0effe', 600: '#0284c7',
+                            700: '#0369a1', 800: '#075985', 900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER NAVIGATION -->
+    <header class="bg-gov-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" 
+                         alt="Logo Pemda Sumba Timur" class="h-10 w-auto object-contain">
+                    <div>
+                        <h1 class="font-bold text-base sm:text-lg leading-tight">e-SPPD Kecamatan Tabundung</h1>
+                        <p class="text-xs text-gov-100">Pemerintah Kabupaten Sumba Timur</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Pemeliharaan Sistem
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN MAINTENANCE CONTENT -->
+    <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 sm:p-10 text-center w-full space-y-6">
+            
+            <!-- ANIMATED ICON -->
+            <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+                <div class="absolute inset-0 bg-gov-100 rounded-full animate-pulse"></div>
+                <div class="relative bg-gov-900 text-amber-400 w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-lg border-2 border-amber-400/50">
+                    <i class="fa-solid fa-screwdriver-wrench animate-bounce"></i>
+                </div>
+            </div>
+
+            <!-- TITLE & DESKRIPSI -->
+            <div class="space-y-2">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-gov-900 uppercase tracking-tight">
+                    Aplikasi Dalam Pemeliharaan & Pengembangan
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
+                    Mohon maaf atas ketidaknyamanannya. Sistem <strong>e-SPPD Terpadu Kecamatan Tabundung</strong> saat ini sedang menjalani proses pemutakhiran data, peningkatan fitur, dan optimasi performa backend.
+                </p>
+            </div>
+
+            <!-- STATUS BOX INFORMASI -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-left space-y-3 max-w-lg mx-auto">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-circle-info text-gov-700 text-base mt-0.5"></i>
+                    <div class="text-xs space-y-1">
+                        <p class="font-bold text-slate-800 uppercase">Catatan Penting Pengguna:</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1">
+                            <li>Data master pelaksana & SK tersimpan aman di basis data Supabase.</li>
+                            <li>Akses form pembuatan SPPD ditutup sementara waktu.</li>
+                            <li>Aplikasi akan dibuka kembali segera setelah proses penyempurnaan selesai.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KONTAK ADMIN / KANTOR -->
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-center items-center gap-4 text-xs text-slate-600">
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-building-columns text-gov-700"></i>
+                    <span>Malahar - Desa Billa</span>
+                </div>
+                <span class="hidden sm:inline text-slate-300">•</span>
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-phone text-gov-700"></i>
+                    <a href="tel:+6281264898836" class="hover:underline font-semibold">+62 81 264-898-836</a>
+                </div>
+                <span class="hidden sm:inline text-slate-300">•</span>
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-envelope text-gov-700"></i>
+                    <a href="mailto:ktabundung@gmail.com" class="hover:underline font-semibold">ktabundung@gmail.com</a>
+                </div>
+            </div>
+
+            <!-- BUTTON RELOAD -->
+            <div>
+                <button onclick="window.location.reload()" class="bg-gov-700 hover:bg-gov-800 text-white text-xs font-bold px-6 py-2.5 rounded-lg transition shadow-md inline-flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate-right"></i> Cek Perkembangan / Muat Ulang
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER COPYRIGHT -->
+    <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs">
+        <p>&copy; 2026 Kecamatan Tabundung - aRL</p>
+    </footer>
+
+</body>
+</html>
