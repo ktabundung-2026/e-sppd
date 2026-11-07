@@ -1,34 +1,223 @@
 /* ====================================================================================
  * Nama Modul  : Modul Master Pelaksana & SPPD - Kecamatan Tabundung
- * Deskripsi   : Integrasi Form Input, Import CSV, dan Sinkronisasi Tabel master_pelaksana
- * Skema Tabel : master_pelaksana (id, nama_pelaksana, nip, jabatan, created_at)
+ * Deskripsi   : Integrasi Form SPPD, Stepper Navigation, Master SK, dan Master Pelaksana
+ * Skema Tabel : 
+ *  - master_pelaksana (id, nama_pelaksana, nip, jabatan, created_at)
+ *  - master_sk (id, kode_sk, nama_sk, quota_oh, created_at)
  * ==================================================================================== */
 
+// Global state untuk menyimpan data lokal / terisi
+let currentSKList = [];
+let currentAsnList = [];
+
 // Event listener saat dokumen HTML selesai dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    loadAsnMasterData();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadMasterSKData();
+    await loadAsnMasterData();
 });
 
-/**
- * HELPER FORMATTER: Golongan / Pangkat
- * Mengubah string pangkat menjadi format: Pembina (IV.a) / Penata Muda (III.a)
- * Teks = Kapital, Romawi = UPPERCASE, Huruf setelah titik (.) = lowercase
- */
+/* ====================================================================================
+ * 1. STEPPER NAVIGATION & FORM FLOW (STEP 1, 2, 3)
+ * ==================================================================================== */
+
+function switchStep(stepNumber) {
+    // Sembunyikan semua step content
+    document.getElementById('step-content-1')?.classList.add('hidden');
+    document.getElementById('step-content-2')?.classList.add('hidden');
+    document.getElementById('step-content-3')?.classList.add('hidden');
+
+    // Reset gaya tombol stepper
+    [1, 2, 3].forEach(i => {
+        const icon = document.getElementById(`step-icon-${i}`);
+        const label = document.getElementById(`step-label-${i}`);
+        if (icon && label) {
+            if (i === stepNumber) {
+                icon.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md transition-all";
+                label.className = "text-xs font-bold text-gov-800 mt-1";
+            } else {
+                icon.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all";
+                label.className = "text-xs font-medium text-slate-500 mt-1";
+            }
+        }
+    });
+
+    // Tampilkan step content yang dipilih
+    const activeStepContent = document.getElementById(`step-content-${stepNumber}`);
+    if (activeStepContent) {
+        activeStepContent.classList.remove('hidden');
+    }
+}
+
+function proceedToStep2() {
+    const kodeSK = document.getElementById('step1_kodeSK')?.value;
+    const desa = document.getElementById('step1_selectDesa')?.value.trim();
+
+    if (!kodeSK) {
+        alert('Silakan pilih Kode Sub Kegiatan (SK) terlebih dahulu!');
+        return;
+    }
+    if (!desa) {
+        alert('Silakan isi Lokasi Perjalanan Dinas!');
+        return;
+    }
+
+    // Pindah ke step 2
+    switchStep(2);
+}
+
+function syncTujuanPerdin(val) {
+    const tempatTujuanInput = document.getElementById('tempatTujuan');
+    if (tempatTujuanInput) {
+        tempatTujuanInput.value = val ? val.toUpperCase() : '';
+    }
+}
+
+/* ====================================================================================
+ * 2. KELOLA MASTER SUB KEGIATAN (SK) MODAL & LOGIC
+ * ==================================================================================== */
+
+async function loadMasterSKData() {
+    try {
+        const { data: skList, error } = await supabaseClient
+            .from('master_sk')
+            .select('*')
+            .order('kode_sk', { ascending: true });
+
+        if (error) throw error;
+
+        currentSKList = skList || [];
+        renderSKDropdown(currentSKList);
+        renderSKTable(currentSKList);
+
+    } catch (err) {
+        console.warn('Gagal memuat master_sk dari Supabase (menggunakan fallback jika ada):', err.message);
+    }
+}
+
+function renderSKDropdown(data) {
+    const selectSK = document.getElementById('step1_kodeSK');
+    if (!selectSK) return;
+
+    selectSK.innerHTML = '<option value="">Pilih Sub Kegiatan</option>' +
+        data.map(item => `<option value="${escapeHtml(item.kode_sk)}">${escapeHtml(item.kode_sk)} - ${escapeHtml(item.nama_sk)}</option>`).join('');
+}
+
+function renderSKTable(data) {
+    const tbody = document.getElementById('tableSKBody');
+    if (!tbody) return;
+
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada Sub Kegiatan tersimpan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="p-2.5 font-mono font-bold text-gov-800">${escapeHtml(item.kode_sk)}</td>
+            <td class="p-2.5 font-medium text-slate-700">${escapeHtml(item.nama_sk)}</td>
+            <td class="p-2.5 text-center font-bold text-slate-800">${item.quota_oh || 0} OH</td>
+            <td class="p-2.5 text-center">
+                <button type="button" onclick="deleteSKMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 font-bold p-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function saveNewSK(event) {
+    event.preventDefault();
+    const kode = document.getElementById('newKodeSK').value.trim();
+    const nama = document.getElementById('newNamaSK').value.trim();
+    const quota = parseInt(document.getElementById('newQuotaSK').value) || 0;
+
+    if (!kode || !nama) {
+        alert('Kode SK dan Nama SK wajib diisi!');
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('master_sk')
+            .insert([{ kode_sk: kode, nama_sk: nama, quota_oh: quota }]);
+
+        if (error) throw error;
+
+        alert('Sub Kegiatan berhasil disimpan!');
+        closeModalSK();
+        await loadMasterSKData();
+    } catch (err) {
+        console.error('Gagal menyimpan SK:', err);
+        alert('Gagal menyimpan Sub Kegiatan: ' + err.message);
+    }
+}
+
+async function deleteSKMaster(id) {
+    if (!confirm('Apakah Anda yakin menghapus Sub Kegiatan ini?')) return;
+    try {
+        const { error } = await supabaseClient
+            .from('master_sk')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        await loadMasterSKData();
+    } catch (err) {
+        alert('Gagal menghapus Sub Kegiatan: ' + err.message);
+    }
+}
+
+function openModalManageSK() {
+    const modal = document.getElementById('modalManageSK');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModalManageSK() {
+    const modal = document.getElementById('modalManageSK');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function openModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function updateSKQuotaInfo() {
+    calculateTotalBiaya();
+}
+
+/* ====================================================================================
+ * 3. FORMATTER PANGKAT & KELOLA MASTER PELAKSANA ASN (MODAL & SUPABASE)
+ * ==================================================================================== */
+
 function formatPangkatGolongan(text) {
     if (!text) return '';
-    
-    // Normalisasi spasi ekstra
     let str = text.trim();
 
-    // 1. Kapitalisasi kata non-golongan (seperti Pembina, Penata, Pembina Utama Muda)
+    // 1. Kapitalisasi teks kata gelar
     str = str.replace(/\b[a-zA-Z]+\b/g, function(txt) {
-        // Jangan ubah jika merupakan bagian romawi yang berdiri sendiri
         if (/^(i|v|x|l|c|d|m)+$/i.test(txt)) return txt;
         return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
     });
 
-    // 2. Format pola Golongan/Ruang dalam kurung atau teks bebas, misal: (iv/a), iv.a, III/B, IV.A
-    // Memastikan Romawi huruf besar, titik/garis miring, lalu huruf ruang menjadi huruf kecil
+    // 2. Format pola Golongan/Ruang (Romawi = UPPERCASE, huruf setelah titik = lowercase)
     str = str.replace(/\b(I{1,3}|IV|V|VI{0,3}|IX|X|XI{0,3})\s*[\./\s]\s*([a-eA-E])\b/gi, function(match, romawi, ruang) {
         return romawi.toUpperCase() + '.' + ruang.toLowerCase();
     });
@@ -36,18 +225,12 @@ function formatPangkatGolongan(text) {
     return str;
 }
 
-/**
- * 1. FUNGSI SIMPAN PELAKSANA MANUALLY
- * Menyimpan data dari modal form manual ke Supabase
- */
 async function saveAsnMaster(event) {
     event.preventDefault();
 
     const namaInput = document.getElementById('addAsnNama').value.trim();
     const nipInput = document.getElementById('addAsnNip').value.trim();
     const jabatanInput = document.getElementById('addAsnJabatan').value.trim();
-    const pangkatEl = document.getElementById('addAsnPangkat');
-    const pangkatInput = pangkatEl ? pangkatEl.value.trim() : '';
 
     if (!namaInput || !nipInput || !jabatanInput) {
         alert('Mohon lengkapi Nama, NIP, dan Jabatan!');
@@ -56,11 +239,8 @@ async function saveAsnMaster(event) {
 
     // Nama Pelaksana: HURUF KAPITAL
     const namaKapital = namaInput.toUpperCase();
-    
-    // Format Pangkat jika diisi (misal: Pembina IV.a)
-    const pangkatFormatted = formatPangkatGolongan(pangkatInput);
 
-    // Payload SESUAI HEADER SUPABASE (id - nama_pelaksana - nip - jabatan - created_at)
+    // Payload SESUAI HEADER SUPABASE: id - nama_pelaksana - nip - jabatan - created_at
     const payload = {
         nama_pelaksana: namaKapital,
         nip: nipInput,
@@ -70,26 +250,19 @@ async function saveAsnMaster(event) {
     try {
         const { data, error } = await supabaseClient
             .from('master_pelaksana')
-            .insert([payload])
-            .select();
+            .insert([payload]);
 
         if (error) throw error;
 
         alert('Data pelaksana berhasil disimpan!');
         document.getElementById('formAddAsn').reset();
-        
-        // Refresh tabel & dropdown pelaksana
         await loadAsnMasterData();
     } catch (err) {
         console.error('Gagal menyimpan data pelaksana:', err);
-        alert('Gagal menyimpan data pelaksana: ' + (err.message || err.error_description || 'Terjadi kesalahan pada Supabase'));
+        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error Supabase'));
     }
 }
 
-/**
- * 2. FUNGSI IMPORT DATA PELAKSANA DARI FILE CSV
- * Parsing CSV 4 Kolom: nama - nip - pangkat - jabatan
- */
 async function importAsnFromCsv() {
     const fileInput = document.getElementById('csvFileInput');
     const file = fileInput ? fileInput.files[0] : null;
@@ -109,24 +282,15 @@ async function importAsnFromCsv() {
             const trimmedLine = line.trim();
             if (!trimmedLine) return;
 
-            // Split kolom berdasarkan Koma (,) atau Titik Koma (;)
             const cols = trimmedLine.split(/[,;]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
 
-            // Abaikan baris header
             if (index === 0 && (cols[0].toLowerCase().includes('nama') || cols[1].toLowerCase().includes('nip'))) {
                 return;
             }
 
             if (cols.length >= 2) {
-                // 1. Nama: HURUF KAPITAL ALL
                 const nama = cols[0] ? cols[0].toUpperCase() : '';
                 const nip = cols[1] || '';
-                
-                // 2. Pangkat / Golongan: Format Khusus (misal: Pembina IV.a)
-                const rawPangkat = cols[2] || '';
-                const pangkatFormatted = formatPangkatGolongan(rawPangkat);
-
-                // 3. Jabatan
                 const jabatan = cols[3] || cols[2] || '-'; 
 
                 if (nama && nip) {
@@ -145,30 +309,24 @@ async function importAsnFromCsv() {
         }
 
         try {
-            const { data, error } = await supabaseClient
+            const { error } = await supabaseClient
                 .from('master_pelaksana')
-                .insert(dataToInsert)
-                .select();
+                .insert(dataToInsert);
 
             if (error) throw error;
 
             alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Supabase!`);
             fileInput.value = '';
-            
-            // Refresh tabel & dropdown pelaksana
             await loadAsnMasterData();
         } catch (err) {
             console.error('Error saat import CSV:', err);
-            alert('Gagal mengimpor CSV: ' + (err.message || 'Format data/koneksi bermasalah.'));
+            alert('Gagal mengimpor CSV: ' + err.message);
         }
     };
 
     reader.readAsText(file);
 }
 
-/**
- * 3. LOAD DATA MASTER PELAKSANA (FETCH FROM SUPABASE & POPULATE UI)
- */
 async function loadAsnMasterData() {
     try {
         const { data: pelaksanaList, error } = await supabaseClient
@@ -178,20 +336,15 @@ async function loadAsnMasterData() {
 
         if (error) throw error;
 
-        // Render ke Tabel Modal Master ASN
-        renderAsnTable(pelaksanaList || []);
-
-        // Render ke Dropdown Select Pelaksana Utama & Bendahara di Form SPPD
-        populateAsnDropdowns(pelaksanaList || []);
+        currentAsnList = pelaksanaList || [];
+        renderAsnTable(currentAsnList);
+        populateAsnDropdowns(currentAsnList);
 
     } catch (err) {
         console.error('Gagal mengambil data master pelaksana:', err);
     }
 }
 
-/**
- * Render data ke tabel modal #asnTableBody
- */
 function renderAsnTable(data) {
     const tbody = document.getElementById('asnTableBody');
     const totalCountEl = document.getElementById('totalAsnCount');
@@ -200,10 +353,7 @@ function renderAsnTable(data) {
     if (!tbody) return;
 
     if (data.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="3" class="p-4 text-center text-slate-400 italic">Belum ada data pelaksana tersimpan.</td>
-            </tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Belum ada data pelaksana tersimpan.</td></tr>`;
         return;
     }
 
@@ -215,7 +365,7 @@ function renderAsnTable(data) {
             </td>
             <td class="p-2.5 text-slate-600 font-medium">${escapeHtml(item.jabatan || '-')}</td>
             <td class="p-2.5 text-center">
-                <button type="button" onclick="deleteAsnMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold" title="Hapus Pelaksana">
+                <button type="button" onclick="deleteAsnMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </td>
@@ -223,9 +373,6 @@ function renderAsnTable(data) {
     `).join('');
 }
 
-/**
- * Mengisi Select Dropdown (#namaPelaksana & #selectBendahara)
- */
 function populateAsnDropdowns(data) {
     const selectPelaksana = document.getElementById('namaPelaksana');
     const selectBendahara = document.getElementById('selectBendahara');
@@ -241,9 +388,6 @@ function populateAsnDropdowns(data) {
     }
 }
 
-/**
- * Listener ketika opsi dropdown Pelaksana/Bendahara dipilih
- */
 function onNamaInputChanged(type, selectedNama) {
     if (type === 'Pelaksana') {
         const select = document.getElementById('namaPelaksana');
@@ -260,9 +404,6 @@ function onBendaharaSelected(selectedNama) {
     document.getElementById('nipBendahara').value = selectedOption ? (selectedOption.getAttribute('data-nip') || '') : '';
 }
 
-/**
- * 4. FUNGSI HAPUS PELAKSANA DARI SUPABASE
- */
 async function deleteAsnMaster(id) {
     if (!confirm('Apakah Anda yakin ingin menghapus pelaksana ini?')) return;
 
@@ -273,16 +414,12 @@ async function deleteAsnMaster(id) {
             .eq('id', id);
 
         if (error) throw error;
-
         await loadAsnMasterData();
     } catch (err) {
         alert('Gagal menghapus data: ' + err.message);
     }
 }
 
-/**
- * 5. FUNGSI FILTER SEARCH TABLE MODAL ASN
- */
 function filterAsnTable(keyword) {
     const filter = keyword.toUpperCase();
     const rows = document.querySelectorAll('#asnTableBody tr');
@@ -293,23 +430,6 @@ function filterAsnTable(keyword) {
     });
 }
 
-/**
- * 6. HELPER UNDUH TEMPLATE CSV
- */
-function downloadCsvTemplate() {
-    const csvContent = "data:text/csv;charset=utf-8,NAMA,NIP,PANGKAT,JABATAN\nPETRUS REMI;198501012010011001;Penata Muda III.a;Staf Umum\nMARIA GORETI;199002022015022002;Pembina IV.a;Kepala Seksi";
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "template_master_pelaksana.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-/**
- * HELPER MODAL ASN UTILITY
- */
 function openModalAsn() {
     const modal = document.getElementById('modalAsn');
     if (modal) {
@@ -326,9 +446,123 @@ function closeModalAsn() {
     }
 }
 
-/**
- * HELPER ESCAPE HTML (Mencegah XSS)
- */
+/* ====================================================================================
+ * 4. LOGIKA HITUNG PERJALANAN DINAS & HASIL
+ * ==================================================================================== */
+
+function calculateLamaHariFromDates() {
+    const tglMulai = document.getElementById('tglMulai')?.value;
+    const tglKembali = document.getElementById('tglKembali')?.value;
+    const lamaHariEl = document.getElementById('lamaHari');
+
+    if (tglMulai && tglKembali && lamaHariEl) {
+        const d1 = new Date(tglMulai);
+        const d2 = new Date(tglKembali);
+        const diffTime = d2.getTime() - d1.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24)) + 1;
+
+        if (diffDays > 0) {
+            lamaHariEl.value = diffDays;
+        } else {
+            lamaHariEl.value = 1;
+        }
+    }
+    calculateTotalBiaya();
+}
+
+function calculateTotalBiaya() {
+    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
+    const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
+    
+    // Hitung total orang (1 Pelaksana Utama + Jumlah Pengikut)
+    const pengikutContainer = document.getElementById('pengikutContainer');
+    const jumlahPengikut = pengikutContainer ? pengikutContainer.children.length : 0;
+    const totalOrang = 1 + jumlahPengikut;
+
+    const total = lamaHari * biayaPerOrang * totalOrang;
+
+    const totalBiayaEl = document.getElementById('totalBiayaFormatted');
+    const terbilangEl = document.getElementById('terbilang');
+
+    if (totalBiayaEl) {
+        totalBiayaEl.value = 'Rp ' + total.toLocaleString('id-ID');
+    }
+    if (terbilangEl) {
+        terbilangEl.value = total > 0 ? terbilangAngka(total) + ' Rupiah' : '';
+    }
+}
+
+function addPengikutRow() {
+    const container = document.getElementById('pengikutContainer');
+    if (!container) return;
+
+    const rowId = 'pengikut_' + Date.now();
+    const div = document.createElement('div');
+    div.id = rowId;
+    div.className = "grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 items-center";
+
+    let optionsHtml = '<option value="">-- Pilih Pengikut --</option>';
+    currentAsnList.forEach(item => {
+        optionsHtml += `<option value="${escapeHtml(item.nama_pelaksana)}">${escapeHtml(item.nama_pelaksana)}</option>`;
+    });
+
+    div.innerHTML = `
+        <div>
+            <select onchange="onPengikutSelected('${rowId}', this.value)" class="w-full p-2 text-xs border rounded bg-white uppercase-input">
+                ${optionsHtml}
+            </select>
+        </div>
+        <div>
+            <input type="text" id="${rowId}_nip" placeholder="NIP Pengikut" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
+        </div>
+        <div class="flex items-center gap-2">
+            <input type="text" id="${rowId}_jabatan" placeholder="Jabatan Pengikut" readonly class="w-full p-2 text-xs border rounded bg-slate-100">
+            <button type="button" onclick="removePengikutRow('${rowId}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+        </div>
+    `;
+
+    container.appendChild(div);
+    calculateTotalBiaya();
+}
+
+function onPengikutSelected(rowId, selectedNama) {
+    const asn = currentAsnList.find(a => a.nama_pelaksana === selectedNama);
+    const nipEl = document.getElementById(`${rowId}_nip`);
+    const jabatanEl = document.getElementById(`${rowId}_jabatan`);
+
+    if (nipEl) nipEl.value = asn ? asn.nip : '';
+    if (jabatanEl) jabatanEl.value = asn ? asn.jabatan : '';
+}
+
+function removePengikutRow(rowId) {
+    const el = document.getElementById(rowId);
+    if (el) el.remove();
+    calculateTotalBiaya();
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    alert('Dokumen SPPD Berhasil Disimpan!');
+    switchStep(3);
+}
+
+/* ====================================================================================
+ * HELPER FUNCTIONS
+ * ==================================================================================== */
+
+function downloadCsvTemplate() {
+    const csvContent = "data:text/csv;charset=utf-8,NAMA,NIP,PANGKAT,JABATAN\nPETRUS REMI;198501012010011001;Penata Muda III.a;Staf Umum\nMARIA GORETI;199002022015022002;Pembina IV.a;Kepala Seksi";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "template_master_pelaksana.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function escapeHtml(text) {
     if (!text) return '';
     return String(text)
@@ -337,4 +571,17 @@ function escapeHtml(text) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function terbilangAngka(angka) {
+    const bil = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    if (angka < 12) return bil[angka];
+    else if (angka < 20) return terbilangAngka(angka - 10) + " Belas";
+    else if (angka < 100) return terbilangAngka(Math.floor(angka / 10)) + " Puluh " + terbilangAngka(angka % 10);
+    else if (angka < 200) return "Seratus " + terbilangAngka(angka - 100);
+    else if (angka < 1000) return terbilangAngka(Math.floor(angka / 100)) + " Ratus " + terbilangAngka(angka % 100);
+    else if (angka < 2000) return "Seribu " + terbilangAngka(angka - 1000);
+    else if (angka < 1000000) return terbilangAngka(Math.floor(angka / 1000)) + " Ribu " + terbilangAngka(angka % 1000);
+    else if (angka < 1000000000) return terbilangAngka(Math.floor(angka / 1000000)) + " Juta " + terbilangAngka(angka % 1000000);
+    return "";
 }
