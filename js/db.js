@@ -1,7 +1,14 @@
-/**
- * js/db.js - Layer Akses & Manajemen Data Terpusat (Offline-First)
- * Aplikasi e-SPPD & Rekapitulasi Perdin Kecamatan Tabundung
- */
+/*
+  ====================================================================================
+  Nama Aplikasi : Sistem e - SPPD Terpadu - Kecamatan Tabundung
+  Hosting       : GitHub Pages (Murni Single Page Application / SPA)
+  Backend / DB  : Supabase REST API & Supabase Storage
+  Nama Halaman  : js/db.js
+  Fungsi Halaman: Modul terpusat manajemen database offline-first (Dexie IndexedDB),
+                  sinkronisasi otomatis ke Supabase REST API, serta penyimpan data 
+                  Master ASN, Master Sub Kegiatan (SK), dan Riwayat Perdin.
+  ====================================================================================
+*/
 
 const SUPABASE_URL = 'https://offeebouiohweqlgyccx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mZmVlYm91aW9od2VxbGd5Y2N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMzEwOTYsImV4cCI6MjEwNjkwNzA5Nn0.IuJLePe6ZvPABvuSFVpwFjiM3TGiIH_4zah8fUvEfbw';
@@ -14,11 +21,23 @@ if (typeof window !== 'undefined' && window.supabase && window.supabase.createCl
 let localDexieDB = null;
 if (typeof window !== 'undefined' && window.Dexie) {
     localDexieDB = new window.Dexie('PerdinTabundungDB');
-    localDexieDB.version(4).stores({
-        riwayat_perdin: 'id, no_sppd, tanggal, tujuan, pelaksana, sub_kegiatan, jumlah_oh, foto_bukti, sinkron',
+    localDexieDB.version(6).stores({
+        riwayat_perdin: 'id, no_sppd, tanggal, tujuan, pelaksana, sub_kegiatan, jumlah_oh, sinkron',
         master_pelaksana: '++id, nip, nama_pelaksana, pangkat, jabatan',
         master_sk: 'kode, nama, quota'
     });
+}
+
+// Poin 3: Helper Formatting Golongan Romawi Kapital (misal Iii.a -> III.a)
+function formatGolonganRomawi(golStr) {
+    if (!golStr) return '-';
+    return golStr
+        .replace(/\bIv\b/gi, 'IV')
+        .replace(/\bIii\b/gi, 'III')
+        .replace(/\bIi\b/gi, 'II')
+        .replace(/\bI\b/gi, 'I')
+        .replace(/\/([a-e])/g, '/$1')
+        .replace(/\.([a-e])/g, '.$1');
 }
 
 const AppDB = {
@@ -47,7 +66,7 @@ const AppDB = {
                         }
                     }
                 }
-                console.log('[Sync Engine] Sinkronisasi selesai!');
+                console.log('[Sync Engine] Sinkronisasi data offline ke online berhasil!');
             }
         } catch (err) {
             console.error('[Sync Engine Error]', err);
@@ -55,7 +74,8 @@ const AppDB = {
     },
 
     // ----------------------------------------------------
-    // MANAJEMEN MASTER PELAKSANA / ASN (HURUF KAPITAL UNTUK NAMA)
+    // MANAJEMEN MASTER PELAKSANA / ASN
+    // Poin 4: Nama Pelaksana Disimpan & Ditampilkan Kapital
     // ----------------------------------------------------
     async getMasterAsn() {
         let asnList = [];
@@ -73,7 +93,7 @@ const AppDB = {
                         nama: item.nama_pelaksana ? item.nama_pelaksana.toUpperCase() : '',
                         nip: item.nip,
                         jabatan: item.jabatan,
-                        pangkat: item.pangkat || '-'
+                        pangkat: formatGolonganRomawi(item.pangkat || '-')
                     }));
                     localStorage.setItem('sppd_master_asn', JSON.stringify(asnList));
                     if (this.dexie) {
@@ -90,7 +110,7 @@ const AppDB = {
                     nama: item.nama_pelaksana ? item.nama_pelaksana.toUpperCase() : '',
                     nip: item.nip,
                     jabatan: item.jabatan,
-                    pangkat: item.pangkat || '-'
+                    pangkat: formatGolonganRomawi(item.pangkat || '-')
                 }));
             }
         }
@@ -103,13 +123,13 @@ const AppDB = {
             nama_pelaksana: asnObj.nama ? asnObj.nama.toUpperCase() : '',
             nip: asnObj.nip,
             jabatan: asnObj.jabatan,
-            pangkat: asnObj.pangkat || '-'
+            pangkat: formatGolonganRomawi(asnObj.pangkat || '-')
         };
 
         const currentList = JSON.parse(localStorage.getItem('sppd_master_asn') || '[]');
         const existingIdx = currentList.findIndex(a => a.nip === asnObj.nip);
-        if (existingIdx >= 0) currentList[existingIdx] = { ...asnObj, nama: payload.nama_pelaksana };
-        else currentList.push({ ...asnObj, nama: payload.nama_pelaksana });
+        if (existingIdx >= 0) currentList[existingIdx] = { ...asnObj, nama: payload.nama_pelaksana, pangkat: payload.pangkat };
+        else currentList.push({ ...asnObj, nama: payload.nama_pelaksana, pangkat: payload.pangkat });
 
         localStorage.setItem('sppd_master_asn', JSON.stringify(currentList));
         if (this.dexie) await this.dexie.master_pelaksana.put(payload);
@@ -127,12 +147,13 @@ const AppDB = {
             nama_pelaksana: a.nama ? a.nama.toUpperCase() : '',
             nip: a.nip,
             jabatan: a.jabatan,
-            pangkat: a.pangkat || '-'
+            pangkat: formatGolonganRomawi(a.pangkat || '-')
         }));
 
         const formattedList = asnArray.map(a => ({
             ...a,
-            nama: a.nama ? a.nama.toUpperCase() : ''
+            nama: a.nama ? a.nama.toUpperCase() : '',
+            pangkat: formatGolonganRomawi(a.pangkat || '-')
         }));
 
         localStorage.setItem('sppd_master_asn', JSON.stringify(formattedList));
@@ -184,7 +205,7 @@ const AppDB = {
                         await this.dexie.master_sk.bulkPut(data.map(i => ({ kode: i.kode, nama: i.nama, quota: i.quota || 50 })));
                     }
                 }
-            } catch (e) { console.warn("Fetch Supabase gagal, menggunakan cache lokal", e); }
+            } catch (e) { console.warn("Fetch Supabase SK gagal, gunakan cache lokal", e); }
         } else if (skList.length === 0 && this.dexie) {
             skList = await this.dexie.master_sk.toArray();
         }
@@ -207,7 +228,7 @@ const AppDB = {
         if (this.isOnline() && this.supabase) {
             try {
                 await this.supabase.from('master_sk').upsert([payload], { onConflict: 'kode' });
-            } catch (err) { console.error("Gagal simpan ke Supabase:", err); }
+            } catch (err) { console.error("Gagal simpan SK ke Supabase:", err); }
         }
 
         return true;
@@ -263,7 +284,6 @@ const AppDB = {
                 pelaksana: record.namaPelaksana,
                 sub_kegiatan: record.kodeSK || '7.01.01.2.01.0003',
                 jumlah_oh: (1 + (record.pengikut?.length || 0)) * (record.lamaHari || 1),
-                foto_bukti: '',
                 sinkron: isOnlineNow ? 1 : 0
             });
         }
