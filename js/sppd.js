@@ -1,9 +1,9 @@
 /* ====================================================================================
  * Nama Modul  : Modul Master Pelaksana & SPPD - Kecamatan Tabundung
  * Deskripsi   : Integrasi Form SPPD, Stepper Navigation, Master SK, dan Master Pelaksana
- * Skema Tabel : 
- *  - master_pelaksana (id, nama_pelaksana, nip, jabatan, created_at)
- *  - master_sk (id, kode_sk, nama_sk, quota_oh, created_at)
+ * Skema Tabel Supabase: 
+ *  - master_pelaksana : id - nama_pelaksana - nip - jabatan - created_at
+ *  - master_sk        : id - kode - nama - quota - created_at
  * ==================================================================================== */
 
 // Global state untuk menyimpan data lokal / terisi
@@ -73,7 +73,7 @@ function syncTujuanPerdin(val) {
 }
 
 /* ====================================================================================
- * 2. KELOLA MASTER SUB KEGIATAN (SK) MODAL & LOGIC
+ * 2. KELOLA MASTER SUB KEGIATAN (master_sk: id - kode - nama - quota)
  * ==================================================================================== */
 
 async function loadMasterSKData() {
@@ -81,7 +81,7 @@ async function loadMasterSKData() {
         const { data: skList, error } = await supabaseClient
             .from('master_sk')
             .select('*')
-            .order('kode_sk', { ascending: true });
+            .order('kode', { ascending: true });
 
         if (error) throw error;
 
@@ -90,7 +90,7 @@ async function loadMasterSKData() {
         renderSKTable(currentSKList);
 
     } catch (err) {
-        console.warn('Gagal memuat master_sk dari Supabase (menggunakan fallback jika ada):', err.message);
+        console.warn('Gagal memuat data:', err.message);
     }
 }
 
@@ -99,7 +99,7 @@ function renderSKDropdown(data) {
     if (!selectSK) return;
 
     selectSK.innerHTML = '<option value="">Pilih Sub Kegiatan</option>' +
-        data.map(item => `<option value="${escapeHtml(item.kode_sk)}">${escapeHtml(item.kode_sk)} - ${escapeHtml(item.nama_sk)}</option>`).join('');
+        data.map(item => `<option value="${escapeHtml(item.kode)}">${escapeHtml(item.kode)} - ${escapeHtml(item.nama)}</option>`).join('');
 }
 
 function renderSKTable(data) {
@@ -113,11 +113,11 @@ function renderSKTable(data) {
 
     tbody.innerHTML = data.map(item => `
         <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="p-2.5 font-mono font-bold text-gov-800">${escapeHtml(item.kode_sk)}</td>
-            <td class="p-2.5 font-medium text-slate-700">${escapeHtml(item.nama_sk)}</td>
-            <td class="p-2.5 text-center font-bold text-slate-800">${item.quota_oh || 0} OH</td>
+            <td class="p-2.5 font-mono font-bold text-gov-800">${escapeHtml(item.kode)}</td>
+            <td class="p-2.5 font-medium text-slate-700">${escapeHtml(item.nama)}</td>
+            <td class="p-2.5 text-center font-bold text-slate-800">${item.quota || 0} OH</td>
             <td class="p-2.5 text-center">
-                <button type="button" onclick="deleteSKMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 font-bold p-1">
+                <button type="button" onclick="deleteSKMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 font-bold p-1" title="Hapus SK">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </td>
@@ -127,28 +127,41 @@ function renderSKTable(data) {
 
 async function saveNewSK(event) {
     event.preventDefault();
-    const kode = document.getElementById('newKodeSK').value.trim();
-    const nama = document.getElementById('newNamaSK').value.trim();
-    const quota = parseInt(document.getElementById('newQuotaSK').value) || 0;
+    const kodeVal = document.getElementById('newKodeSK').value.trim();
+    const namaVal = document.getElementById('newNamaSK').value.trim();
+    const quotaVal = parseInt(document.getElementById('newQuotaSK').value) || 0;
 
-    if (!kode || !nama) {
+    if (!kodeVal || !namaVal) {
         alert('Kode SK dan Nama SK wajib diisi!');
         return;
     }
 
+    // Payload SESUAI HEADER SUPABASE: id - kode - nama - quota - created_at
+    const payload = {
+        kode: kodeVal,
+        nama: namaVal,
+        quota: quotaVal
+    };
+
     try {
-        const { error } = await supabaseClient
+        const { data, error } = await supabaseClient
             .from('master_sk')
-            .insert([{ kode_sk: kode, nama_sk: nama, quota_oh: quota }]);
+            .insert([payload]);
 
         if (error) throw error;
 
         alert('Sub Kegiatan berhasil disimpan!');
         closeModalSK();
+        
+        // Reset form modal SK
+        document.getElementById('newKodeSK').value = '';
+        document.getElementById('newNamaSK').value = '';
+        document.getElementById('newQuotaSK').value = '50';
+
         await loadMasterSKData();
     } catch (err) {
         console.error('Gagal menyimpan SK:', err);
-        alert('Gagal menyimpan Sub Kegiatan: ' + err.message);
+        alert('Gagal menyimpan Sub Kegiatan: ' + (err.message || 'Error Supabase'));
     }
 }
 
@@ -204,7 +217,7 @@ function updateSKQuotaInfo() {
 }
 
 /* ====================================================================================
- * 3. FORMATTER PANGKAT & KELOLA MASTER PELAKSANA ASN (MODAL & SUPABASE)
+ * 3. KELOLA MASTER PELAKSANA ASN (master_pelaksana: id - nama_pelaksana - nip - jabatan)
  * ==================================================================================== */
 
 function formatPangkatGolongan(text) {
@@ -259,7 +272,7 @@ async function saveAsnMaster(event) {
         await loadAsnMasterData();
     } catch (err) {
         console.error('Gagal menyimpan data pelaksana:', err);
-        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error Supabase'));
+        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error database'));
     }
 }
 
@@ -315,7 +328,7 @@ async function importAsnFromCsv() {
 
             if (error) throw error;
 
-            alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Supabase!`);
+            alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Database`);
             fileInput.value = '';
             await loadAsnMasterData();
         } catch (err) {
