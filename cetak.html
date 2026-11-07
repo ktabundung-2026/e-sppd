@@ -648,9 +648,9 @@ function renderDocument(record) {
     document.getElementById('sppdTransport').innerText = ': ' + (record.alatAngkutan || '-');
     document.getElementById('sppdBerangkat').innerText = record.tempatBerangkat || 'Malahar';
     document.getElementById('sppdTujuan').innerText = record.tempatTujuan || '-';
-    document.getElementById('sppdLama').innerText = `: ${record.lamaHari || 1} Hari`;
-    document.getElementById('sppdTglMulai').innerText = ': ' + formatDate(record.tglMulai);
-    document.getElementById('sppdTglSelesai').innerText = ': ' + formatDate(record.tglSelesai || record.tglKembali);
+    document.getElementById('sppdLama').innerText = record.lamaHari || 1 'Hari';
+    document.getElementById('sppdTglMulai').innerText = formatDate(record.tglMulai);
+    document.getElementById('sppdTglSelesai').innerText = formatDate(record.tglSelesai || record.tglKembali);
     document.getElementById('sppdTglSurat').innerText = formatDate(record.tglSurat || record.tglMulai);
     document.getElementById('sppdCamatNama').innerText = defaultCamatNama;
     document.getElementById('sppdCamatPangkat').innerText = defaultCamatPangkat;
