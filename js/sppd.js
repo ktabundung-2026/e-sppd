@@ -4,9 +4,9 @@
   Hosting       : GitHub Pages (Murni Single Page Application / SPA)
   Backend / DB  : Supabase REST API & Supabase Storage
   Nama Halaman  : js/sppd.js
-  Fungsi Halaman: Logika pemrosesan form bertahap (Step 1 s.d. 3), pengisian otomatis 
-                  Master ASN, pembuatan baris Pengikut, Rute Perjalanan II/III/IV, 
-                  Sekretaris Camat, serta penyimpanan dan pengalihan ke cetak.html.
+  Fungsi Halaman: Logika pemrosesan form, perhitungan otomatis Lama Hari dari selisih 
+                  tanggal, autofill ASN (NIP, Pangkat, Jabatan), perbaikan mapping 
+                  data tertukar, serta penyimpanan dan pengalihan ke cetak.html.
   ====================================================================================
 */
 
@@ -40,9 +40,31 @@ function switchTab(tabId) {
 }
 
 // ----------------------------------------------------
-// LOAD DATA MASTER
-// Poin 4: Konsolidasi Nama ASN Kapital di Frontend
-// Poin 10: Memuat Sekretaris Camat ke Dropdown Terpisah
+// PERHITUNGAN OTOMATIS LAMA HARI PERJALANAN
+// ----------------------------------------------------
+function hitungLamaHariOtomatis() {
+    const tglMulaiVal = document.getElementById('tglMulai').value;
+    const tglKembaliVal = document.getElementById('tglKembali').value;
+    const inputLamaHari = document.getElementById('lamaHari');
+
+    if (tglMulaiVal && tglKembaliVal) {
+        const dMulai = new Date(tglMulaiVal);
+        const dKembali = new Date(tglKembaliVal);
+
+        if (dKembali >= dMulai) {
+            const diffTime = Math.abs(dKembali - dMulai);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
+            inputLamaHari.value = diffDays;
+        } else {
+            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai Berangkat!");
+            document.getElementById('tglKembali').value = tglMulaiVal;
+            inputLamaHari.value = 1;
+        }
+    }
+}
+
+// ----------------------------------------------------
+// LOAD DATA MASTER & PERBAIKAN PANGKAT VS JABATAN
 // ----------------------------------------------------
 async function loadInitialMasterData() {
     if (window.AppDB) {
@@ -78,7 +100,6 @@ function populateASNDropdowns() {
     if (selectSekcam) selectSekcam.innerHTML = '<option value="">-- Pilih Sekretaris Camat --</option>';
 
     currentMasterASN.forEach(asn => {
-        // Poin 4: Nama Kapital
         const namaUpper = asn.nama ? asn.nama.toUpperCase() : '';
         
         // Option Pelaksana Utama
@@ -100,7 +121,7 @@ function populateASNDropdowns() {
             selectCamat.appendChild(optC);
         }
 
-        // Poin 10: Option Sekretaris Camat
+        // Option Sekretaris Camat
         if (selectSekcam) {
             const optS = document.createElement('option');
             optS.value = JSON.stringify(asn);
@@ -113,14 +134,23 @@ function populateASNDropdowns() {
     });
 }
 
+// ----------------------------------------------------
+// AUTOFILL PELAKSANA UTAMA (NIP, PANGKAT, JABATAN)
+// PERBAIKAN: Pemetaan Pangkat & Jabatan Terpasang Benar
+// ----------------------------------------------------
 function autoFillPelaksanaUtama() {
     const nipVal = document.getElementById('select-pelaksana-utama').value;
     const matched = currentMasterASN.find(a => a.nip === nipVal);
+
     if (matched) {
-        document.getElementById('namaPelaksana').value = matched.nama.toUpperCase();
-        document.getElementById('nipPelaksana').value = matched.nip;
-        document.getElementById('pangkatPelaksana').value = matched.pangkat;
-        document.getElementById('jabatanPelaksana').value = matched.jabatan;
+        document.getElementById('nipPelaksana').value = matched.nip || '-';
+        // Dipastikan Pangkat mengisi Pangkat, Jabatan mengisi Jabatan
+        document.getElementById('pangkatPelaksana').value = matched.pangkat || '-';
+        document.getElementById('jabatanPelaksana').value = matched.jabatan || '-';
+    } else {
+        document.getElementById('nipPelaksana').value = '';
+        document.getElementById('pangkatPelaksana').value = '';
+        document.getElementById('jabatanPelaksana').value = '';
     }
 }
 
@@ -149,7 +179,7 @@ function tambahRowPengikut() {
             <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nama uppercase" placeholder="NAMA PENGIKUT">
         </td>
         <td class="p-2">
-            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nip" placeholder="NIP">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nip font-mono" placeholder="NIP">
         </td>
         <td class="p-2 space-y-1">
             <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-pangkat" placeholder="Pangkat / Gol">
@@ -198,7 +228,7 @@ function renderPengikutTable() {
 }
 
 // ----------------------------------------------------
-// LANJUT STEP 2 & SIMPAN PERDIN
+// NAVIGASI PENERBITAN & SIMPAN DOKUMEN SPPD
 // ----------------------------------------------------
 function lanjutKeStep2() {
     const formStep1 = document.getElementById('form-step1');
@@ -215,6 +245,10 @@ async function simpanDanCetakPerdin() {
         formStep2.reportValidity();
         return;
     }
+
+    const nipUtama = document.getElementById('select-pelaksana-utama').value;
+    const matchedPelaksana = currentMasterASN.find(a => a.nip === nipUtama);
+    const namaUtama = matchedPelaksana ? matchedPelaksana.nama.toUpperCase() : '';
 
     // Ambil Data Pengikut
     const pengikutList = [];
@@ -239,13 +273,14 @@ async function simpanDanCetakPerdin() {
         noSPPD: document.getElementById('noSPPD').value,
         kodeSK: document.getElementById('kodeSK').value,
         tglMulai: document.getElementById('tglMulai').value,
+        tglKembali: document.getElementById('tglKembali').value,
         lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
         maksudPerdin: document.getElementById('maksudPerdin').value,
         tingkatanSPPD: document.getElementById('tingkatanSPPD').value,
         alatAngkut: document.getElementById('alatAngkut').value,
         
-        // Pelaksana Utama
-        namaPelaksana: document.getElementById('namaPelaksana').value.toUpperCase(),
+        // Pelaksana Utama (Secara konsisten disimpan tepat sesuai atributnya)
+        namaPelaksana: namaUtama,
         nipPelaksana: document.getElementById('nipPelaksana').value,
         pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
         jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
@@ -284,12 +319,11 @@ async function simpanDanCetakPerdin() {
         await window.AppDB.saveRecord(recordData);
     }
 
-    // Poin 4: Buka Halaman Cetak Terpadu
     window.location.href = `cetak.html?id=${recordData.id}`;
 }
 
 // ----------------------------------------------------
-// TABEL RIWAYAT PERDIN (STEP 3)
+// TABEL RIWAYAT PERDIN DITERBITKAN
 // ----------------------------------------------------
 async function renderRiwayatTable() {
     const tbody = document.getElementById('tbody-riwayat');
@@ -300,8 +334,8 @@ async function renderRiwayatTable() {
 
     const searchKeyword = (document.getElementById('search-riwayat')?.value || '').toLowerCase();
     const filtered = records.filter(r => 
-        r.namaPelaksana.toLowerCase().includes(searchKeyword) ||
-        r.noSPPD.toLowerCase().includes(searchKeyword)
+        (r.namaPelaksana && r.namaPelaksana.toLowerCase().includes(searchKeyword)) ||
+        (r.noSPPD && r.noSPPD.toLowerCase().includes(searchKeyword))
     );
 
     tbody.innerHTML = '';
@@ -322,7 +356,7 @@ async function renderRiwayatTable() {
             <td class="p-3 font-semibold text-slate-800 uppercase">${r.namaPelaksana}</td>
             <td class="p-3">
                 <div>${r.tempatTujuan}</div>
-                <div class="text-[11px] text-slate-500">${r.tglMulai} (${r.lamaHari} Hari)</div>
+                <div class="text-[11px] text-slate-500">${r.tglMulai} s/d ${r.tglKembali || r.tglMulai} (${r.lamaHari} Hari)</div>
             </td>
             <td class="p-3 font-mono text-[11px]">${r.kodeSK || '-'}</td>
             <td class="p-3 text-center">
@@ -348,8 +382,9 @@ function renderMasterTables() {
             tr.className = 'hover:bg-slate-50';
             tr.innerHTML = `
                 <td class="p-2 font-bold uppercase text-slate-800">${asn.nama}</td>
-                <td class="p-2 text-slate-600">${asn.nip}</td>
+                <td class="p-2 font-mono text-slate-600">${asn.nip}</td>
                 <td class="p-2">${asn.pangkat}</td>
+                <td class="p-2 text-slate-700">${asn.jabatan}</td>
                 <td class="p-2 text-center">
                     <button onclick="hapusASN('${asn.nip}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
                 </td>
