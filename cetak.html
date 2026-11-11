@@ -280,11 +280,10 @@
 </head>
 <body class="bg-slate-700 text-slate-900 min-h-screen">
 
-    <!-- HEADER / NAVIGATION BAR DENGAN LOGO KECAMATAN & MENU KEMBALI -->
+    <!-- HEADER / NAVIGATION BAR -->
     <header class="no-print bg-gov-900 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center justify-between py-2 md:h-16 gap-2">
-                <!-- LOGO DAN JUDUL IDENTITAS KECAMATAN -->
                 <div class="flex items-center space-x-3 shrink-0">
                     <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" 
                          alt="Logo Pemda Sumba Timur" class="h-10 w-auto object-contain">
@@ -294,7 +293,6 @@
                     </div>
                 </div>
 
-                <!-- SUB NAVIGASI ATAU TAUTAN PINTAS PER DOKUMEN -->
                 <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs">
                     <a href="#bagian-1" class="px-2.5 py-1 bg-gov-700 hover:bg-gov-600 rounded font-medium transition text-white">1. Surat Tugas</a>
                     <a href="#bagian-2" class="px-2.5 py-1 bg-gov-700 hover:bg-gov-600 rounded font-medium transition text-white">2. SPPD Depan</a>
@@ -304,7 +302,6 @@
                     <a href="#bagian-6" class="px-2.5 py-1 bg-gov-700 hover:bg-gov-600 rounded font-medium transition text-white">6. Kwitansi</a>
                 </div>
 
-                <!-- AKSI TOMBOL KEMBALI & CETAK DOKUMEN -->
                 <div class="flex items-center space-x-2 shrink-0">
                     <a href="sppd.html" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm border border-amber-500">
                         <i class="fa-solid fa-arrow-left"></i> Kembali ke Modul e-SPPD
@@ -353,9 +350,7 @@
             <tr>
                 <td class="col-label">Kepada</td>
                 <td class="col-colon">:</td>
-                <td id="st-container-pegawai">
-                    <!-- PEGAWAI DITERBITKAN SECARA DINAMIS VIA SCRIPT -->
-                </td>
+                <td id="st-container-pegawai"></td>
             </tr>
         </table>
 
@@ -523,9 +518,10 @@
         </div>
     </div>
 
-    <!-- BAGIAN 3: SPPD BELAKANG ISI -->
+    <!-- BAGIAN 3: SPPD BELAKANG ISI (UTUH 7 BARIS UTAMA) -->
     <div id="bagian-3" class="page sppd-bisi-container">
         <table class="sppd-bisi-table">
+            <!-- BARIS 1: HEADER SPPD -->
             <tr>
                 <td class="sppd-bisi-col-half"></td>
                 <td class="sppd-bisi-col-half">
@@ -557,6 +553,7 @@
                 </td>
             </tr>
 
+            <!-- BARIS 2: RUTE I (UTAMA) -->
             <tr>
                 <td class="sppd-bisi-col-half">
                     <table class="sppd-bisi-inner-table">
@@ -583,6 +580,61 @@
                 </td>
             </tr>
 
+            <!-- BARIS 3: RUTE II (OPSIONAL - DATA TEKS DINAMIS) -->
+            <tr>
+                <td class="sppd-bisi-col-half">
+                    <table class="sppd-bisi-inner-table">
+                        <tr><td style="width: 30%;">II. Tiba di</td><td style="width: 5%;">:</td><td style="width: 65%;"><span id="bisi_rute2_tibaDi">...........................................</span></td></tr>
+                        <tr><td style="font-size: 9.5pt;">Pada Tanggal</td><td>:</td><td><span id="bisi_rute2_tglTiba">...........................................</span></td></tr>
+                    </table>
+                    <div class="sppd-bisi-route-signature-box">
+                        <div class="sppd-bisi-route-signature-name">
+                            ( <span id="bisi_rute2_ttd_nama1">...........................................</span> )
+                        </div>
+                    </div>
+                </td>
+                <td class="sppd-bisi-col-half">
+                    <table class="sppd-bisi-inner-table">
+                        <tr><td style="width: 35%;">Berangkat dari</td><td style="width: 5%;">:</td><td style="width: 60%;"><span id="bisi_rute2_berangkatDari">...........................................</span></td></tr>
+                        <tr><td>Ke</td><td>:</td><td><span id="bisi_rute2_ke">...........................................</span></td></tr>
+                        <tr><td>Pada Tanggal</td><td>:</td><td><span id="bisi_rute2_tglBerangkat">...........................................</span></td></tr>
+                    </table>
+                    <div class="sppd-bisi-route-signature-box">
+                        <div class="sppd-bisi-route-signature-name">
+                            ( <span id="bisi_rute2_ttd_nama2">...........................................</span> )
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- BARIS 4: RUTE III (OPSIONAL - DATA TEKS DINAMIS) -->
+            <tr>
+                <td class="sppd-bisi-col-half">
+                    <table class="sppd-bisi-inner-table">
+                        <tr><td style="width: 30%;">III. Tiba di</td><td style="width: 5%;">:</td><td style="width: 65%;"><span id="bisi_rute3_tibaDi">...........................................</span></td></tr>
+                        <tr><td style="font-size: 9.5pt;">Pada Tanggal</td><td>:</td><td><span id="bisi_rute3_tglTiba">...........................................</span></td></tr>
+                    </table>
+                    <div class="sppd-bisi-route-signature-box">
+                        <div class="sppd-bisi-route-signature-name">
+                            ( <span id="bisi_rute3_ttd_nama1">...........................................</span> )
+                        </div>
+                    </div>
+                </td>
+                <td class="sppd-bisi-col-half">
+                    <table class="sppd-bisi-inner-table">
+                        <tr><td style="width: 35%;">Berangkat dari</td><td style="width: 5%;">:</td><td style="width: 60%;"><span id="bisi_rute3_berangkatDari">...........................................</span></td></tr>
+                        <tr><td>Ke</td><td>:</td><td><span id="bisi_rute3_ke">...........................................</span></td></tr>
+                        <tr><td>Pada Tanggal</td><td>:</td><td><span id="bisi_rute3_tglBerangkat">...........................................</span></td></tr>
+                    </table>
+                    <div class="sppd-bisi-route-signature-box">
+                        <div class="sppd-bisi-route-signature-name">
+                            ( <span id="bisi_rute3_ttd_nama2">...........................................</span> )
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- BARIS 5: PENGESAHAN KEMBALI IV -->
             <tr>
                 <td class="sppd-bisi-col-half"></td>
                 <td class="sppd-bisi-col-half" style="padding: 6px 8px;">
@@ -603,6 +655,7 @@
                 </td>
             </tr>
 
+            <!-- BARIS 6: CATATAN LAIN-LAIN -->
             <tr>
                 <td colspan="2" class="sppd-bisi-catatan-box">
                     <span style="font-weight: bold;">Catatan Lain-lain :</span>
@@ -610,6 +663,7 @@
                 </td>
             </tr>
 
+            <!-- BARIS 7: PERHATIAN -->
             <tr>
                 <td colspan="2" class="sppd-bisi-perhatian-cell">
                     <span class="sppd-bisi-perhatian-title">PERHATIAN:</span> Pejabat yang berwenang menerbitkan SPPD Pegawai yang melakukan perjalanan dinas para pejabat yang mengesahkan tanggal berangkat/tiba serta bendaharawan bertanggungjawab berdasarkan peraturan-peraturan keuangan negara apabila negara mendapat rugi akibat kesalahan, kealpaannya.
@@ -758,7 +812,6 @@
 
     <!-- BAGIAN 5: LAPORAN HASIL PERJALANAN DINAS -->
     <div id="bagian-5" class="page">
-        <!-- KOP SURAT RESMI -->
         <div class="flex items-center justify-between border-kop-double pb-2 mb-4">
             <img src="https://offeebouiohweqlgyccx.supabase.co/storage/v1/object/public/image/logo_st.png" alt="Logo ST" class="h-20 w-auto object-contain">
             <div class="text-center flex-1 px-2">
@@ -773,7 +826,6 @@
             <h1 class="text-base font-bold underline uppercase tracking-wide">LAPORAN HASIL PERJALANAN DINAS</h1>
         </div>
 
-        <!-- DETAIL PETUGAS & MAKSUD PERDIN -->
         <table class="content-table mb-4">
             <tr>
                 <td class="col-label">1. Dasar Pelaksanaan</td>
@@ -798,13 +850,10 @@
             <tr>
                 <td class="col-label">5. Pelaksana Tugas</td>
                 <td class="col-colon">:</td>
-                <td id="lap-container-pelaksana">
-                    <!-- PEGAWAI PELAKSANA & PENGIKUT -->
-                </td>
+                <td id="lap-container-pelaksana"></td>
             </tr>
         </table>
 
-        <!-- RINCIAN HASIL YANG DICAPAI -->
         <div class="mb-4 text-xs leading-relaxed">
             <p class="font-bold uppercase mb-1">6. Hasil Yang Dicapai / Laporan Ringkas :</p>
             <div id="lap-isiHasil" class="p-3 border border-slate-300 rounded text-justify min-h-[220px] whitespace-pre-line bg-slate-50/50">
@@ -816,7 +865,6 @@
             <p>Demikian laporan hasil perjalanan dinas ini dibuat untuk dapat dipergunakan sebagaimana mestinya.</p>
         </div>
 
-        <!-- TANDA TANGAN PELAKSANA PERDIN -->
         <div class="flex justify-end mt-8">
             <div class="w-72 text-center text-xs leading-normal">
                 <p>Dikeluarkan di : <span id="lap-ttd-tempat">Tabundung</span></p>
@@ -1012,10 +1060,7 @@
             const matchedSK = skList.find(s => s.kode === recordData.kodeSK);
             const namaSubKegiatan = matchedSK ? matchedSK.nama : "Penyelenggaraan Urusan Pemerintahan Umum";
 
-            // Normalisasi Maksud Perjalanan Dinas (Fallback Lengkap)
             const maksudDinamis = recordData.maksudTujuan || recordData.maksudPerdin || recordData.maksud || recordData.maksudPerjalanan || '-';
-
-            // Normalisasi Pangkat Pelaksana Utama (Fallback Lengkap)
             const pangkatDinamis = recordData.pangkatPelaksana || recordData.pangkat || recordData.golongan || '-';
 
             // ---------------------------------------------
@@ -1029,7 +1074,6 @@
                 document.getElementById('st-tglDikeluarkan').textContent = recordData.tglMulai || '-';
                 document.getElementById('st-tempatDikeluarkan').textContent = recordData.tempatBerangkat || 'Tabundung';
                 
-                // Susun Tim Lengkap (Pelaksana Utama + Pengikut)
                 const timLengkap = [
                     {
                         nama: recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-',
@@ -1185,34 +1229,91 @@
             renderRincianTabel(timKwitansi);
         });
 
-        // FUNGSI POPULASI SPPD BELAKANG ISI (BAGIAN 3)
+        // FUNGSI POPULASI SPPD BELAKANG ISI (OPSIONAL TANPA MENGHILANGKAN BARIS)
         function populateSPPDBelakangIsi(recordData) {
             if (!recordData) return;
+
+            const defaultDots = "...........................................";
 
             if (document.getElementById('bisi_noSPPD')) document.getElementById('bisi_noSPPD').textContent = recordData.noSPPD || '-';
             if (document.getElementById('bisi_tempatBerangkat')) document.getElementById('bisi_tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
             if (document.getElementById('bisi_tglMulai')) document.getElementById('bisi_tglMulai').textContent = recordData.tglMulai || '-';
             if (document.getElementById('bisi_tempatTujuan')) document.getElementById('bisi_tempatTujuan').textContent = recordData.tempatTujuan || '-';
 
-            const tujuan = recordData.tempatTujuan || '-';
+            const tempatBerangkat = recordData.tempatBerangkat || 'Malahar';
+            const tujuan1 = recordData.tempatTujuan || '-';
             const tglMulai = recordData.tglMulai || '-';
             const tglKembali = recordData.tglKembali || recordData.tglMulai || '-';
-            const pejabatTujuan = recordData.namaPejabatTujuan ? recordData.namaPejabatTujuan.toUpperCase() : '...........................................';
+            const pejabatTujuan1 = recordData.namaPejabatTujuan ? recordData.namaPejabatTujuan.toUpperCase() : defaultDots;
 
-            if (document.getElementById('bisi_rute1_tibaDi')) document.getElementById('bisi_rute1_tibaDi').textContent = tujuan;
+            // RUTE I (UTAMA)
+            if (document.getElementById('bisi_rute1_tibaDi')) document.getElementById('bisi_rute1_tibaDi').textContent = tujuan1;
             if (document.getElementById('bisi_rute1_tglTiba')) document.getElementById('bisi_rute1_tglTiba').textContent = tglMulai;
-            if (document.getElementById('bisi_rute1_ttd_nama1')) document.getElementById('bisi_rute1_ttd_nama1').textContent = pejabatTujuan;
+            if (document.getElementById('bisi_rute1_ttd_nama1')) document.getElementById('bisi_rute1_ttd_nama1').textContent = pejabatTujuan1;
 
-            if (document.getElementById('bisi_rute1_berangkatDari')) document.getElementById('bisi_rute1_berangkatDari').textContent = tujuan;
-            if (document.getElementById('bisi_rute1_ke')) document.getElementById('bisi_rute1_ke').textContent = recordData.tempatBerangkat || 'Malahar';
-            if (document.getElementById('bisi_rute1_tglBerangkat')) document.getElementById('bisi_rute1_tglBerangkat').textContent = tglKembali;
-            if (document.getElementById('bisi_rute1_ttd_nama2')) document.getElementById('bisi_rute1_ttd_nama2').textContent = pejabatTujuan;
+            const keRute1 = recordData.tempatTujuan2 && recordData.tempatTujuan2.trim() !== '' ? recordData.tempatTujuan2 : tempatBerangkat;
+            const tglBerangkat1 = recordData.tglBerangkat2 && recordData.tglBerangkat2.trim() !== '' ? recordData.tglBerangkat2 : tglKembali;
 
-            if (document.getElementById('bisi_tibaKembaliDi')) document.getElementById('bisi_tibaKembaliDi').textContent = recordData.tempatBerangkat || 'Malahar';
+            if (document.getElementById('bisi_rute1_berangkatDari')) document.getElementById('bisi_rute1_berangkatDari').textContent = tujuan1;
+            if (document.getElementById('bisi_rute1_ke')) document.getElementById('bisi_rute1_ke').textContent = keRute1;
+            if (document.getElementById('bisi_rute1_tglBerangkat')) document.getElementById('bisi_rute1_tglBerangkat').textContent = tglBerangkat1;
+            if (document.getElementById('bisi_rute1_ttd_nama2')) document.getElementById('bisi_rute1_ttd_nama2').textContent = pejabatTujuan1;
+
+            // RUTE II (KONDISIONAL TEKS)
+            if (recordData.tempatTujuan2 && recordData.tempatTujuan2.trim() !== '') {
+                const tujuan2 = recordData.tempatTujuan2;
+                const pejabatTujuan2 = recordData.pejabatTujuan2 ? recordData.pejabatTujuan2.toUpperCase() : defaultDots;
+                const keRute2 = recordData.tempatTujuan3 && recordData.tempatTujuan3.trim() !== '' ? recordData.tempatTujuan3 : tempatBerangkat;
+                const tglBerangkat2 = recordData.tglBerangkat2 || tglKembali;
+
+                if (document.getElementById('bisi_rute2_tibaDi')) document.getElementById('bisi_rute2_tibaDi').textContent = tujuan2;
+                if (document.getElementById('bisi_rute2_tglTiba')) document.getElementById('bisi_rute2_tglTiba').textContent = recordData.tglTiba2 || defaultDots;
+                if (document.getElementById('bisi_rute2_ttd_nama1')) document.getElementById('bisi_rute2_ttd_nama1').textContent = pejabatTujuan2;
+
+                if (document.getElementById('bisi_rute2_berangkatDari')) document.getElementById('bisi_rute2_berangkatDari').textContent = tujuan2;
+                if (document.getElementById('bisi_rute2_ke')) document.getElementById('bisi_rute2_ke').textContent = keRute2;
+                if (document.getElementById('bisi_rute2_tglBerangkat')) document.getElementById('bisi_rute2_tglBerangkat').textContent = tglBerangkat2;
+                if (document.getElementById('bisi_rute2_ttd_nama2')) document.getElementById('bisi_rute2_ttd_nama2').textContent = pejabatTujuan2;
+            } else {
+                if (document.getElementById('bisi_rute2_tibaDi')) document.getElementById('bisi_rute2_tibaDi').textContent = defaultDots;
+                if (document.getElementById('bisi_rute2_tglTiba')) document.getElementById('bisi_rute2_tglTiba').textContent = defaultDots;
+                if (document.getElementById('bisi_rute2_ttd_nama1')) document.getElementById('bisi_rute2_ttd_nama1').textContent = defaultDots;
+
+                if (document.getElementById('bisi_rute2_berangkatDari')) document.getElementById('bisi_rute2_berangkatDari').textContent = defaultDots;
+                if (document.getElementById('bisi_rute2_ke')) document.getElementById('bisi_rute2_ke').textContent = defaultDots;
+                if (document.getElementById('bisi_rute2_tglBerangkat')) document.getElementById('bisi_rute2_tglBerangkat').textContent = defaultDots;
+                if (document.getElementById('bisi_rute2_ttd_nama2')) document.getElementById('bisi_rute2_ttd_nama2').textContent = defaultDots;
+            }
+
+            // RUTE III (KONDISIONAL TEKS)
+            if (recordData.tempatTujuan3 && recordData.tempatTujuan3.trim() !== '') {
+                const tujuan3 = recordData.tempatTujuan3;
+                const pejabatTujuan3 = recordData.pejabatTujuan3 ? recordData.pejabatTujuan3.toUpperCase() : defaultDots;
+
+                if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = tujuan3;
+                if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = recordData.tglTiba3 || defaultDots;
+                if (document.getElementById('bisi_rute3_ttd_nama1')) document.getElementById('bisi_rute3_ttd_nama1').textContent = pejabatTujuan3;
+
+                if (document.getElementById('bisi_rute3_berangkatDari')) document.getElementById('bisi_rute3_berangkatDari').textContent = tujuan3;
+                if (document.getElementById('bisi_rute3_ke')) document.getElementById('bisi_rute3_ke').textContent = tempatBerangkat;
+                if (document.getElementById('bisi_rute3_tglBerangkat')) document.getElementById('bisi_rute3_tglBerangkat').textContent = recordData.tglBerangkat3 || tglKembali;
+                if (document.getElementById('bisi_rute3_ttd_nama2')) document.getElementById('bisi_rute3_ttd_nama2').textContent = pejabatTujuan3;
+            } else {
+                if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = defaultDots;
+                if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = defaultDots;
+                if (document.getElementById('bisi_rute3_ttd_nama1')) document.getElementById('bisi_rute3_ttd_nama1').textContent = defaultDots;
+
+                if (document.getElementById('bisi_rute3_berangkatDari')) document.getElementById('bisi_rute3_berangkatDari').textContent = defaultDots;
+                if (document.getElementById('bisi_rute3_ke')) document.getElementById('bisi_rute3_ke').textContent = defaultDots;
+                if (document.getElementById('bisi_rute3_tglBerangkat')) document.getElementById('bisi_rute3_tglBerangkat').textContent = defaultDots;
+                if (document.getElementById('bisi_rute3_ttd_nama2')) document.getElementById('bisi_rute3_ttd_nama2').textContent = defaultDots;
+            }
+
+            // PENGESAHAN KEMBALI
+            if (document.getElementById('bisi_tibaKembaliDi')) document.getElementById('bisi_tibaKembaliDi').textContent = tempatBerangkat;
             if (document.getElementById('bisi_tglKembali')) document.getElementById('bisi_tglKembali').textContent = tglKembali;
         }
 
-        // FUNGSI POPULASI SPPD BELAKANG KOSONG (BAGIAN 4)
         function populateSPPDBelakangKosong(recordData) {
             if (!recordData) return;
             if (document.getElementById('bks_noSPPD')) document.getElementById('bks_noSPPD').textContent = recordData.noSPPD || '-';
@@ -1223,7 +1324,6 @@
             if (document.getElementById('bks_tglKembali')) document.getElementById('bks_tglKembali').textContent = recordData.tglKembali || recordData.tglMulai || '-';
         }
 
-        // FUNGSI POPULASI LAPORAN PERJALANAN DINAS (BAGIAN 5)
         function populateLaporanHasil(recordData, maksudPerdinText) {
             if (!recordData) return;
 
@@ -1237,10 +1337,12 @@
                 document.getElementById('lap-waktuPelaksanaan').textContent = `${recordData.tglMulai || '-'} s/d ${recordData.tglKembali || recordData.tglMulai || '-'} (${recordData.lamaHari || 1} Hari)`;
             }
             if (document.getElementById('lap-daerahTujuan')) {
-                document.getElementById('lap-daerahTujuan').textContent = recordData.tempatTujuan || '-';
+                let lokasiTujuanSemua = recordData.tempatTujuan || '-';
+                if (recordData.tempatTujuan2) lokasiTujuanSemua += `, ${recordData.tempatTujuan2}`;
+                if (recordData.tempatTujuan3) lokasiTujuanSemua += `, ${recordData.tempatTujuan3}`;
+                document.getElementById('lap-daerahTujuan').textContent = lokasiTujuanSemua;
             }
 
-            // Susun Pelaksana Tugas
             const containerPelaksana = document.getElementById('lap-container-pelaksana');
             if (containerPelaksana) {
                 containerPelaksana.innerHTML = '';
@@ -1256,14 +1358,12 @@
                 containerPelaksana.innerHTML = htmlPeg;
             }
 
-            // Isi Laporan Hasil
             if (document.getElementById('lap-isiHasil')) {
                 document.getElementById('lap-isiHasil').textContent = recordData.laporanHasil && recordData.laporanHasil.trim() !== '' 
                     ? recordData.laporanHasil 
                     : "Pelaksanaan Perjalanan Dinas telah dilaksanakan sesuai jadwal dan maksud tujuan yang ditetapkan. Seluruh agenda kegiatan kedinasan berjalan dengan lancar tanpa hambatan.";
             }
 
-            // TTD Laporan
             if (document.getElementById('lap-ttd-tempat')) document.getElementById('lap-ttd-tempat').textContent = recordData.tempatBerangkat || 'Tabundung';
             if (document.getElementById('lap-ttd-tgl')) document.getElementById('lap-ttd-tgl').textContent = recordData.tglKembali || recordData.tglMulai || '-';
             if (document.getElementById('lap-ttd-nama')) document.getElementById('lap-ttd-nama').textContent = recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-';
