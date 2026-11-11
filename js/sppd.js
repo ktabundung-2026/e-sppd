@@ -1,7 +1,14 @@
-/**
- * Logika dan Manajemen Form e-SPPD Terpadu - Kecamatan Tabundung
- * Terintegrasi Terpusat dengan AppDB (js/db.js) untuk master_pelaksana & master_sk
- */
+/*
+  ====================================================================================
+  Nama Aplikasi : Sistem e - SPPD Terpadu - Kecamatan Tabundung
+  Hosting       : GitHub Pages (Murni Single Page Application / SPA)
+  Backend / DB  : Supabase REST API & Supabase Storage
+  Nama Halaman  : js/rekap.js
+  Fungsi Halaman: Logika pengolah data rekapitulasi realisasi perjalanan dinas, 
+                  perhitungan akumulasi Orang Hari (OH) per Sub Kegiatan, 
+                  visualisasi batas kuota, serta pemfilteran dan pencarian rekap.
+  ====================================================================================
+*/
 
 let masterASN = [];
 let masterSK = [];
