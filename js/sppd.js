@@ -359,11 +359,13 @@ async function handleFormSubmit(e) {
     switchStep(3);
 }
 
+// Helper Format Rupiah (contoh: 1200 -> Rp. 1.200)
 function formatRupiahRP(angka) {
     const val = parseInt(angka) || 0;
     return "Rp. " + val.toLocaleString('id-ID');
 }
 
+// Helper Navigasi ke Halaman Cetak di Tab/Halaman yang Sama
 function openCetakPage(id) {
     window.location.href = `cetak.html?id=${id}`;
 }
@@ -379,7 +381,7 @@ function renderHistoryTable() {
         return;
     }
 
-    // Kelompokkan data riwayat berdasarkan Kode SK
+    // 1. Pengelompokan Data Riwayat Berdasarkan Kode SK
     const groupedBySK = {};
     let grandTotalBiaya = 0;
 
@@ -391,7 +393,7 @@ function renderHistoryTable() {
         groupedBySK[kodeSK].push(item);
     });
 
-    // Render tabel per Sub Kegiatan (SK) beserta Sub Total & Total Keseluruhan
+    // 2. Render Baris Riwayat, Sub Total per SK, dan Total Keseluruhan
     Object.keys(groupedBySK).forEach(kodeSK => {
         let subTotalSK = 0;
 
@@ -417,10 +419,10 @@ function renderHistoryTable() {
                     <td class="p-3">${item.tempatTujuan || item.tujuan || '-'}</td>
                     <td class="p-3 font-bold text-emerald-700">${formatRupiahRP(totalBiayaVal)}</td>
                     <td class="p-3 text-center flex items-center justify-center gap-2">
-                        <button type="button" onclick="openCetakPage(${item.id})" class="text-sky-600 hover:text-sky-800 font-bold p-1" title="Cetak SPPD">
+                        <button type="button" onclick="openCetakPage(${item.id})" class="text-sky-600 hover:text-sky-800 font-bold p-1 cursor-pointer" title="Cetak Dokumen">
                             <i class="fa-solid fa-print"></i>
                         </button>
-                        <button type="button" onclick="deleteHistoryRecord(${item.id})" class="text-rose-600 hover:text-rose-800 font-bold p-1" title="Hapus SPPD">
+                        <button type="button" onclick="deleteHistoryRecord(${item.id})" class="text-rose-600 hover:text-rose-800 font-bold p-1 cursor-pointer" title="Hapus SPPD">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
@@ -428,7 +430,7 @@ function renderHistoryTable() {
             `;
         });
 
-        // Baris Sub Total per SK
+        // Baris Sub Total Biaya Realisasi Per SK
         tbody.innerHTML += `
             <tr class="bg-sky-50 font-bold border-b-2 border-slate-300">
                 <td colspan="4" class="p-2.5 text-right text-gov-900 uppercase text-xs">Sub Total Biaya Realisasi (${kodeSK}) :</td>
@@ -438,7 +440,7 @@ function renderHistoryTable() {
         `;
     });
 
-    // Baris Grand Total Keseluruhan
+    // Baris Total Keseluruhan Biaya Realisasi
     tbody.innerHTML += `
         <tr class="bg-emerald-100 font-extrabold border-t-2 border-emerald-500 text-slate-900">
             <td colspan="4" class="p-3 text-right uppercase text-xs text-emerald-900">TOTAL KESELURUHAN BIAYA REALISASI :</td>
