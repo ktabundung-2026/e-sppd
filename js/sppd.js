@@ -5,8 +5,8 @@
   Backend / DB  : Supabase REST API & Supabase Storage
   Nama Halaman  : js/sppd.js
   Fungsi Halaman: Logika pemrosesan form, perhitungan otomatis Lama Hari dari selisih 
-                  tanggal, autofill ASN (NIP, Pangkat, Jabatan), perbaikan mapping 
-                  data tertukar, import data ASN via CSV, serta penyimpanan & cetak.
+                  tanggal, autofill ASN, penyimpanan rute lokasi opsional II & III, 
+                  serta penyimpanan & cetak.
   ====================================================================================
 */
 
@@ -165,12 +165,11 @@ function populateASNDropdowns() {
         }
     });
 
-    // Refresh opsi pada tabel pengikut: Tampilkan NAMA ASN SAJA di dropdown
     document.querySelectorAll('.select-pengikut-asn').forEach(sel => {
         const currentVal = sel.value;
         sel.innerHTML = '<option value="">-- Pilih ASN --</option>';
         currentMasterASN.forEach(a => {
-            sel.innerHTML += `<option value="${a.nip}">${a.nama.toUpperCase()}</option>`;
+            sel.innerHTML += `<option value="${a.nip}">${a.nama.toUpperCase()} - NIP. ${a.nip}</option>`;
         });
         sel.value = currentVal;
     });
@@ -199,7 +198,6 @@ function onBendaharaSelected(nip) {
 
 // ----------------------------------------------------
 // MANAJEMEN PENGIKUT
-// Susunan Kolom: Nama ASN | NIP | Pangkat/Gol | Jabatan
 // ----------------------------------------------------
 let pengikutCount = 0;
 function addPengikutRow() {
@@ -211,24 +209,23 @@ function addPengikutRow() {
 
     let optionsAsn = '<option value="">-- Pilih ASN --</option>';
     currentMasterASN.forEach(a => {
-        optionsAsn += `<option value="${a.nip}">${a.nama.toUpperCase()}</option>`;
+        optionsAsn += `<option value="${a.nip}">${a.nama.toUpperCase()} - NIP. ${a.nip}</option>`;
     });
 
     tr.innerHTML = `
         <td class="p-2 text-center font-bold text-slate-500 row-index">${tbody.children.length + 1}</td>
         <td class="p-2">
-            <select class="w-full text-xs p-2 border border-slate-300 rounded font-semibold uppercase-input select-pengikut-asn" onchange="autoFillRowPengikut(${pengikutCount}, this.value)">
+            <select class="w-full text-xs p-1.5 border border-slate-300 rounded mb-1 select-pengikut-asn" onchange="autoFillRowPengikut(${pengikutCount}, this.value)">
                 ${optionsAsn}
             </select>
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nama uppercase-input" placeholder="NAMA PENGIKUT">
         </td>
         <td class="p-2">
-            <input type="text" class="w-full text-xs p-2 border border-slate-300 rounded input-pengikut-nip font-mono bg-slate-50" readonly placeholder="NIP">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nip font-mono" placeholder="NIP">
         </td>
-        <td class="p-2">
-            <input type="text" class="w-full text-xs p-2 border border-slate-300 rounded input-pengikut-pangkat font-semibold bg-slate-50" readonly placeholder="Pangkat / Gol">
-        </td>
-        <td class="p-2">
-            <input type="text" class="w-full text-xs p-2 border border-slate-300 rounded input-pengikut-jabatan font-semibold bg-slate-50" readonly placeholder="Jabatan">
+        <td class="p-2 space-y-1">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-pangkat" placeholder="Pangkat / Gol">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-jabatan" placeholder="Jabatan">
         </td>
         <td class="p-2 text-center">
             <button type="button" onclick="hapusRowPengikut(${pengikutCount})" class="text-rose-600 hover:text-rose-800 p-1">
@@ -246,13 +243,10 @@ function autoFillRowPengikut(rowId, nip) {
     if (!row) return;
     const matched = currentMasterASN.find(a => a.nip === nip);
     if (matched) {
-        row.querySelector('.input-pengikut-nip').value = matched.nip || '-';
-        row.querySelector('.input-pengikut-pangkat').value = matched.pangkat || '-';
-        row.querySelector('.input-pengikut-jabatan').value = matched.jabatan || '-';
-    } else {
-        row.querySelector('.input-pengikut-nip').value = '';
-        row.querySelector('.input-pengikut-pangkat').value = '';
-        row.querySelector('.input-pengikut-jabatan').value = '';
+        row.querySelector('.input-pengikut-nama').value = matched.nama.toUpperCase();
+        row.querySelector('.input-pengikut-nip').value = matched.nip;
+        row.querySelector('.input-pengikut-pangkat').value = matched.pangkat;
+        row.querySelector('.input-pengikut-jabatan').value = matched.jabatan;
     }
 }
 
@@ -289,15 +283,13 @@ async function handleFormSubmit(event) {
 
     const pengikutList = [];
     document.querySelectorAll('#tbody-pengikut tr').forEach(row => {
-        const nipVal = row.querySelector('.select-pengikut-asn')?.value;
-        const matched = currentMasterASN.find(a => a.nip === nipVal);
-
-        if (matched) {
+        const nama = row.querySelector('.input-pengikut-nama')?.value;
+        if (nama && nama.trim() !== '') {
             pengikutList.push({
-                nama: matched.nama.toUpperCase(),
-                nip: matched.nip || '-',
-                pangkat: matched.pangkat || '-',
-                jabatan: matched.jabatan || '-'
+                nama: nama.toUpperCase(),
+                nip: row.querySelector('.input-pengikut-nip')?.value || '-',
+                pangkat: row.querySelector('.input-pengikut-pangkat')?.value || '-',
+                jabatan: row.querySelector('.input-pengikut-jabatan')?.value || '-'
             });
         }
     });
@@ -317,6 +309,18 @@ async function handleFormSubmit(event) {
         
         tempatBerangkat: document.getElementById('tempatBerangkat').value,
         tempatTujuan: document.getElementById('tempatTujuan').value,
+
+        // --- TUJUAN OPSIONAL II & III ---
+        tempatTujuan2: document.getElementById('tempatTujuan2')?.value.trim() || '',
+        tglTiba2: document.getElementById('tglTiba2')?.value || '',
+        tglBerangkat2: document.getElementById('tglBerangkat2')?.value || '',
+        pejabatTujuan2: document.getElementById('pejabatTujuan2')?.value.trim() || '',
+
+        tempatTujuan3: document.getElementById('tempatTujuan3')?.value.trim() || '',
+        tglTiba3: document.getElementById('tglTiba3')?.value || '',
+        tglBerangkat3: document.getElementById('tglBerangkat3')?.value || '',
+        pejabatTujuan3: document.getElementById('pejabatTujuan3')?.value.trim() || '',
+
         tglMulai: document.getElementById('tglMulai').value,
         tglKembali: document.getElementById('tglKembali').value,
         lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
@@ -402,7 +406,7 @@ async function hapusRiwayatSppd(id) {
 }
 
 // ----------------------------------------------------
-// MANAJEMEN MODAL & MASTER ASN (IMPORT CSV & MANUAL)
+// MANAJEMEN MODAL & MASTER ASN
 // ----------------------------------------------------
 function openModalAsn() {
     const modal = document.getElementById('modalAsn');
