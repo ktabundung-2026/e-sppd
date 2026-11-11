@@ -124,7 +124,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kode Sub Kegiatan (SK)</label>
-                            <select id="step1_kodeSK" onchange="updateSKQuotaInfo()" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50">
+                            <select id="step1_kodeSK" onchange="updateSKQuotaInfo()" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-mono focus:ring-2 focus:ring-gov-600 bg-slate-50" required>
                                 <option value="">Pilih Sub Kegiatan</option>
                             </select>
                         </div>
@@ -163,7 +163,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. SPPD</label>
-                            <input type="text" id="noSPPD" placeholder="Isi No. SPPD"  class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                            <input type="text" id="noSPPD" placeholder="Isi No. SPPD" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
@@ -174,14 +174,18 @@
                     <!-- PELAKSANA UTAMA (NAMA PELAKSANA: UPPERCASE) -->
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                         <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Data Pelaksana Utama (Pegawai Terperintah)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Pegawai</label>
-                                <select id="namaPelaksana" onchange="onNamaInputChanged('Pelaksana', this.value)" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input"></select>
+                                <select id="namaPelaksana" onchange="autoFillPelaksanaUtama()" class="w-full p-2 text-xs border rounded font-semibold bg-white uppercase-input"></select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">NIP Pegawai</label>
                                 <input type="text" id="nipPelaksana" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Pangkat / Gol</label>
+                                <input type="text" id="pangkatPelaksana" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase">Jabatan</label>
@@ -198,26 +202,39 @@
                                 <i class="fa-solid fa-user-plus"></i> Tambah Pengikut
                             </button>
                         </div>
-                        <div id="pengikutContainer"></div>
+                        <div id="pengikutContainer">
+                            <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                                <thead class="bg-slate-100 font-bold text-slate-700">
+                                    <tr>
+                                        <th class="p-2 text-center w-10">No</th>
+                                        <th class="p-2">Nama Pegawai / Pelaksana</th>
+                                        <th class="p-2">NIP</th>
+                                        <th class="p-2">Pangkat & Jabatan</th>
+                                        <th class="p-2 text-center w-12">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-pengikut" class="divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- LOKASI & TANGGAL PELAKSANAAN -->
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-4 border-t pt-4">
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Isi Tempat Berangkat</label>
-                            <input type="text" id="tempatBerangkat" placeholder="Isi tempat berangkat" value="" class="w-full p-2 text-xs border rounded-lg border-slate-300">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Berangkat</label>
+                            <input type="text" id="tempatBerangkat" placeholder="Isi tempat berangkat" value="Malahar" class="w-full p-2 text-xs border rounded-lg border-slate-300">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Tujuan</label>
                             <input type="text" id="tempatTujuan" placeholder="Terisi Otomatis" class="w-full p-2 text-xs border rounded-lg border-slate-300 bg-slate-50">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tgl. Berangkat (Mulai)</label>
-                            <input type="date" id="tglMulai" onchange="calculateLamaHariFromDates()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tgl. Berangkat</label>
+                            <input type="date" id="tglMulai" onchange="hitungLamaHariOtomatis()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tgl. Kembali (Selesai)</label>
-                            <input type="date" id="tglKembali" onchange="calculateLamaHariFromDates()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tgl. Kembali</label>
+                            <input type="date" id="tglKembali" onchange="hitungLamaHariOtomatis()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Lama Hari</label>
@@ -232,7 +249,7 @@
                     <!-- INPUT HASIL YANG DICAPAI -->
                     <div class="border-t pt-4">
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hasil yang dicapai / Laporan Ringkas</label>
-                        <textarea id="laporanHasil" rows="3" placeholder="Isi hasil yang dicapai / Laporan Ringkas" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 "></textarea>
+                        <textarea id="laporanHasil" rows="3" placeholder="Isi hasil yang dicapai / Laporan Ringkas" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600"></textarea>
                     </div>
 
                     <!-- INPUT PEJABAT PENANDATANGAN & BENDAHARA -->
@@ -240,7 +257,7 @@
                         <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Pejabat Penandatangan & Pengelola Keuangan</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna</label>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengguna Anggaran / Camat</label>
                                 <input type="text" id="namaPenggunaAnggaran" value="RUDOLF UMBU RESI LOLY, ST" readonly class="w-full p-2 text-xs border rounded font-semibold bg-slate-100 uppercase-input">
                                 <input type="hidden" id="nipPenggunaAnggaran" value="197205212006041008">
                             </div>
@@ -255,7 +272,7 @@
                         <div class="border-t pt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Penandatangan SPPD di Tempat Tujuan</label>
-                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white ">
+                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan Pejabat Tempat Tujuan</label>
@@ -321,7 +338,7 @@
 
     <!-- FOOTER COPYRIGHT -->
     <footer class="bg-gov-900 text-white text-center py-3 border-t border-gov-800 text-xs mt-8">
-        <p>&copy; 2026 Kecamatan Tabundung - ArL</p>
+        <p>© 2026 Kecamatan Tabundung - ArL</p>
     </footer>
 
     <!-- MODAL KELOLA / EDIT / HAPUS SUB KEGIATAN -->
