@@ -156,7 +156,7 @@
                         <span><i class="fa-solid fa-file-signature text-gov-700 mr-2"></i> Kelengkapan Rincian Surat Tugas & SPPD</span>
                     </h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No Surat Tugas</label>
                             <input type="text" id="noSuratTugas" placeholder="Isi No Surat Tugas" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
@@ -165,10 +165,12 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. SPPD</label>
                             <input type="text" id="noSPPD" placeholder="Isi No. SPPD" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
-                            <input type="text" id="maksudTujuan" placeholder="Isi maksud Perjalanan Dinas" class="w-full p-2 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 capitalize-input">
-                        </div>
+                    </div>
+
+                    <!-- MAKSUD PERJALANAN DINAS (TEXTAREA LELUASA) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
+                        <textarea id="maksudTujuan" rows="3" placeholder="Isi maksud Perjalanan Dinas secara mendetail..." class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 capitalize-input"></textarea>
                     </div>
 
                     <!-- PELAKSANA UTAMA (NAMA PELAKSANA: UPPERCASE) -->
@@ -204,13 +206,14 @@
                         </div>
                         <div id="pengikutContainer">
                             <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
-                                <thead class="bg-slate-100 font-bold text-slate-700">
+                                <thead class="bg-slate-100 font-bold text-slate-700 uppercase border-b">
                                     <tr>
-                                        <th class="p-2 text-center w-10">No</th>
-                                        <th class="p-2">Nama Pegawai / Pelaksana</th>
-                                        <th class="p-2">NIP</th>
-                                        <th class="p-2">Pangkat & Jabatan</th>
-                                        <th class="p-2 text-center w-12">Aksi</th>
+                                        <th class="p-2.5 text-center w-10">No</th>
+                                        <th class="p-2.5">Nama ASN</th>
+                                        <th class="p-2.5">NIP</th>
+                                        <th class="p-2.5">Pangkat / Gol</th>
+                                        <th class="p-2.5">Jabatan</th>
+                                        <th class="p-2.5 text-center w-12">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-pengikut" class="divide-y divide-slate-200"></tbody>
