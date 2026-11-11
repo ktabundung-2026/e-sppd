@@ -1060,8 +1060,10 @@
             const matchedSK = skList.find(s => s.kode === recordData.kodeSK);
             const namaSubKegiatan = matchedSK ? matchedSK.nama : "Penyelenggaraan Urusan Pemerintahan Umum";
 
-            const maksudDinamis = recordData.maksudTujuan || recordData.maksudPerdin || recordData.maksud || recordData.maksudPerjalanan || '-';
+            const maksudDinamis = recordData.maksudPerdin || recordData.maksudPerdin || recordData.maksud || recordData.maksudPerjalanan || '-';
             const pangkatDinamis = recordData.pangkatPelaksana || recordData.pangkat || recordData.golongan || '-';
+            const tglKembaliDinamis = recordData.tglKembali || recordData.tglKembali || recordData.tglMulai || '-';
+            const alatAngkutanDinamis = recordData.alatAngkutan || recordData.alatAngkut || 'Kendaraan Roda Dua';
 
             // ---------------------------------------------
             // 1. POPULASI BAGIAN 1: SURAT TUGAS
