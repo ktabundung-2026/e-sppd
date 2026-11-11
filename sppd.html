@@ -6,7 +6,8 @@
   Nama Halaman  : sppd.html
   Fungsi Halaman: Modul Form Input Terpadu (Perencanaan Tim, Penerbitan Dokumen, 
                   Riwayat Perdin, dan Master ASN & SK) dengan perhitungan otomatis 
-                  Lama Hari, pengisian otomatis ASN, dan susunan Navbar terbaru.
+                  Lama Hari, pengisian otomatis ASN, Tempat Tujuan II & III opsional,
+                  dan susunan Navbar terbaru.
   ====================================================================================
 -->
 <!DOCTYPE html>
@@ -138,7 +139,7 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Lokasi Perjalanan Dinas</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Lokasi Perjalanan Dinas (Tujuan I)</label>
                         <input type="text" id="step1_selectDesa" oninput="syncTujuanPerdin(this.value)" placeholder="Isi Lokasi Perdin" class="w-full p-2.5 text-xs border rounded-lg border-slate-300 font-semibold focus:ring-2 focus:ring-gov-600 bg-white capitalize-input">
                     </div>
                     <div class="flex justify-end">
@@ -167,13 +168,13 @@
                         </div>
                     </div>
 
-                    <!-- MAKSUD PERJALANAN DINAS (TEXTAREA LELUASA) -->
+                    <!-- MAKSUD PERJALANAN DINAS -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Maksud Perjalanan Dinas</label>
                         <textarea id="maksudTujuan" rows="3" placeholder="Isi maksud Perjalanan Dinas secara mendetail..." class="w-full p-2.5 text-xs border rounded-lg border-slate-300 focus:ring-2 focus:ring-gov-600 capitalize-input"></textarea>
                     </div>
 
-                    <!-- PELAKSANA UTAMA (NAMA PELAKSANA: UPPERCASE) -->
+                    <!-- PELAKSANA UTAMA -->
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                         <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Data Pelaksana Utama (Pegawai Terperintah)</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -221,14 +222,14 @@
                         </div>
                     </div>
 
-                    <!-- LOKASI & TANGGAL PELAKSANAAN -->
+                    <!-- LOKASI & TANGGAL PELAKSANAAN UTAMA -->
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-4 border-t pt-4">
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Berangkat</label>
                             <input type="text" id="tempatBerangkat" placeholder="Isi tempat berangkat" value="Malahar" class="w-full p-2 text-xs border rounded-lg border-slate-300">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Tujuan</label>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tempat Tujuan (I)</label>
                             <input type="text" id="tempatTujuan" placeholder="Terisi Otomatis" class="w-full p-2 text-xs border rounded-lg border-slate-300 bg-slate-50">
                         </div>
                         <div class="md:col-span-1">
@@ -246,6 +247,61 @@
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Biaya Per Orang (Rp)</label>
                             <input type="number" id="biayaPerOrang" value="170000" step="10000" oninput="updateSKQuotaInfo()" class="w-full p-2 text-xs border rounded-lg border-slate-300 font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- LOKASI RUTE TAMBAHAN (OPSIONAL: TUJUAN II & III) -->
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-gov-900 uppercase tracking-wider">Tujuan Lanjutan / Rute Tambahan (Opsional)</h3>
+                            <span class="text-[11px] text-slate-500 font-normal">Kosongkan jika hanya 1 lokasi tujuan.</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- RUTE TUJUAN II -->
+                            <div class="bg-white p-3 border rounded-lg space-y-2 border-slate-200">
+                                <span class="block text-[11px] font-bold text-slate-600 uppercase">Tempat Tujuan II (Rute II)</span>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Lokasi Tujuan II</label>
+                                    <input type="text" id="tempatTujuan2" placeholder="Contoh: Desa Katiku Luku" class="w-full p-2 text-xs border rounded font-semibold capitalize-input">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase">Tgl. Tiba II</label>
+                                        <input type="date" id="tglTiba2" class="w-full p-1.5 text-xs border rounded">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase">Tgl. Berangkat II</label>
+                                        <input type="date" id="tglBerangkat2" class="w-full p-1.5 text-xs border rounded">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Pejabat / Kades Tujuan II</label>
+                                    <input type="text" id="pejabatTujuan2" placeholder="Nama Pejabat / Kades Tujuan II" class="w-full p-2 text-xs border rounded capitalize-input">
+                                </div>
+                            </div>
+
+                            <!-- RUTE TUJUAN III -->
+                            <div class="bg-white p-3 border rounded-lg space-y-2 border-slate-200">
+                                <span class="block text-[11px] font-bold text-slate-600 uppercase">Tempat Tujuan III (Rute III)</span>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Lokasi Tujuan III</label>
+                                    <input type="text" id="tempatTujuan3" placeholder="Contoh: Desa Tarimbang" class="w-full p-2 text-xs border rounded font-semibold capitalize-input">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase">Tgl. Tiba III</label>
+                                        <input type="date" id="tglTiba3" class="w-full p-1.5 text-xs border rounded">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase">Tgl. Berangkat III</label>
+                                        <input type="date" id="tglBerangkat3" class="w-full p-1.5 text-xs border rounded">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Pejabat / Kades Tujuan III</label>
+                                    <input type="text" id="pejabatTujuan3" placeholder="Nama Pejabat / Kades Tujuan III" class="w-full p-2 text-xs border rounded capitalize-input">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -271,14 +327,14 @@
                             </div>
                         </div>
 
-                        <!-- MENU INPUT PEJABAT TEMPAT TUJUAN -->
+                        <!-- MENU INPUT PEJABAT TEMPAT TUJUAN UTAMA (I) -->
                         <div class="border-t pt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Penandatangan SPPD di Tempat Tujuan</label>
-                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan" class="w-full p-2 text-xs border rounded font-semibold bg-white">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Penandatangan SPPD di Tempat Tujuan (I)</label>
+                                <input type="text" id="namaPejabatTujuan" placeholder="Isi Nama Pejabat / Kepala Desa Tujuan I" class="w-full p-2 text-xs border rounded font-semibold bg-white">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan Pejabat Tempat Tujuan</label>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan Pejabat Tempat Tujuan (I)</label>
                                 <input type="text" id="jabatanPejabatTujuan" placeholder="Contoh: Kepala Desa / Sekretaris Desa" class="w-full p-2 text-xs border rounded font-semibold bg-white capitalize-input">
                             </div>
                         </div>
@@ -407,7 +463,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP KELOLA MASTER ASN (PELAKSANA KAPITAL) -->
+    <!-- MODAL POPUP KELOLA MASTER ASN -->
     <div id="modalAsn" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-gov-900 text-white px-6 py-4 flex items-center justify-between">
@@ -439,7 +495,7 @@
                     </div>
                 </div>
 
-                <!-- FORM TAMBAH MANUAL (NAMA HAKIKI HURUF KAPITAL) -->
+                <!-- FORM TAMBAH MANUAL -->
                 <form id="formAddAsn" onsubmit="saveAsnMaster(event)" class="border-t pt-4 space-y-3">
                     <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Tambah Pelaksana Secara Manual</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
