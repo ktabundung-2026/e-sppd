@@ -1,771 +1,515 @@
-/* ====================================================================================
- * Nama Modul  : Modul Master Pelaksana & SPPD - Kecamatan Tabundung
- * Deskripsi   : Integrasi Form SPPD, Stepper Navigation, Master SK, Master Pelaksana, 
- *               dan Riwayat Perdin (Supabase: riwayat_perdin)
- * Skema Tabel Supabase: 
- *  - master_pelaksana : id - nama_pelaksana - nip - jabatan - created_at
- *  - master_sk        : id - kode - nama - quota - created_at
- *  - riwayat_perdin   : id, noSuratTugas, noSPPD, noBku, kodeSK, sumberDana, 
- *                       dasarPelaksanaan, maksudTujuan, namaPelaksana, nipPelaksana, 
- *                       pangkatPelaksana, jabatanPelaksana, pengikut, tempatBerangkat, 
- *                       tempatTujuan, alatAngkutan, tglMulai, tglSelesai, lamaHari, 
- *                       biayaPerOrang, totalBiaya, namaPejabatTujuan, jabatanPejabatTujuan, 
- *                       nipPejabatTujuan, namaCamat, nipCamat, pangkatCamat, 
- *                       namaBendahara, nipBendahara, laporanHasil, createdAt
- * ==================================================================================== */
+/*
+  ====================================================================================
+  Nama Aplikasi : Sistem e - SPPD Terpadu - Kecamatan Tabundung
+  Hosting       : GitHub Pages (Murni Single Page Application / SPA)
+  Backend / DB  : Supabase REST API & Supabase Storage
+  Nama Halaman  : js/sppd.js
+  Fungsi Halaman: Logika pemrosesan form, perhitungan otomatis Lama Hari dari selisih 
+                  tanggal, autofill ASN, penyimpanan record, serta NAVIGASI PENGALIHAN 
+                  KE cetak.html?id=... (BUKAN printer lokal secara langsung).
+  ====================================================================================
+*/
 
-// Global state untuk menyimpan data lokal
-let currentSKList = [];
-let currentAsnList = [];
-let sppdHistoryList = [];
+let currentMasterASN = [];
+let currentMasterSK = [];
+let pengikutCount = 0;
 
-// Event listener saat dokumen HTML selesai dimuat
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadMasterSKData();
-    await loadAsnMasterData();
-    await loadHistoryData();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadInitialMasterData();
+    renderPengikutTable();
+    await renderRiwayatTable();
+    updateTotalBiayaEstimasi();
 });
 
-/* ====================================================================================
- * 1. STEPPER NAVIGATION & FORM FLOW (STEP 1, 2, 3)
- * ==================================================================================== */
-
+// ----------------------------------------------------
+// STEPPER & TAB NAVIGATION
+// ----------------------------------------------------
 function switchStep(stepNumber) {
-    // Sembunyikan semua step content
-    document.getElementById('step-content-1')?.classList.add('hidden');
-    document.getElementById('step-content-2')?.classList.add('hidden');
-    document.getElementById('step-content-3')?.classList.add('hidden');
+    [1, 2, 3].forEach(num => {
+        const content = document.getElementById(`step-content-${num}`);
+        const icon = document.getElementById(`step-icon-${num}`);
+        const label = document.getElementById(`step-label-${num}`);
 
-    // Reset gaya indikator tombol stepper
-    [1, 2, 3].forEach(i => {
-        const icon = document.getElementById(`step-icon-${i}`);
-        const label = document.getElementById(`step-label-${i}`);
-        if (icon && label) {
-            if (i === stepNumber) {
-                icon.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md transition-all";
-                label.className = "text-xs font-bold text-gov-800 mt-1";
+        if (content) {
+            if (num === stepNumber) {
+                content.classList.remove('hidden');
             } else {
-                icon.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all";
-                label.className = "text-xs font-medium text-slate-500 mt-1";
+                content.classList.add('hidden');
+            }
+        }
+
+        if (icon && label) {
+            if (num === stepNumber) {
+                icon.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-gov-700 text-white shadow-md transition-all';
+                label.className = 'text-xs font-bold text-gov-800 mt-1';
+            } else {
+                icon.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 text-slate-600 transition-all';
+                label.className = 'text-xs font-medium text-slate-500 mt-1';
             }
         }
     });
 
-    // Tampilkan step content yang aktif
-    const activeStepContent = document.getElementById(`step-content-${stepNumber}`);
-    if (activeStepContent) {
-        activeStepContent.classList.remove('hidden');
-    }
-
-    // Jika masuk ke Step 3, refresh tabel riwayat perdin dari Supabase
     if (stepNumber === 3) {
-        loadHistoryData();
+        renderRiwayatTable();
     }
 }
 
 function proceedToStep2() {
-    const kodeSK = document.getElementById('step1_kodeSK')?.value;
-    const desa = document.getElementById('step1_selectDesa')?.value.trim();
+    const kodeSK = document.getElementById('kodeSK')?.value;
+    const tujuan = document.getElementById('step1_selectDesa')?.value;
 
     if (!kodeSK) {
-        alert('Silakan pilih Kode Sub Kegiatan (SK) terlebih dahulu!');
+        alert('Silakan pilih Sub Kegiatan terlebih dahulu!');
         return;
     }
-    if (!desa) {
-        alert('Silakan isi Lokasi Perjalanan Dinas!');
+    if (!tujuan || tujuan.trim() === '') {
+        alert('Silakan isi Lokasi Perjalanan Dinas terlebih dahulu!');
         return;
     }
 
-    // Lanjut ke Step 2
     switchStep(2);
 }
 
 function syncTujuanPerdin(val) {
-    const tempatTujuanInput = document.getElementById('tempatTujuan');
-    if (tempatTujuanInput) {
-        tempatTujuanInput.value = val ? val.toUpperCase() : '';
-    }
+    const tempatTujuan = document.getElementById('tempatTujuan');
+    if (tempatTujuan) tempatTujuan.value = val;
 }
 
-/* ====================================================================================
- * 2. KELOLA MASTER SUB KEGIATAN (master_sk: id - kode - nama - quota)
- * ==================================================================================== */
+// ----------------------------------------------------
+// PERHITUNGAN OTOMATIS LAMA HARI & ESTIMASI BIAYA
+// ----------------------------------------------------
+function hitungLamaHariOtomatis() {
+    const tglMulaiVal = document.getElementById('tglMulai').value;
+    const tglKembaliVal = document.getElementById('tglKembali').value;
+    const inputLamaHari = document.getElementById('lamaHari');
 
-async function loadMasterSKData() {
-    try {
-        const { data: skList, error } = await supabaseClient
-            .from('master_sk')
-            .select('*')
-            .order('kode', { ascending: true });
+    if (tglMulaiVal && tglKembaliVal) {
+        const dMulai = new Date(tglMulaiVal);
+        const dKembali = new Date(tglKembaliVal);
 
-        if (error) throw error;
-
-        currentSKList = skList || [];
-        renderSKDropdown(currentSKList);
-        renderSKTable(currentSKList);
-
-    } catch (err) {
-        console.warn('Gagal memuat master_sk dari Supabase:', err.message);
+        if (dKembali >= dMulai) {
+            const diffTime = Math.abs(dKembali - dMulai);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inklusif
+            inputLamaHari.value = diffDays;
+        } else {
+            alert("Tanggal Kembali tidak boleh sebelum Tanggal Mulai Berangkat!");
+            document.getElementById('tglKembali').value = tglMulaiVal;
+            inputLamaHari.value = 1;
+        }
     }
-}
-
-function renderSKDropdown(data) {
-    const selectSK = document.getElementById('step1_kodeSK');
-    if (!selectSK) return;
-
-    selectSK.innerHTML = '<option value="">Pilih Sub Kegiatan</option>' +
-        data.map(item => `<option value="${escapeHtml(item.kode)}">${escapeHtml(item.kode)} - ${escapeHtml(item.nama)}</option>`).join('');
-}
-
-function renderSKTable(data) {
-    const tbody = document.getElementById('tableSKBody');
-    if (!tbody) return;
-
-    if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada Sub Kegiatan tersimpan.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = data.map(item => `
-        <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="p-2.5 font-mono font-bold text-gov-800">${escapeHtml(item.kode)}</td>
-            <td class="p-2.5 font-medium text-slate-700">${escapeHtml(item.nama)}</td>
-            <td class="p-2.5 text-center font-bold text-slate-800">${item.quota || 0} OH</td>
-            <td class="p-2.5 text-center">
-                <button type="button" onclick="deleteSKMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 font-bold p-1" title="Hapus SK">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-async function saveNewSK(event) {
-    event.preventDefault();
-    const kodeVal = document.getElementById('newKodeSK').value.trim();
-    const namaVal = document.getElementById('newNamaSK').value.trim();
-    const quotaVal = parseInt(document.getElementById('newQuotaSK').value) || 0;
-
-    if (!kodeVal || !namaVal) {
-        alert('Kode SK dan Nama SK wajib diisi!');
-        return;
-    }
-
-    const payload = {
-        kode: kodeVal,
-        nama: namaVal,
-        quota: quotaVal
-    };
-
-    try {
-        const { data, error } = await supabaseClient
-            .from('master_sk')
-            .insert([payload]);
-
-        if (error) throw error;
-
-        alert('Sub Kegiatan berhasil disimpan!');
-        closeModalSK();
-        
-        document.getElementById('newKodeSK').value = '';
-        document.getElementById('newNamaSK').value = '';
-        document.getElementById('newQuotaSK').value = '50';
-
-        await loadMasterSKData();
-    } catch (err) {
-        console.error('Gagal menyimpan SK:', err);
-        alert('Gagal menyimpan Sub Kegiatan: ' + (err.message || 'Error Supabase'));
-    }
-}
-
-async function deleteSKMaster(id) {
-    if (!confirm('Apakah Anda yakin menghapus Sub Kegiatan ini?')) return;
-    try {
-        const { error } = await supabaseClient
-            .from('master_sk')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        await loadMasterSKData();
-    } catch (err) {
-        alert('Gagal menghapus Sub Kegiatan: ' + err.message);
-    }
-}
-
-function openModalManageSK() {
-    const modal = document.getElementById('modalManageSK');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-}
-
-function closeModalManageSK() {
-    const modal = document.getElementById('modalManageSK');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-}
-
-function openModalSK() {
-    const modal = document.getElementById('modalSK');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-}
-
-function closeModalSK() {
-    const modal = document.getElementById('modalSK');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+    updateTotalBiayaEstimasi();
 }
 
 function updateSKQuotaInfo() {
-    calculateTotalBiaya();
+    updateTotalBiayaEstimasi();
 }
 
-/* ====================================================================================
- * 3. KELOLA MASTER PELAKSANA ASN (master_pelaksana: id - nama_pelaksana - nip - jabatan)
- * ==================================================================================== */
+function updateTotalBiayaEstimasi() {
+    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
+    const biayaPerOrang = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
+    
+    // Hitung total orang: Pelaksana Utama (1) + Pengikut
+    const totalPengikut = document.querySelectorAll('#tbody-pengikut tr').length;
+    const totalOrang = 1 + totalPengikut;
 
-function formatPangkatGolongan(text) {
-    if (!text) return '';
-    let str = text.trim();
+    const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
 
-    str = str.replace(/\b[a-zA-Z]+\b/g, function(txt) {
-        if (/^(i|v|x|l|c|d|m)+$/i.test(txt)) return txt;
-        return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
+    const elemFormatted = document.getElementById('totalBiayaFormatted');
+    const elemTerbilang = document.getElementById('terbilang');
+
+    if (elemFormatted) {
+        elemFormatted.value = 'Rp ' + totalBiaya.toLocaleString('id-ID');
+    }
+    if (elemTerbilang) {
+        elemTerbilang.value = terbilangAngka(totalBiaya) + ' Rupiah';
+    }
+}
+
+function terbilangAngka(n) {
+    if (n < 0) return "";
+    const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    if (n < 12) return angka[n];
+    if (n < 20) return terbilangAngka(n - 10) + " Belas";
+    if (n < 100) return terbilangAngka(Math.floor(n / 10)) + " Puluh " + terbilangAngka(n % 10);
+    if (n < 200) return "Seratus " + terbilangAngka(n - 100);
+    if (n < 1000) return terbilangAngka(Math.floor(n / 100)) + " Ratus " + terbilangAngka(n % 100);
+    if (n < 2000) return "Seribu " + terbilangAngka(n - 1000);
+    if (n < 1000000) return terbilangAngka(Math.floor(n / 1000)) + " Ribu " + terbilangAngka(n % 1000);
+    if (n < 1000000000) return terbilangAngka(Math.floor(n / 1000000)) + " Juta " + terbilangAngka(n % 1000000);
+    return n.toString();
+}
+
+// ----------------------------------------------------
+// LOAD DATA MASTER & DROP DOWN POPULATION
+// ----------------------------------------------------
+async function loadInitialMasterData() {
+    if (window.AppDB) {
+        currentMasterASN = await window.AppDB.getMasterAsn();
+        currentMasterSK = await window.AppDB.getMasterSK();
+    }
+
+    populateSKDropdown();
+    populateASNDropdowns();
+    renderMasterTables();
+}
+
+function populateSKDropdown() {
+    const skSelect = document.getElementById('kodeSK');
+    if (!skSelect) return;
+    skSelect.innerHTML = '<option value="">-- Pilih Sub Kegiatan --</option>';
+
+    currentMasterSK.forEach(sk => {
+        const opt = document.createElement('option');
+        opt.value = sk.kode;
+        opt.textContent = `[${sk.kode}] ${sk.nama} (Kuota: ${sk.quota || 50} OH)`;
+        skSelect.appendChild(opt);
     });
-
-    str = str.replace(/\b(I{1,3}|IV|V|VI{0,3}|IX|X|XI{0,3})\s*[\./\s]\s*([a-eA-E])\b/gi, function(match, romawi, ruang) {
-        return romawi.toUpperCase() + '.' + ruang.toLowerCase();
-    });
-
-    return str;
 }
 
-async function saveAsnMaster(event) {
-    event.preventDefault();
-
-    const namaInput = document.getElementById('addAsnNama').value.trim();
-    const nipInput = document.getElementById('addAsnNip').value.trim();
-    const jabatanInput = document.getElementById('addAsnJabatan').value.trim();
-
-    if (!namaInput || !nipInput || !jabatanInput) {
-        alert('Mohon lengkapi Nama, NIP, dan Jabatan!');
-        return;
-    }
-
-    const namaKapital = namaInput.toUpperCase();
-    const payload = {
-        nama_pelaksana: namaKapital,
-        nip: nipInput,
-        jabatan: jabatanInput
-    };
-
-    try {
-        const { data, error } = await supabaseClient
-            .from('master_pelaksana')
-            .insert([payload]);
-
-        if (error) throw error;
-
-        alert('Data pelaksana berhasil disimpan!');
-        document.getElementById('formAddAsn').reset();
-        await loadAsnMasterData();
-    } catch (err) {
-        console.error('Gagal menyimpan data pelaksana:', err);
-        alert('Gagal menyimpan data pelaksana: ' + (err.message || 'Error Supabase'));
-    }
-}
-
-async function importAsnFromCsv() {
-    const fileInput = document.getElementById('csvFileInput');
-    const file = fileInput ? fileInput.files[0] : null;
-
-    if (!file) {
-        alert('Silakan pilih file CSV terlebih dahulu.');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        const text = e.target.result;
-        const lines = text.split(/\r\n|\n/);
-        const dataToInsert = [];
-
-        lines.forEach((line, index) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return;
-
-            const cols = trimmedLine.split(/[,;]/).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
-
-            if (index === 0 && (cols[0].toLowerCase().includes('nama') || cols[1].toLowerCase().includes('nip'))) {
-                return;
-            }
-
-            if (cols.length >= 2) {
-                const nama = cols[0] ? cols[0].toUpperCase() : '';
-                const nip = cols[1] || '';
-                const jabatan = cols[3] || cols[2] || '-'; 
-
-                if (nama && nip) {
-                    dataToInsert.push({
-                        nama_pelaksana: nama,
-                        nip: nip,
-                        jabatan: jabatan
-                    });
-                }
-            }
-        });
-
-        if (dataToInsert.length === 0) {
-            alert('Tidak ada baris data valid yang dapat diproses dari CSV.');
-            return;
-        }
-
-        try {
-            const { error } = await supabaseClient
-                .from('master_pelaksana')
-                .insert(dataToInsert);
-
-            if (error) throw error;
-
-            alert(`Berhasil mengimpor ${dataToInsert.length} data pelaksana ke Supabase!`);
-            fileInput.value = '';
-            await loadAsnMasterData();
-        } catch (err) {
-            console.error('Error saat import CSV:', err);
-            alert('Gagal mengimpor CSV: ' + err.message);
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-async function loadAsnMasterData() {
-    try {
-        const { data: pelaksanaList, error } = await supabaseClient
-            .from('master_pelaksana')
-            .select('*')
-            .order('nama_pelaksana', { ascending: true });
-
-        if (error) throw error;
-
-        currentAsnList = pelaksanaList || [];
-        renderAsnTable(currentAsnList);
-        populateAsnDropdowns(currentAsnList);
-
-    } catch (err) {
-        console.error('Gagal mengambil data master pelaksana:', err);
-    }
-}
-
-function renderAsnTable(data) {
-    const tbody = document.getElementById('asnTableBody');
-    const totalCountEl = document.getElementById('totalAsnCount');
-
-    if (totalCountEl) totalCountEl.textContent = data.length;
-    if (!tbody) return;
-
-    if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Belum ada data pelaksana tersimpan.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = data.map(item => `
-        <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="p-2.5">
-                <div class="font-bold text-slate-800 uppercase">${escapeHtml(item.nama_pelaksana)}</div>
-                <div class="text-[11px] font-mono text-slate-500">NIP. ${escapeHtml(item.nip || '-')}</div>
-            </td>
-            <td class="p-2.5 text-slate-600 font-medium">${escapeHtml(item.jabatan || '-')}</td>
-            <td class="p-2.5 text-center">
-                <button type="button" onclick="deleteAsnMaster('${item.id}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function populateAsnDropdowns(data) {
+function populateASNDropdowns() {
     const selectPelaksana = document.getElementById('namaPelaksana');
     const selectBendahara = document.getElementById('selectBendahara');
 
-    if (selectPelaksana) {
-        selectPelaksana.innerHTML = '<option value="">-- PILIH PELAKSANA UTAMA --</option>' +
-            data.map(item => `<option value="${escapeHtml(item.nama_pelaksana)}" data-nip="${escapeHtml(item.nip)}" data-jabatan="${escapeHtml(item.jabatan)}">${escapeHtml(item.nama_pelaksana)}</option>`).join('');
-    }
+    if (selectPelaksana) selectPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>';
+    if (selectBendahara) selectBendahara.innerHTML = '<option value="">-- Pilih Bendahara --</option>';
 
-    if (selectBendahara) {
-        selectBendahara.innerHTML = '<option value="">-- PILIH BENDAHARA PENGELUARAN --</option>' +
-            data.map(item => `<option value="${escapeHtml(item.nama_pelaksana)}" data-nip="${escapeHtml(item.nip)}">${escapeHtml(item.nama_pelaksana)}</option>`).join('');
-    }
-}
-
-function onNamaInputChanged(type, selectedNama) {
-    if (type === 'Pelaksana') {
-        const select = document.getElementById('namaPelaksana');
-        const selectedOption = select.options[select.selectedIndex];
+    currentMasterASN.forEach(asn => {
+        const namaUpper = asn.nama ? asn.nama.toUpperCase() : '';
         
-        document.getElementById('nipPelaksana').value = selectedOption ? (selectedOption.getAttribute('data-nip') || '') : '';
-        document.getElementById('jabatanPelaksana').value = selectedOption ? (selectedOption.getAttribute('data-jabatan') || '') : '';
-    }
-}
+        // Option Pelaksana Utama
+        if (selectPelaksana) {
+            const opt = document.createElement('option');
+            opt.value = asn.nip;
+            opt.textContent = `${namaUpper} - NIP. ${asn.nip}`;
+            selectPelaksana.appendChild(opt);
+        }
 
-function onBendaharaSelected(selectedNama) {
-    const select = document.getElementById('selectBendahara');
-    const selectedOption = select.options[select.selectedIndex];
-    document.getElementById('nipBendahara').value = selectedOption ? (selectedOption.getAttribute('data-nip') || '') : '';
-}
-
-async function deleteAsnMaster(id) {
-    if (!confirm('Apakah Anda yakin ingin menghapus pelaksana ini?')) return;
-
-    try {
-        const { error } = await supabaseClient
-            .from('master_pelaksana')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        await loadAsnMasterData();
-    } catch (err) {
-        alert('Gagal menghapus data: ' + err.message);
-    }
-}
-
-function filterAsnTable(keyword) {
-    const filter = keyword.toUpperCase();
-    const rows = document.querySelectorAll('#asnTableBody tr');
-
-    rows.forEach(row => {
-        const text = row.textContent || row.innerText;
-        row.style.display = text.toUpperCase().includes(filter) ? '' : 'none';
+        // Option Bendahara
+        if (selectBendahara) {
+            const optB = document.createElement('option');
+            optB.value = asn.nip;
+            optB.textContent = `${namaUpper} (${asn.jabatan || 'Bendahara'})`;
+            if (asn.jabatan && asn.jabatan.toLowerCase().includes('bendahara')) {
+                optB.selected = true;
+            }
+            selectBendahara.appendChild(optB);
+        }
     });
 }
 
+function autoFillPelaksanaUtama() {
+    const nipVal = document.getElementById('namaPelaksana').value;
+    const matched = currentMasterASN.find(a => a.nip === nipVal);
+
+    if (matched) {
+        document.getElementById('nipPelaksana').value = matched.nip || '-';
+        document.getElementById('jabatanPelaksana').value = matched.jabatan || '-';
+    } else {
+        document.getElementById('nipPelaksana').value = '';
+        document.getElementById('jabatanPelaksana').value = '';
+    }
+}
+
+// ----------------------------------------------------
+// MANAJEMEN TIM PENGIKUT
+// ----------------------------------------------------
+function tambahRowPengikut() {
+    pengikutCount++;
+    const tbody = document.getElementById('tbody-pengikut');
+    const tr = document.createElement('tr');
+    tr.id = `row-pengikut-${pengikutCount}`;
+    tr.className = 'hover:bg-slate-50';
+
+    let optionsAsn = '<option value="">-- Pilih ASN --</option>';
+    currentMasterASN.forEach(a => {
+        optionsAsn += `<option value="${a.nip}">${a.nama.toUpperCase()} - NIP. ${a.nip}</option>`;
+    });
+
+    tr.innerHTML = `
+        <td class="p-2 text-center font-bold text-slate-500 row-index">${tbody.children.length + 1}</td>
+        <td class="p-2">
+            <select class="w-full text-xs p-1.5 border border-slate-300 rounded mb-1 select-pengikut-asn" onchange="autoFillRowPengikut(${pengikutCount}, this.value)">
+                ${optionsAsn}
+            </select>
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nama uppercase" placeholder="NAMA PENGIKUT">
+        </td>
+        <td class="p-2">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-nip font-mono" placeholder="NIP">
+        </td>
+        <td class="p-2 space-y-1">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-pangkat" placeholder="Pangkat / Gol">
+            <input type="text" class="w-full text-xs p-1.5 border border-slate-300 rounded input-pengikut-jabatan" placeholder="Jabatan">
+        </td>
+        <td class="p-2 text-center">
+            <button type="button" onclick="hapusRowPengikut(${pengikutCount})" class="text-rose-600 hover:text-rose-800 p-1">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    updatePengikutIndices();
+    updateTotalBiayaEstimasi();
+}
+
+function autoFillRowPengikut(rowId, nip) {
+    const row = document.getElementById(`row-pengikut-${rowId}`);
+    if (!row) return;
+    const matched = currentMasterASN.find(a => a.nip === nip);
+    if (matched) {
+        row.querySelector('.input-pengikut-nama').value = matched.nama.toUpperCase();
+        row.querySelector('.input-pengikut-nip').value = matched.nip;
+        row.querySelector('.input-pengikut-pangkat').value = matched.pangkat || '-';
+        row.querySelector('.input-pengikut-jabatan').value = matched.jabatan || '-';
+    }
+}
+
+function hapusRowPengikut(rowId) {
+    const row = document.getElementById(`row-pengikut-${rowId}`);
+    if (row) row.remove();
+    updatePengikutIndices();
+    updateTotalBiayaEstimasi();
+}
+
+function updatePengikutIndices() {
+    const rows = document.querySelectorAll('#tbody-pengikut tr');
+    rows.forEach((r, idx) => {
+        r.querySelector('.row-index').textContent = idx + 1;
+    });
+}
+
+function renderPengikutTable() {
+    const tbody = document.getElementById('tbody-pengikut');
+    if (tbody && tbody.children.length === 0) {
+        tambahRowPengikut();
+    }
+}
+
+// ----------------------------------------------------
+// PENYIMPANAN DATA & PENGALIHAN KE CETAK.HTML
+// ----------------------------------------------------
+async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const nipUtama = document.getElementById('namaPelaksana').value;
+    const matchedPelaksana = currentMasterASN.find(a => a.nip === nipUtama);
+    const namaUtama = matchedPelaksana ? matchedPelaksana.nama.toUpperCase() : document.getElementById('namaPelaksana').options[document.getElementById('namaPelaksana').selectedIndex]?.text || '';
+
+    // Ambil Data Pengikut
+    const pengikutList = [];
+    document.querySelectorAll('#tbody-pengikut tr').forEach(row => {
+        const nama = row.querySelector('.input-pengikut-nama')?.value;
+        if (nama && nama.trim() !== '') {
+            pengikutList.push({
+                nama: nama.toUpperCase(),
+                nip: row.querySelector('.input-pengikut-nip')?.value || '-',
+                pangkat: row.querySelector('.input-pengikut-pangkat')?.value || '-',
+                jabatan: row.querySelector('.input-pengikut-jabatan')?.value || '-'
+            });
+        }
+    });
+
+    const recordData = {
+        id: Date.now().toString(),
+        noSuratTugas: document.getElementById('noSuratTugas').value,
+        noSPPD: document.getElementById('noSPPD').value,
+        kodeSK: document.getElementById('kodeSK').value,
+        sumberDana: document.getElementById('sumberDana').value,
+        tglMulai: document.getElementById('tglMulai').value,
+        tglKembali: document.getElementById('tglKembali').value,
+        lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
+        biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 0,
+        maksudPerdin: document.getElementById('maksudTujuan').value,
+        laporanHasil: document.getElementById('laporanHasil').value,
+        
+        // Pelaksana Utama
+        namaPelaksana: namaUtama,
+        nipPelaksana: document.getElementById('nipPelaksana').value,
+        jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
+        
+        // Lokasi
+        tempatBerangkat: document.getElementById('tempatBerangkat').value,
+        tempatTujuan: document.getElementById('tempatTujuan').value,
+        
+        // Pejabat TTD
+        namaPenggunaAnggaran: document.getElementById('namaPenggunaAnggaran').value,
+        nipPenggunaAnggaran: document.getElementById('nipPenggunaAnggaran').value,
+        nipBendahara: document.getElementById('selectBendahara').value,
+        namaPejabatTujuan: document.getElementById('namaPejabatTujuan').value,
+        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan').value,
+
+        pengikut: pengikutList,
+        createdAt: new Date().toISOString()
+    };
+
+    if (window.AppDB) {
+        await window.AppDB.saveRecord(recordData);
+    }
+
+    // Arahkan browser menuju cetak.html dengan menyertakan ID dokumen
+    window.location.href = `cetak.html?id=${recordData.id}`;
+}
+
+// ----------------------------------------------------
+// TABEL RIWAYAT PERDIN (DIARAHKAN KE CETAK.HTML)
+// ----------------------------------------------------
+async function renderRiwayatTable() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+    
+    let records = [];
+    if (window.AppDB) records = await window.AppDB.getAllRecords();
+
+    const searchKeyword = (document.getElementById('search-riwayat')?.value || '').toLowerCase();
+    const filtered = records.filter(r => 
+        (r.namaPelaksana && r.namaPelaksana.toLowerCase().includes(searchKeyword)) ||
+        (r.noSPPD && r.noSPPD.toLowerCase().includes(searchKeyword)) ||
+        (r.noSuratTugas && r.noSuratTugas.toLowerCase().includes(searchKeyword))
+    );
+
+    tbody.innerHTML = '';
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">Belum ada data riwayat perjalanan dinas.</td></tr>';
+        return;
+    }
+
+    filtered.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+            <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
+            <td class="p-3">
+                <div class="font-bold text-gov-900">${r.noSPPD || '-'}</div>
+                <div class="text-[11px] text-slate-500">ST: ${r.noSuratTugas || '-'}</div>
+            </td>
+            <td class="p-3 font-semibold text-slate-800 uppercase">${r.namaPelaksana || '-'}</td>
+            <td class="p-3">
+                <div class="font-bold">${r.tempatTujuan || '-'}</div>
+                <div class="text-[11px] text-slate-500">${r.tglMulai || ''} s/d ${r.tglKembali || r.tglMulai || ''} (${r.lamaHari || 1} Hari)</div>
+            </td>
+            <td class="p-3 font-mono text-[11px]">${r.kodeSK || '-'}</td>
+            <td class="p-3 text-center">
+                <a href="cetak.html?id=${r.id}" class="px-2.5 py-1 bg-gov-800 hover:bg-gov-900 text-white rounded text-[11px] font-bold transition inline-flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-file-lines"></i> Cetak Dokumen
+                </a>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ----------------------------------------------------
+// MODAL MANAGEMENT & MASTER DATA HAPUS/TAMBAH
+// ----------------------------------------------------
 function openModalAsn() {
     const modal = document.getElementById('modalAsn');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+    if (modal) modal.classList.remove('hidden'), modal.classList.add('flex');
 }
 
 function closeModalAsn() {
     const modal = document.getElementById('modalAsn');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+    if (modal) modal.classList.add('hidden'), modal.classList.remove('flex');
 }
 
-/* ====================================================================================
- * 4. LOGIKA PERHITUNGAN BIAYA & MANAJEMEN PENGIKUT
- * ==================================================================================== */
-
-function calculateLamaHariFromDates() {
-    const tglMulai = document.getElementById('tglMulai')?.value;
-    const tglKembali = document.getElementById('tglKembali')?.value;
-    const lamaHariEl = document.getElementById('lamaHari');
-
-    if (tglMulai && tglKembali && lamaHariEl) {
-        const d1 = new Date(tglMulai);
-        const d2 = new Date(tglKembali);
-        const diffTime = d2.getTime() - d1.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24)) + 1;
-
-        if (diffDays > 0) {
-            lamaHariEl.value = diffDays;
-        } else {
-            lamaHariEl.value = 1;
-        }
-    }
-    calculateTotalBiaya();
+function openModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) modal.classList.remove('hidden'), modal.classList.add('flex');
 }
 
-function calculateTotalBiaya() {
-    const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
-    const biayaPerOrang = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
-    
-    const pengikutContainer = document.getElementById('pengikutContainer');
-    const jumlahPengikut = pengikutContainer ? pengikutContainer.children.length : 0;
-    const totalOrang = 1 + jumlahPengikut;
-
-    const total = lamaHari * biayaPerOrang * totalOrang;
-
-    const totalBiayaEl = document.getElementById('totalBiayaFormatted');
-    const terbilangEl = document.getElementById('terbilang');
-
-    if (totalBiayaEl) {
-        totalBiayaEl.value = 'Rp ' + total.toLocaleString('id-ID');
-    }
-    if (terbilangEl) {
-        terbilangEl.value = total > 0 ? terbilangAngka(total) + ' Rupiah' : '';
-    }
+function closeModalSK() {
+    const modal = document.getElementById('modalSK');
+    if (modal) modal.classList.add('hidden'), modal.classList.remove('flex');
 }
 
-function addPengikutRow() {
-    const container = document.getElementById('pengikutContainer');
-    if (!container) return;
-
-    const rowId = 'pengikut_' + Date.now();
-    const div = document.createElement('div');
-    div.id = rowId;
-    div.className = "grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 items-center pengikut-row";
-
-    let optionsHtml = '<option value="">-- Pilih Pengikut --</option>';
-    currentAsnList.forEach(item => {
-        optionsHtml += `<option value="${escapeHtml(item.nama_pelaksana)}">${escapeHtml(item.nama_pelaksana)}</option>`;
-    });
-
-    div.innerHTML = `
-        <div>
-            <select onchange="onPengikutSelected('${rowId}', this.value)" class="w-full p-2 text-xs border rounded bg-white uppercase-input pengikut-nama">
-                ${optionsHtml}
-            </select>
-        </div>
-        <div>
-            <input type="text" id="${rowId}_nip" placeholder="NIP Pengikut" readonly class="w-full p-2 text-xs border rounded font-mono bg-slate-100 pengikut-nip">
-        </div>
-        <div class="flex items-center gap-2">
-            <input type="text" id="${rowId}_jabatan" placeholder="Jabatan Pengikut" readonly class="w-full p-2 text-xs border rounded bg-slate-100 pengikut-jabatan">
-            <button type="button" onclick="removePengikutRow('${rowId}')" class="text-rose-600 hover:text-rose-800 p-1 font-bold">
-                <i class="fa-solid fa-circle-xmark"></i>
-            </button>
-        </div>
-    `;
-
-    container.appendChild(div);
-    calculateTotalBiaya();
+function openModalManageSK() {
+    const modal = document.getElementById('modalManageSK');
+    if (modal) modal.classList.remove('hidden'), modal.classList.add('flex');
 }
 
-function onPengikutSelected(rowId, selectedNama) {
-    const asn = currentAsnList.find(a => a.nama_pelaksana === selectedNama);
-    const nipEl = document.getElementById(`${rowId}_nip`);
-    const jabatanEl = document.getElementById(`${rowId}_jabatan`);
-
-    if (nipEl) nipEl.value = asn ? asn.nip : '';
-    if (jabatanEl) jabatanEl.value = asn ? asn.jabatan : '';
+function closeModalManageSK() {
+    const modal = document.getElementById('modalManageSK');
+    if (modal) modal.classList.add('hidden'), modal.classList.remove('flex');
 }
 
-function removePengikutRow(rowId) {
-    const el = document.getElementById(rowId);
-    if (el) el.remove();
-    calculateTotalBiaya();
-}
-
-function getPengikutData() {
-    const pengikutRows = document.querySelectorAll('#pengikutContainer .pengikut-row');
-    const result = [];
-    pengikutRows.forEach(row => {
-        const nama = row.querySelector('.pengikut-nama')?.value;
-        const nip = row.querySelector('.pengikut-nip')?.value;
-        const jabatan = row.querySelector('.pengikut-jabatan')?.value;
-        if (nama) {
-            result.push({ nama, nip, jabatan });
-        }
-    });
-    return result;
-}
-
-/* ====================================================================================
- * 5. LOGIKA MODUL STEP 3: RIWAYAT DAN CETAK SPPD (Tabel: riwayat_perdin)
- * ==================================================================================== */
-
-async function loadHistoryData() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('riwayat_perdin')
-            .select('*')
-            .order('createdAt', { ascending: false });
-
-        if (error) throw error;
-
-        sppdHistoryList = data || [];
-        renderHistoryTable();
-
-    } catch (err) {
-        console.warn('Gagal memuat riwayat_perdin dari Supabase:', err.message);
-        const stored = localStorage.getItem('sppd_history_tabundung');
-        sppdHistoryList = stored ? JSON.parse(stored) : [];
-        renderHistoryTable();
-    }
-}
-
-function renderHistoryTable() {
-    const tbody = document.getElementById('historyTableBody');
-    if (!tbody) return;
-
-    if (sppdHistoryList.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada riwayat dokumen perjalanan dinas tersimpan.</td>
-            </tr>`;
-        return;
-    }
-
-    tbody.innerHTML = sppdHistoryList.map(item => `
-        <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="p-3">
-                <div class="font-bold text-slate-800">ST: ${escapeHtml(item.noSuratTugas || '-')}</div>
-                <div class="text-[11px] text-gov-700 font-mono">SPPD: ${escapeHtml(item.noSPPD || '-')}</div>
-            </td>
-            <td class="p-3 font-mono text-slate-600 font-semibold">${escapeHtml(item.kodeSK || '-')}</td>
-            <td class="p-3 font-bold text-slate-800 uppercase">${escapeHtml(item.namaPelaksana || '-')}</td>
-            <td class="p-3 text-slate-700 font-medium">${escapeHtml(item.tempatTujuan || '-')}</td>
-            <td class="p-3 font-bold text-emerald-700">Rp ${parseInt(item.totalBiaya || 0).toLocaleString('id-ID')}</td>
-            <td class="p-3 text-center space-x-1">
-                <button type="button" onclick="printSPPD('${item.id}')" class="bg-gov-700 hover:bg-gov-800 text-white px-2.5 py-1 rounded text-xs font-semibold" title="Cetak Dokumen">
-                    <i class="fa-solid fa-print"></i>
-                </button>
-                <button type="button" onclick="deleteHistoryItem('${item.id}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-1 rounded text-xs font-semibold" title="Hapus Riwayat">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-async function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const lamaHariVal = parseInt(document.getElementById('lamaHari')?.value) || 1;
-    const biayaPerOrangVal = parseInt(document.getElementById('biayaPerOrang')?.value) || 0;
-    const pengikutArr = getPengikutData();
-    const totalBiayaVal = lamaHariVal * biayaPerOrangVal * (1 + pengikutArr.length);
-
-    const tujuanUtama = document.getElementById('tempatTujuan')?.value || '';
-    const tujuan2 = document.getElementById('tempatTujuan2')?.value.trim();
-    const tujuan3 = document.getElementById('tempatTujuan3')?.value.trim();
-    
-    let lokasiTujuanGabungan = tujuanUtama;
-    if (tujuan2) lokasiTujuanGabungan += `, ${tujuan2.toUpperCase()}`;
-    if (tujuan3) lokasiTujuanGabungan += `, ${tujuan3.toUpperCase()}`;
-
-    // Payload SESUAI HEADER TABEL `riwayat_perdin` SUPABASE
-    const payload = {
-        noSuratTugas: document.getElementById('noSuratTugas')?.value || '',
-        noSPPD: document.getElementById('noSPPD')?.value || '',
-        noBku: '',
-        kodeSK: document.getElementById('step1_kodeSK')?.value || '',
-        sumberDana: document.getElementById('sumberDana')?.value || 'DAU',
-        dasarPelaksanaan: document.getElementById('maksudTujuan')?.value || '',
-        maksudTujuan: document.getElementById('maksudTujuan')?.value || '',
-        namaPelaksana: document.getElementById('namaPelaksana')?.value || '',
-        nipPelaksana: document.getElementById('nipPelaksana')?.value || '',
-        pangkatPelaksana: '',
-        jabatanPelaksana: document.getElementById('jabatanPelaksana')?.value || '',
-        pengikut: JSON.stringify(pengikutArr),
-        tempatBerangkat: document.getElementById('tempatBerangkat')?.value || '',
-        tempatTujuan: lokasiTujuanGabungan,
-        alatAngkutan: document.getElementById('alatAngkut')?.value || '',
-        tglMulai: document.getElementById('tglMulai')?.value || null,
-        tglSelesai: document.getElementById('tglKembali')?.value || null,
-        lamaHari: lamaHariVal,
-        biayaPerOrang: biayaPerOrangVal,
-        totalBiaya: totalBiayaVal,
-        namaPejabatTujuan: document.getElementById('namaPejabatTujuan')?.value || '',
-        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan')?.value || '',
-        nipPejabatTujuan: '',
-        namaCamat: document.getElementById('namaPenggunaAnggaran')?.value || 'RUDOLF UMBU RESI LOLY, ST',
-        nipCamat: document.getElementById('nipPenggunaAnggaran')?.value || '197205212006041008',
-        pangkatCamat: 'Pembina (IV/a)',
-        namaBendahara: document.getElementById('selectBendahara')?.value || '',
-        nipBendahara: document.getElementById('nipBendahara')?.value || '',
-        laporanHasil: document.getElementById('laporanHasil')?.value || '',
-        createdAt: new Date().toISOString()
+async function saveAsnMaster(e) {
+    e.preventDefault();
+    const newAsn = {
+        nama: document.getElementById('addAsnNama').value.toUpperCase(),
+        nip: document.getElementById('addAsnNip').value,
+        jabatan: document.getElementById('addAsnJabatan').value,
+        pangkat: document.getElementById('addAsnPangkat').value
     };
 
-    try {
-        const { data, error } = await supabaseClient
-            .from('riwayat_perdin')
-            .insert([payload])
-            .select();
-
-        if (error) throw error;
-
-        alert('Dokumen SPPD Berhasil Disimpan ke Database!');
-        
-        // Simpan cadangan ke LocalStorage
-        localStorage.setItem('sppd_history_tabundung', JSON.stringify(sppdHistoryList));
-
-        // Refresh & Pindah ke Step 3 (Riwayat dan Cetak SPPD)
-        await loadHistoryData();
-        switchStep(3);
-
-    } catch (err) {
-        console.error('Gagal menyimpan riwayat perdin ke Supabase:', err);
-        alert('Gagal menyimpan ke basis data online: ' + (err.message || 'Error Supabase'));
+    if (window.AppDB) {
+        await window.AppDB.saveMasterAsn(newAsn);
+        await loadInitialMasterData();
+        document.getElementById('formAddAsn').reset();
     }
 }
 
-async function deleteHistoryItem(id) {
-    if (!confirm('Hapus riwayat perjalanan dinas ini dari database?')) return;
+async function saveNewSK(e) {
+    e.preventDefault();
+    const newSk = {
+        kode: document.getElementById('newKodeSK').value,
+        nama: document.getElementById('newNamaSK').value,
+        quota: parseInt(document.getElementById('newQuotaSK').value) || 50
+    };
 
-    try {
-        const { error } = await supabaseClient
-            .from('riwayat_perdin')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-
-        alert('Riwayat berhasil dihapus.');
-        await loadHistoryData();
-    } catch (err) {
-        alert('Gagal menghapus riwayat: ' + err.message);
+    if (window.AppDB) {
+        await window.AppDB.saveMasterSK(newSk);
+        await loadInitialMasterData();
+        closeModalSK();
     }
 }
 
-function printSPPD(id) {
-    const item = sppdHistoryList.find(s => String(s.id) === String(id));
-    if (!item) return;
-    alert(`Mencetak Dokumen SPPD No: ${item.noSPPD} untuk ${item.namaPelaksana}`);
-    window.print();
+function renderMasterTables() {
+    // Master ASN
+    const tbodyAsn = document.getElementById('tbody-master-asn');
+    if (tbodyAsn) {
+        tbodyAsn.innerHTML = '';
+        currentMasterASN.forEach(asn => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="p-2 font-bold uppercase text-slate-800">${asn.nama}<br><span class="font-mono text-[10px] text-slate-500">${asn.nip}</span></td>
+                <td class="p-2">${asn.jabatan || '-'}</td>
+                <td class="p-2 text-center">
+                    <button onclick="hapusASN('${asn.nip}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbodyAsn.appendChild(tr);
+        });
+    }
+
+    // Master SK
+    const tbodySk = document.getElementById('tbody-master-sk');
+    if (tbodySk) {
+        tbodySk.innerHTML = '';
+        currentMasterSK.forEach(sk => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="p-2 font-mono font-bold text-slate-700">${sk.kode}</td>
+                <td class="p-2 font-medium">${sk.nama}</td>
+                <td class="p-2 text-center font-bold text-gov-800">${sk.quota || 50}</td>
+                <td class="p-2 text-center">
+                    <button onclick="hapusSK('${sk.kode}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbodySk.appendChild(tr);
+        });
+    }
 }
 
-/* ====================================================================================
- * HELPER UTILITY FUNCTIONS
- * ==================================================================================== */
-
-function downloadCsvTemplate() {
-    const csvContent = "data:text/csv;charset=utf-8,NAMA,NIP,PANGKAT,JABATAN\nPETRUS REMI;198501012010011001;Penata Muda III.a;Staf Umum\nMARIA GORETI;199002022015022002;Pembina IV.a;Kepala Seksi";
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "template_master_pelaksana.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+async function hapusASN(nip) {
+    if (confirm(`Hapus ASN dengan NIP ${nip}?`)) {
+        await window.AppDB.deleteMasterAsn(nip);
+        await loadInitialMasterData();
+    }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function terbilangAngka(angka) {
-    const bil = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-    if (angka < 12) return bil[angka];
-    else if (angka < 20) return terbilangAngka(angka - 10) + " Belas";
-    else if (angka < 100) return terbilangAngka(Math.floor(angka / 10)) + " Puluh " + terbilangAngka(angka % 10);
-    else if (angka < 200) return "Seratus " + terbilangAngka(angka - 100);
-    else if (angka < 1000) return terbilangAngka(Math.floor(angka / 100)) + " Ratus " + terbilangAngka(angka % 100);
-    else if (angka < 2000) return "Seribu " + terbilangAngka(angka - 1000);
-    else if (angka < 1000000) return terbilangAngka(Math.floor(angka / 1000)) + " Ribu " + terbilangAngka(angka % 1000);
-    else if (angka < 1000000000) return terbilangAngka(Math.floor(angka / 1000000)) + " Juta " + terbilangAngka(angka % 1000000);
-    return "";
+async function hapusSK(kode) {
+    if (confirm(`Hapus Sub Kegiatan ${kode}?`)) {
+        await window.AppDB.deleteMasterSK(kode);
+        await loadInitialMasterData();
+    }
 }
