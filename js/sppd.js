@@ -359,30 +359,93 @@ async function handleFormSubmit(e) {
     switchStep(3);
 }
 
+function formatRupiahRP(angka) {
+    const val = parseInt(angka) || 0;
+    return "Rp. " + val.toLocaleString('id-ID');
+}
+
+function openCetakPage(id) {
+    window.location.href = `cetak.html?id=${id}`;
+}
+
 function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    riwayatSPPD.forEach((item) => {
+
+    if (!riwayatSPPD || riwayatSPPD.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada riwayat perjalanan dinas.</td></tr>`;
+        return;
+    }
+
+    // Kelompokkan data riwayat berdasarkan Kode SK
+    const groupedBySK = {};
+    let grandTotalBiaya = 0;
+
+    riwayatSPPD.forEach(item => {
+        const kodeSK = item.kodeSK || '7.01.01.2.01.0003';
+        if (!groupedBySK[kodeSK]) {
+            groupedBySK[kodeSK] = [];
+        }
+        groupedBySK[kodeSK].push(item);
+    });
+
+    // Render tabel per Sub Kegiatan (SK) beserta Sub Total & Total Keseluruhan
+    Object.keys(groupedBySK).forEach(kodeSK => {
+        let subTotalSK = 0;
+
+        // Header Sub Kegiatan
         tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 border-b">
-                <td class="p-3 font-semibold">${item.noSuratTugas || '-'}<br><span class="text-[10px] text-slate-400">${item.noSPPD || '-'}</span></td>
-                <td class="p-3 font-mono">${item.kodeSK || '-'}</td>
-                <td class="p-3 font-bold">${item.namaPelaksana || item.pelaksanaUtama || '-'}</td>
-                <td class="p-3">${item.tempatTujuan || item.tujuan || '-'}</td>
-                <td class="p-3 font-bold text-emerald-700">${item.totalBiayaFormatted || item.totalBiaya || '0'}</td>
-                <td class="p-3 text-center flex items-center justify-center gap-2">
-                    <button type="button" onclick="window.print()" class="text-sky-600 hover:text-sky-800 font-bold" title="Cetak SPPD">
-                        <i class="fa-solid fa-print"></i>
-                    </button>
-                    <button type="button" onclick="deleteHistoryRecord(${item.id})" class="text-rose-600 hover:text-rose-800 font-bold" title="Hapus SPPD">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+            <tr class="bg-gov-900 text-white font-bold">
+                <td colspan="6" class="p-2.5 text-xs tracking-wider">
+                    <i class="fa-solid fa-folder-open text-sky-300 mr-2"></i> SUB KEGIATAN: ${kodeSK}
                 </td>
             </tr>
         `;
+
+        groupedBySK[kodeSK].forEach(item => {
+            const totalBiayaVal = parseFloat(item.totalBiaya) || 0;
+            subTotalSK += totalBiayaVal;
+            grandTotalBiaya += totalBiayaVal;
+
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-3 font-semibold">${item.noSuratTugas || '-'}<br><span class="text-[10px] text-slate-400">${item.noSPPD || '-'}</span></td>
+                    <td class="p-3 font-mono">${item.kodeSK || '-'}</td>
+                    <td class="p-3 font-bold uppercase">${item.namaPelaksana || item.pelaksanaUtama || '-'}</td>
+                    <td class="p-3">${item.tempatTujuan || item.tujuan || '-'}</td>
+                    <td class="p-3 font-bold text-emerald-700">${formatRupiahRP(totalBiayaVal)}</td>
+                    <td class="p-3 text-center flex items-center justify-center gap-2">
+                        <button type="button" onclick="openCetakPage(${item.id})" class="text-sky-600 hover:text-sky-800 font-bold p-1" title="Cetak SPPD">
+                            <i class="fa-solid fa-print"></i>
+                        </button>
+                        <button type="button" onclick="deleteHistoryRecord(${item.id})" class="text-rose-600 hover:text-rose-800 font-bold p-1" title="Hapus SPPD">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Baris Sub Total per SK
+        tbody.innerHTML += `
+            <tr class="bg-sky-50 font-bold border-b-2 border-slate-300">
+                <td colspan="4" class="p-2.5 text-right text-gov-900 uppercase text-xs">Sub Total Biaya Realisasi (${kodeSK}) :</td>
+                <td class="p-2.5 text-emerald-800 text-xs font-extrabold">${formatRupiahRP(subTotalSK)}</td>
+                <td></td>
+            </tr>
+        `;
     });
+
+    // Baris Grand Total Keseluruhan
+    tbody.innerHTML += `
+        <tr class="bg-emerald-100 font-extrabold border-t-2 border-emerald-500 text-slate-900">
+            <td colspan="4" class="p-3 text-right uppercase text-xs text-emerald-900">TOTAL KESELURUHAN BIAYA REALISASI :</td>
+            <td class="p-3 text-emerald-900 text-sm font-extrabold">${formatRupiahRP(grandTotalBiaya)}</td>
+            <td></td>
+        </tr>
+    `;
 }
 
 async function deleteHistoryRecord(id) {
