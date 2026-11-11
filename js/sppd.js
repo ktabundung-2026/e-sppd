@@ -108,10 +108,16 @@ function updateTotalBiayaEstimasi() {
     const lamaHari = parseInt(document.getElementById('lamaHari')?.value) || 1;
     const biayaPerOrang = parseFloat(document.getElementById('biayaPerOrang')?.value) || 0;
     
-    // Hitung total orang: Pelaksana Utama (1) + Pengikut
-    const totalPengikut = document.querySelectorAll('#tbody-pengikut tr').length;
-    const totalOrang = 1 + totalPengikut;
+    // Hitung total orang: Pelaksana Utama (1) + Pengikut Valid
+    let validPengikutCount = 0;
+    document.querySelectorAll('#tbody-pengikut tr').forEach(row => {
+        const nama = row.querySelector('.input-pengikut-nama')?.value;
+        if (nama && nama.trim() !== '') {
+            validPengikutCount++;
+        }
+    });
 
+    const totalOrang = 1 + validPengikutCount;
     const totalBiaya = lamaHari * biayaPerOrang * totalOrang;
 
     const elemFormatted = document.getElementById('totalBiayaFormatted');
@@ -176,7 +182,6 @@ function populateASNDropdowns() {
     currentMasterASN.forEach(asn => {
         const namaUpper = asn.nama ? asn.nama.toUpperCase() : '';
         
-        // Option Pelaksana Utama
         if (selectPelaksana) {
             const opt = document.createElement('option');
             opt.value = asn.nip;
@@ -184,7 +189,6 @@ function populateASNDropdowns() {
             selectPelaksana.appendChild(opt);
         }
 
-        // Option Bendahara
         if (selectBendahara) {
             const optB = document.createElement('option');
             optB.value = asn.nip;
@@ -273,14 +277,15 @@ function hapusRowPengikut(rowId) {
 function updatePengikutIndices() {
     const rows = document.querySelectorAll('#tbody-pengikut tr');
     rows.forEach((r, idx) => {
-        r.querySelector('.row-index').textContent = idx + 1;
+        const elemIndex = r.querySelector('.row-index');
+        if (elemIndex) elemIndex.textContent = idx + 1;
     });
 }
 
 function renderPengikutTable() {
     const tbody = document.getElementById('tbody-pengikut');
     if (tbody && tbody.children.length === 0) {
-        tambahRowPengikut();
+        // Biarkan kosong di awal agar pengguna memasukkan pengikut secara sukarela
     }
 }
 
@@ -292,15 +297,24 @@ async function handleFormSubmit(event) {
 
     const nipUtama = document.getElementById('namaPelaksana').value;
     const matchedPelaksana = currentMasterASN.find(a => a.nip === nipUtama);
-    const namaUtama = matchedPelaksana ? matchedPelaksana.nama.toUpperCase() : document.getElementById('namaPelaksana').options[document.getElementById('namaPelaksana').selectedIndex]?.text || '';
+    
+    let namaUtama = "";
+    let pangkatUtama = "-";
+    if (matchedPelaksana) {
+        namaUtama = matchedPelaksana.nama.toUpperCase();
+        pangkatUtama = matchedPelaksana.pangkat || "-";
+    } else {
+        const selectElem = document.getElementById('namaPelaksana');
+        namaUtama = selectElem.options[selectElem.selectedIndex]?.text || '';
+    }
 
-    // Ambil Data Pengikut
+    // Ambil Data Pengikut Murni yang Diisi (Filter yang kosong)
     const pengikutList = [];
     document.querySelectorAll('#tbody-pengikut tr').forEach(row => {
-        const nama = row.querySelector('.input-pengikut-nama')?.value;
-        if (nama && nama.trim() !== '') {
+        const namaInput = row.querySelector('.input-pengikut-nama')?.value;
+        if (namaInput && namaInput.trim() !== '') {
             pengikutList.push({
-                nama: nama.toUpperCase(),
+                nama: namaInput.trim().toUpperCase(),
                 nip: row.querySelector('.input-pengikut-nip')?.value || '-',
                 pangkat: row.querySelector('.input-pengikut-pangkat')?.value || '-',
                 jabatan: row.querySelector('.input-pengikut-jabatan')?.value || '-'
@@ -324,6 +338,7 @@ async function handleFormSubmit(event) {
         // Pelaksana Utama
         namaPelaksana: namaUtama,
         nipPelaksana: document.getElementById('nipPelaksana').value,
+        pangkatPelaksana: pangkatUtama,
         jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
         
         // Lokasi
@@ -345,12 +360,12 @@ async function handleFormSubmit(event) {
         await window.AppDB.saveRecord(recordData);
     }
 
-    // Arahkan browser menuju cetak.html dengan menyertakan ID dokumen
+    // Arahkan ke cetak.html membawa query parameter ID record
     window.location.href = `cetak.html?id=${recordData.id}`;
 }
 
 // ----------------------------------------------------
-// TABEL RIWAYAT PERDIN (DIARAHKAN KE CETAK.HTML)
+// TABEL RIWAYAT PERDIN
 // ----------------------------------------------------
 async function renderRiwayatTable() {
     const tbody = document.getElementById('historyTableBody');
@@ -398,7 +413,7 @@ async function renderRiwayatTable() {
 }
 
 // ----------------------------------------------------
-// MODAL MANAGEMENT & MASTER DATA HAPUS/TAMBAH
+// MODAL MANAGEMENT & MASTER DATA
 // ----------------------------------------------------
 function openModalAsn() {
     const modal = document.getElementById('modalAsn');
@@ -462,7 +477,6 @@ async function saveNewSK(e) {
 }
 
 function renderMasterTables() {
-    // Master ASN
     const tbodyAsn = document.getElementById('tbody-master-asn');
     if (tbodyAsn) {
         tbodyAsn.innerHTML = '';
@@ -480,7 +494,6 @@ function renderMasterTables() {
         });
     }
 
-    // Master SK
     const tbodySk = document.getElementById('tbody-master-sk');
     if (tbodySk) {
         tbodySk.innerHTML = '';
