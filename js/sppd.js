@@ -299,37 +299,50 @@ function proceedToStep2() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
+
+    const lamaHariVal = parseInt(document.getElementById('lamaHari').value) || 1;
+    const biayaPerOrangVal = parseFloat(document.getElementById('biayaPerOrang').value) || 0;
+    const jumlahPersonel = 1 + (daftarPengikut ? daftarPengikut.length : 0);
+    const totalBiayaVal = lamaHariVal * biayaPerOrangVal * jumlahPersonel;
+
+    // Ambil data Bendahara yang dipilih
+    const namaBendaharaVal = document.getElementById('selectBendahara').value || '';
+    const nipBendaharaVal = document.getElementById('nipBendahara').value || '';
+
+    // Buat Objek Record Presisi Sesuai Header Kolom Supabase
     const record = {
-    id: Date.now(),
-    noSuratTugas: document.getElementById('noSuratTugas').value,
-    noSPPD: document.getElementById('noSPPD').value,
-    kodeSK: document.getElementById('step1_kodeSK').value,
-    maksudPerdin: document.getElementById('maksudTujuan').value,
-    namaPelaksana: document.getElementById('namaPelaksana').value,
-    nipPelaksana: document.getElementById('nipPelaksana').value,
-    pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
-    jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
-    tempatBerangkat: document.getElementById('tempatBerangkat').value,
-    tempatTujuan: document.getElementById('tempatTujuan').value,
-    tglMulai: document.getElementById('tglMulai').value,
-    tglKembali: document.getElementById('tglKembali').value,
-    lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
-    biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 170000,
-    pengikut: [...daftarPengikut],
-    laporanHasil: document.getElementById('laporanHasil').value,
-    // Rute Opsional & Penandatangan
-    tempatTujuan2: document.getElementById('tempatTujuan2').value,
-    tglTiba2: document.getElementById('tglTiba2').value,
-    tglBerangkat2: document.getElementById('tglBerangkat2').value,
-    pejabatTujuan2: document.getElementById('pejabatTujuan2').value,
-    tempatTujuan3: document.getElementById('tempatTujuan3').value,
-    tglTiba3: document.getElementById('tglTiba3').value,
-    tglBerangkat3: document.getElementById('tglBerangkat3').value,
-    pejabatTujuan3: document.getElementById('pejabatTujuan3').value,
-    namaPejabatTujuan: document.getElementById('namaPejabatTujuan').value,
-    jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan').value,
-    createdAt: new Date().toISOString()
-};
+        id: Date.now(),
+        noSuratTugas: document.getElementById('noSuratTugas').value || '-',
+        noSPPD: document.getElementById('noSPPD').value || '-',
+        noBku: '', // opsional / diisi nanti
+        kodeSK: document.getElementById('step1_kodeSK').value || '',
+        sumberDana: document.getElementById('sumberDana').value || 'DAU',
+        dasarPelaksanaan: `DPA Kecamatan Tabundung Kabupaten Sumba Timur Tahun Anggaran 2026`,
+        maksudPerdin: document.getElementById('maksudPerdin').value || '-',
+        namaPelaksana: document.getElementById('namaPelaksana').value || '-',
+        nipPelaksana: document.getElementById('nipPelaksana').value || '-',
+        pangkatPelaksana: document.getElementById('pangkatPelaksana').value || '-',
+        jabatanPelaksana: document.getElementById('jabatanPelaksana').value || '-',
+        pengikut: daftarPengikut || [], // JSONB di Supabase
+        tempatBerangkat: document.getElementById('tempatBerangkat').value || 'Malahar',
+        tempatTujuan: document.getElementById('tempatTujuan').value || '-',
+        alatAngkutan: 'Kendaraan Roda Dua',
+        tglMulai: document.getElementById('tglMulai').value || null,
+        tglKembali: document.getElementById('tglKembali').value || document.getElementById('tglMulai').value || null,
+        lamaHari: lamaHariVal,
+        biayaPerOrang: biayaPerOrangVal,
+        totalBiaya: totalBiayaVal,
+        namaPejabatTujuan: document.getElementById('namaPejabatTujuan').value || '',
+        jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan').value || '',
+        nipPejabatTujuan: '-',
+        namaCamat: document.getElementById('namaPenggunaAnggaran').value || 'RUDOLF UMBU RESI LOLY, ST',
+        nipCamat: document.getElementById('nipPenggunaAnggaran').value || '197205212006041008',
+        pangkatCamat: 'Pembina',
+        namaBendahara: namaBendaharaVal,
+        nipBendahara: nipBendaharaVal,
+        laporanHasil: document.getElementById('laporanHasil').value || '',
+        createdAt: new Date().toISOString()
+    };
 
     if (window.AppDB) await window.AppDB.saveRecord(record);
     riwayatSPPD.unshift(record);
