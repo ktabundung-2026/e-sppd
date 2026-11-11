@@ -300,17 +300,36 @@ function proceedToStep2() {
 async function handleFormSubmit(e) {
     e.preventDefault();
     const record = {
-        id: Date.now(),
-        noST: document.getElementById('noSuratTugas').value,
-        noSPPD: document.getElementById('noSPPD').value,
-        kodeSK: document.getElementById('step1_kodeSK').value,
-        namaPelaksana: document.getElementById('namaPelaksana').value,
-        tempatTujuan: document.getElementById('tempatTujuan').value,
-        totalBiayaFormatted: document.getElementById('totalBiayaFormatted').value,
-        tglMulai: document.getElementById('tglMulai').value,
-        lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
-        pengikut: daftarPengikut
-    };
+    id: Date.now(),
+    noSuratTugas: document.getElementById('noSuratTugas').value,
+    noSPPD: document.getElementById('noSPPD').value,
+    kodeSK: document.getElementById('step1_kodeSK').value,
+    maksudPerdin: document.getElementById('maksudTujuan').value,
+    namaPelaksana: document.getElementById('namaPelaksana').value,
+    nipPelaksana: document.getElementById('nipPelaksana').value,
+    pangkatPelaksana: document.getElementById('pangkatPelaksana').value,
+    jabatanPelaksana: document.getElementById('jabatanPelaksana').value,
+    tempatBerangkat: document.getElementById('tempatBerangkat').value,
+    tempatTujuan: document.getElementById('tempatTujuan').value,
+    tglMulai: document.getElementById('tglMulai').value,
+    tglKembali: document.getElementById('tglKembali').value,
+    lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
+    biayaPerOrang: parseFloat(document.getElementById('biayaPerOrang').value) || 170000,
+    pengikut: [...daftarPengikut],
+    laporanHasil: document.getElementById('laporanHasil').value,
+    // Rute Opsional & Penandatangan
+    tempatTujuan2: document.getElementById('tempatTujuan2').value,
+    tglTiba2: document.getElementById('tglTiba2').value,
+    tglBerangkat2: document.getElementById('tglBerangkat2').value,
+    pejabatTujuan2: document.getElementById('pejabatTujuan2').value,
+    tempatTujuan3: document.getElementById('tempatTujuan3').value,
+    tglTiba3: document.getElementById('tglTiba3').value,
+    tglBerangkat3: document.getElementById('tglBerangkat3').value,
+    pejabatTujuan3: document.getElementById('pejabatTujuan3').value,
+    namaPejabatTujuan: document.getElementById('namaPejabatTujuan').value,
+    jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan').value,
+    createdAt: new Date().toISOString()
+};
 
     if (window.AppDB) await window.AppDB.saveRecord(record);
     riwayatSPPD.unshift(record);
@@ -328,7 +347,7 @@ function renderHistoryTable() {
     riwayatSPPD.forEach((item) => {
         tbody.innerHTML += `
             <tr class="hover:bg-slate-50 border-b">
-                <td class="p-3 font-semibold">${item.noST || '-'}<br><span class="text-[10px] text-slate-400">${item.noSPPD || '-'}</span></td>
+                <td class="p-3 font-semibold">${item.noSuratTugas || '-'}<br><span class="text-[10px] text-slate-400">${item.noSPPD || '-'}</span></td>
                 <td class="p-3 font-mono">${item.kodeSK || '-'}</td>
                 <td class="p-3 font-bold">${item.namaPelaksana || item.pelaksanaUtama || '-'}</td>
                 <td class="p-3">${item.tempatTujuan || item.tujuan || '-'}</td>
