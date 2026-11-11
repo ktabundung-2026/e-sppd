@@ -477,10 +477,10 @@
                 <tr>
                     <td class="text-center font-bold">7.</td>
                     <td colspan="2">
-                        <div class="mb-1">Pengikut :</div>
-                        <div class="flex justify-between font-normal text-xs mb-1 border-b pb-0.5">
-                            <span class="w-[45%] font-bold">Nama</span>
-                            <span class="w-[50%] font-bold">NIP</span>
+                        <div class="mb-1 font-bold">Pengikut :</div>
+                        <div class="flex justify-between font-bold text-xs mb-1 border-b pb-0.5">
+                            <span class="w-[45%]">Nama</span>
+                            <span class="w-[50%]">NIP / Pangkat</span>
                         </div>
                         <div id="sppd-container-pengikut" class="space-y-1 text-xs"></div>
                     </td>
@@ -1012,6 +1012,12 @@
             const matchedSK = skList.find(s => s.kode === recordData.kodeSK);
             const namaSubKegiatan = matchedSK ? matchedSK.nama : "Penyelenggaraan Urusan Pemerintahan Umum";
 
+            // Normalisasi Maksud Perjalanan Dinas (Fallback Lengkap)
+            const maksudDinamis = recordData.maksudTujuan || recordData.maksudPerdin || recordData.maksud || recordData.maksudPerjalanan || '-';
+
+            // Normalisasi Pangkat Pelaksana Utama (Fallback Lengkap)
+            const pangkatDinamis = recordData.pangkatPelaksana || recordData.pangkat || recordData.golongan || '-';
+
             // ---------------------------------------------
             // 1. POPULASI BAGIAN 1: SURAT TUGAS
             // ---------------------------------------------
@@ -1019,28 +1025,32 @@
                 document.getElementById('st-noSuratTugas').textContent = recordData.noSuratTugas || '-';
                 document.getElementById('st-kodeSK').textContent = recordData.kodeSK || '7.01.01.2.01.0003';
                 document.getElementById('st-namaSK').textContent = namaSubKegiatan;
-                document.getElementById('st-maksudPerdin').textContent = recordData.maksudPerdin || recordData.maksudTujuan || '-';
+                document.getElementById('st-maksudPerdin').textContent = maksudDinamis;
                 document.getElementById('st-tglDikeluarkan').textContent = recordData.tglMulai || '-';
                 document.getElementById('st-tempatDikeluarkan').textContent = recordData.tempatBerangkat || 'Tabundung';
                 
+                // Susun Tim Lengkap (Pelaksana Utama + Pengikut)
                 const timLengkap = [
                     {
                         nama: recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-',
-                        nip: recordData.nipPelaksana || '-',
-                        pangkat: recordData.pangkatPelaksana || '-',
-                        jabatan: recordData.jabatanPelaksana || '-'
+                        nip: recordData.nipPelaksana || recordData.nip || '-',
+                        pangkat: pangkatDinamis,
+                        jabatan: recordData.jabatanPelaksana || recordData.jabatan || '-'
                     }
                 ];
 
                 if (Array.isArray(recordData.pengikut)) {
                     recordData.pengikut.forEach(p => {
-                        if (p && p.nama && p.nama.trim() !== '') {
-                            timLengkap.push({
-                                nama: p.nama.toUpperCase(),
-                                nip: p.nip || '-',
-                                pangkat: p.pangkat || '-',
-                                jabatan: p.jabatan || '-'
-                            });
+                        if (p) {
+                            const namaP = p.nama || p.namaPengikut || p.namaAsn;
+                            if (namaP && namaP.trim() !== '') {
+                                timLengkap.push({
+                                    nama: namaP.toUpperCase(),
+                                    nip: p.nip || p.nipPengikut || '-',
+                                    pangkat: p.pangkat || p.pangkatPengikut || p.golongan || '-',
+                                    jabatan: p.jabatan || p.jabatanPengikut || '-'
+                                });
+                            }
                         }
                     });
                 }
@@ -1086,10 +1096,10 @@
             if(document.getElementById('sppd-noSPPD')) {
                 document.getElementById('sppd-noSPPD').textContent = recordData.noSPPD || '-';
                 document.getElementById('sppd-namaPelaksana').textContent = recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-';
-                document.getElementById('sppd-nipPelaksana').textContent = recordData.nipPelaksana || '-';
-                document.getElementById('sppd-pangkatPelaksana').textContent = recordData.pangkatPelaksana || '-';
-                document.getElementById('sppd-jabatanPelaksana').textContent = recordData.jabatanPelaksana || '-';
-                document.getElementById('sppd-maksudPerdin').textContent = recordData.maksudPerdin || recordData.maksudTujuan || '-';
+                document.getElementById('sppd-nipPelaksana').textContent = recordData.nipPelaksana || recordData.nip || '-';
+                document.getElementById('sppd-pangkatPelaksana').textContent = pangkatDinamis;
+                document.getElementById('sppd-jabatanPelaksana').textContent = recordData.jabatanPelaksana || recordData.jabatan || '-';
+                document.getElementById('sppd-maksudPerdin').textContent = maksudDinamis;
                 document.getElementById('sppd-alatAngkut').textContent = recordData.alatAngkut || 'Kendaraan Roda Dua';
                 document.getElementById('sppd-tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
                 document.getElementById('sppd-tempatTujuan').textContent = recordData.tempatTujuan || '-';
@@ -1101,17 +1111,25 @@
 
                 const pengikutContainer = document.getElementById('sppd-container-pengikut');
                 pengikutContainer.innerHTML = '';
-                if (recordData.pengikut && recordData.pengikut.length > 0) {
+                if (Array.isArray(recordData.pengikut) && recordData.pengikut.length > 0) {
+                    let hasPengikut = false;
                     recordData.pengikut.forEach((p, idx) => {
-                        if (p && p.nama) {
+                        const namaP = p ? (p.nama || p.namaPengikut || p.namaAsn) : null;
+                        if (namaP) {
+                            hasPengikut = true;
+                            const nipP = p.nip || p.nipPengikut || '-';
+                            const pangkatP = p.pangkat || p.pangkatPengikut || p.golongan || '-';
                             pengikutContainer.innerHTML += `
-                                <div class="flex justify-between text-xs">
-                                    <span class="w-[45%] uppercase">${idx + 1}. ${p.nama}</span>
-                                    <span class="w-[50%]">${p.nip || '-'}</span>
+                                <div class="flex justify-between text-xs py-0.5 border-b border-slate-100">
+                                    <span class="w-[45%] uppercase font-medium">${idx + 1}. ${namaP}</span>
+                                    <span class="w-[50%]">${nipP}${pangkatP !== '-' ? ' (' + pangkatP + ')' : ''}</span>
                                 </div>
                             `;
                         }
                     });
+                    if (!hasPengikut) {
+                        pengikutContainer.innerHTML = '<div class="italic text-slate-400 text-xs">- Tidak ada pengikut -</div>';
+                    }
                 } else {
                     pengikutContainer.innerHTML = '<div class="italic text-slate-400 text-xs">- Tidak ada pengikut -</div>';
                 }
@@ -1130,7 +1148,7 @@
             // ---------------------------------------------
             // 5. POPULASI BAGIAN 5: LAPORAN PERJALANAN DINAS
             // ---------------------------------------------
-            populateLaporanHasil(recordData);
+            populateLaporanHasil(recordData, maksudDinamis);
 
             // ---------------------------------------------
             // 6. POPULASI BAGIAN 6: KWITANSI
@@ -1145,9 +1163,10 @@
 
             if (Array.isArray(recordData.pengikut)) {
                 recordData.pengikut.forEach((p, idx) => {
-                    if (p && p.nama) {
+                    const namaP = p ? (p.nama || p.namaPengikut || p.namaAsn) : null;
+                    if (namaP) {
                         timKwitansi.push({
-                            nama: `${idx + 2}. ${p.nama.toUpperCase()}`,
+                            nama: `${idx + 2}. ${namaP.toUpperCase()}`,
                             vol: parseInt(recordData.lamaHari) || 1,
                             harga: parseInt(recordData.biayaPerOrang) || 170000
                         });
@@ -1156,7 +1175,7 @@
             }
 
             if(document.getElementById('kwitansi-maksudTujuan')) {
-                document.getElementById('kwitansi-maksudTujuan').textContent = `Dalam Rangka ${recordData.maksudPerdin || recordData.maksudTujuan || 'Perjalanan Dinas'} di ${recordData.tempatTujuan || '-'} pada Tanggal ${recordData.tglMulai || '-'}.`;
+                document.getElementById('kwitansi-maksudTujuan').textContent = `Dalam Rangka ${maksudDinamis} di ${recordData.tempatTujuan || '-'} pada Tanggal ${recordData.tglMulai || '-'}.`;
             }
 
             if(document.getElementById('lap-tgl')) {
@@ -1205,14 +1224,14 @@
         }
 
         // FUNGSI POPULASI LAPORAN PERJALANAN DINAS (BAGIAN 5)
-        function populateLaporanHasil(recordData) {
+        function populateLaporanHasil(recordData, maksudPerdinText) {
             if (!recordData) return;
 
             if (document.getElementById('lap-dasarST')) {
                 document.getElementById('lap-dasarST').textContent = `Surat Tugas Nomor: ${recordData.noSuratTugas || '-'}`;
             }
             if (document.getElementById('lap-maksudPerdin')) {
-                document.getElementById('lap-maksudPerdin').textContent = recordData.maksudPerdin || recordData.maksudTujuan || '-';
+                document.getElementById('lap-maksudPerdin').textContent = maksudPerdinText || '-';
             }
             if (document.getElementById('lap-waktuPelaksanaan')) {
                 document.getElementById('lap-waktuPelaksanaan').textContent = `${recordData.tglMulai || '-'} s/d ${recordData.tglKembali || recordData.tglMulai || '-'} (${recordData.lamaHari || 1} Hari)`;
@@ -1222,14 +1241,15 @@
             }
 
             // Susun Pelaksana Tugas
-            const containerPelaksana = document.getElementById('lap-container-pegawai');
+            const containerPelaksana = document.getElementById('lap-container-pelaksana');
             if (containerPelaksana) {
                 containerPelaksana.innerHTML = '';
-                let htmlPeg = `<div class="font-bold">${recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-'} (NIP. ${recordData.nipPelaksana || '-'})</div>`;
+                let htmlPeg = `<div class="font-bold">1. ${recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-'} (NIP. ${recordData.nipPelaksana || recordData.nip || '-'})</div>`;
                 if (Array.isArray(recordData.pengikut) && recordData.pengikut.length > 0) {
                     recordData.pengikut.forEach((p, idx) => {
-                        if (p && p.nama) {
-                            htmlPeg += `<div class="mt-0.5">${idx + 2}. ${p.nama.toUpperCase()} (NIP. ${p.nip || '-'})</div>`;
+                        const namaP = p ? (p.nama || p.namaPengikut || p.namaAsn) : null;
+                        if (namaP) {
+                            htmlPeg += `<div class="mt-0.5"><sup></sup>${idx + 2}. ${namaP.toUpperCase()} (NIP. ${p.nip || p.nipPengikut || '-'})</div>`;
                         }
                     });
                 }
@@ -1247,7 +1267,7 @@
             if (document.getElementById('lap-ttd-tempat')) document.getElementById('lap-ttd-tempat').textContent = recordData.tempatBerangkat || 'Tabundung';
             if (document.getElementById('lap-ttd-tgl')) document.getElementById('lap-ttd-tgl').textContent = recordData.tglKembali || recordData.tglMulai || '-';
             if (document.getElementById('lap-ttd-nama')) document.getElementById('lap-ttd-nama').textContent = recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-';
-            if (document.getElementById('lap-ttd-nip')) document.getElementById('lap-ttd-nip').textContent = recordData.nipPelaksana || '-';
+            if (document.getElementById('lap-ttd-nip')) document.getElementById('lap-ttd-nip').textContent = recordData.nipPelaksana || recordData.nip || '-';
         }
 
         function renderRincianTabel(data) {
