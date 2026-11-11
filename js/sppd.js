@@ -1,15 +1,14 @@
 /**
  * Logika dan Manajemen Form e-SPPD Terpadu - Kecamatan Tabundung
- * Penyimpanan Data Pelaksana: master_pelaksana
+ * Terintegrasi Terpusat dengan AppDB (js/db.js) untuk master_pelaksana & master_sk
  */
 
-// Variabel Global Data
-let masterPelaksana = [];
+let masterASN = [];
 let masterSK = [];
 let daftarPengikut = [];
 let riwayatSPPD = [];
 
-// Map Bobot Hirarki Jabatan Kedinasan (Angka lebih kecil = Posisi lebih tinggi)
+// Urutan Bobot Hirarki Jabatan Kedinasan
 const HIRARKI_JABATAN = [
     { keyword: "CAMAT", rank: 1 },
     { keyword: "SEKRETARIS CAMAT", rank: 2 },
@@ -28,7 +27,6 @@ const HIRARKI_JABATAN = [
     { keyword: "HONOR", rank: 8 }
 ];
 
-// Inisialisasi Saat Halaman Dimuat
 document.addEventListener('DOMContentLoaded', async () => {
     await loadInitialData();
     populateSelects();
@@ -38,95 +36,72 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * Mengurutkan array ASN/Pelaksana berdasarkan hirarki jabatan
+ * Mengurutkan array ASN berdasarkan Hirarki Jabatan
  */
-function sortPelaksanaByHirarki(list) {
+function sortASNByHirarki(list) {
     return list.sort((a, b) => {
         const getRank = (jabatan) => {
             if (!jabatan) return 99;
             const uppercaseJab = jabatan.toUpperCase();
             for (let item of HIRARKI_JABATAN) {
-                if (uppercaseJab.includes(item.keyword)) {
-                    return item.rank;
-                }
+                if (uppercaseJab.includes(item.keyword)) return item.rank;
             }
-            return 50; // default rank menengah jika tidak sesuai keyword
+            return 50;
         };
 
         const rankA = getRank(a.jabatan);
         const rankB = getRank(b.jabatan);
 
-        if (rankA !== rankB) {
-            return rankA - rankB;
-        }
-        // Jika tingkat hirarki sama, urutkan berdasarkan Nama secara Alfabetis
+        if (rankA !== rankB) return rankA - rankB;
         return (a.nama || '').localeCompare(b.nama || '');
     });
 }
 
 /**
- * Memuat data awal dari Dexie (tabel master_pelaksana) / LocalStorage
+ * Memuat Data awal dari AppDB (js/db.js)
  */
 async function loadInitialData() {
     try {
-        if (typeof db !== 'undefined' && db.master_pelaksana) {
-            masterPelaksana = await db.master_pelaksana.toArray();
-            masterSK = await db.sk ? await db.sk.toArray() : [];
-            riwayatSPPD = await db.sppd ? await db.sppd.toArray() : [];
-        } else if (typeof db !== 'undefined' && db.asn) {
-            // Fallback backward compatibility
-            masterPelaksana = await db.asn.toArray();
-            masterSK = await db.sk ? await db.sk.toArray() : [];
-            riwayatSPPD = await db.sppd ? await db.sppd.toArray() : [];
-        } else {
-            masterPelaksana = JSON.parse(localStorage.getItem('master_pelaksana')) || [
-                { id: 1, nama: "RUDOLF UMBU RESI LOLY, ST", nip: "197205212006041008", pangkat: "Pembina / IV.a", jabatan: "Camat Tabundung" },
-                { id: 2, nama: "YOHANES NDAPA, S.IP", nip: "198001012005011002", pangkat: "Penata / III.c", jabatan: "Sekretaris Camat" },
-                { id: 3, nama: "MARIA KIKU, S.AP", nip: "198502022008022004", pangkat: "Penata Muda / III.a", jabatan: "Kepala Sub Bagian Umum" },
-                { id: 4, nama: "AHMAD FADLI, A.Md", nip: "199203032015031001", pangkat: "Pengatur / II.c", jabatan: "Pengelola Keuangan" }
-            ];
-            masterSK = JSON.parse(localStorage.getItem('master_sk')) || [
-                { id: 1, kode: "5.01.01.2.01", nama: "Koordinasi Pelaksanaan Kegiatan Pemerintahan", kuota: 50 },
-                { id: 2, kode: "5.01.01.2.02", nama: "Pemberdayaan Masyarakat Desa & Kelurahan", kuota: 30 }
-            ];
-            riwayatSPPD = JSON.parse(localStorage.getItem('riwayat_sppd')) || [];
+        if (window.AppDB) {
+            masterASN = await window.AppDB.getMasterAsn();
+            masterSK = await window.AppDB.getMasterSK();
+            riwayatSPPD = await window.AppDB.getAllRecords();
         }
     } catch (err) {
-        console.error("Gagal memuat data master:", err);
+        console.error("Gagal memuat data master dari AppDB:", err);
     }
-
-    // Urutkan data berdasarkan hirarki jabatan
-    masterPelaksana = sortPelaksanaByHirarki(masterPelaksana);
+    masterASN = sortASNByHirarki(masterASN);
 }
 
 /**
- * Mengisi Dropdown Master
+ * Mengisi Dropdown Form
  */
 function populateSelects() {
-    // Dropdown Pelaksana Utama
+    // 1. Dropdown Pelaksana Utama
     const selPelaksana = document.getElementById('namaPelaksana');
     if (selPelaksana) {
         selPelaksana.innerHTML = '<option value="">-- Pilih Pelaksana Utama --</option>';
-        masterPelaksana.forEach(asn => {
+        masterASN.forEach(asn => {
             selPelaksana.innerHTML += `<option value="${asn.nama}">${asn.nama}</option>`;
         });
     }
 
-    // Dropdown Bendahara
+    // 2. Dropdown Bendahara
     const selBendahara = document.getElementById('selectBendahara');
     if (selBendahara) {
         selBendahara.innerHTML = '<option value="">-- Pilih Bendahara Pengeluaran --</option>';
-        masterPelaksana.forEach(asn => {
+        masterASN.forEach(asn => {
             selBendahara.innerHTML += `<option value="${asn.nama}">${asn.nama}</option>`;
         });
     }
 
-    // Dropdown Kode SK
+    // 3. Dropdown Kode SK
     const selSK = document.getElementById('step1_kodeSK');
     if (selSK) {
         selSK.innerHTML = '<option value="">Pilih Sub Kegiatan</option>';
         masterSK.forEach(sk => {
-            selSK.innerHTML += `<option value="${sk.kode}">${sk.kode} - ${sk.nama}</option>`;
+            const quotaVal = sk.quota || sk.kuota || 50;
+            selSK.innerHTML += `<option value="${sk.kode}">${sk.kode} - ${sk.nama} (Kuota: ${quotaVal} OH)</option>`;
         });
     }
     
@@ -136,11 +111,11 @@ function populateSelects() {
 }
 
 /**
- * Autocomplete Data Pelaksana Utama
+ * Auto-fill Pelaksana Utama
  */
 function autoFillPelaksanaUtama() {
     const namaVal = document.getElementById('namaPelaksana').value;
-    const selected = masterPelaksana.find(item => item.nama === namaVal);
+    const selected = masterASN.find(item => item.nama === namaVal);
 
     if (selected) {
         document.getElementById('nipPelaksana').value = selected.nip || '-';
@@ -153,23 +128,17 @@ function autoFillPelaksanaUtama() {
     }
 }
 
-/**
- * Autocomplete Data Bendahara
- */
 function onBendaharaSelected(namaVal) {
-    const selected = masterPelaksana.find(item => item.nama === namaVal);
+    const selected = masterASN.find(item => item.nama === namaVal);
     document.getElementById('nipBendahara').value = selected ? (selected.nip || '') : '';
 }
 
-/**
- * Sinkronisasi Lokasi Perdin Step 1 ke Tempat Tujuan Step 2
- */
 function syncTujuanPerdin(val) {
     document.getElementById('tempatTujuan').value = val;
 }
 
 /**
- * Modul Pengikut (Tambah, Hapus, Render)
+ * Manajamen Pengikut
  */
 function addPengikutRow() {
     daftarPengikut.push({
@@ -189,7 +158,7 @@ function removePengikutRow(index) {
 }
 
 function onSelectPengikut(index, namaSelected) {
-    const selectedAsn = masterPelaksana.find(item => item.nama === namaSelected);
+    const selectedAsn = masterASN.find(item => item.nama === namaSelected);
     if (selectedAsn) {
         daftarPengikut[index].nama = selectedAsn.nama;
         daftarPengikut[index].nip = selectedAsn.nip || '-';
@@ -203,10 +172,6 @@ function onSelectPengikut(index, namaSelected) {
     }
     renderPengikutTable();
     updateSKQuotaInfo();
-}
-
-function updatePengikutData(index, field, value) {
-    daftarPengikut[index][field] = value;
 }
 
 function renderPengikutTable() {
@@ -228,7 +193,7 @@ function renderPengikutTable() {
 
     daftarPengikut.forEach((item, index) => {
         let options = `<option value="">-- Pilih ASN --</option>`;
-        masterPelaksana.forEach(asn => {
+        masterASN.forEach(asn => {
             const isSelected = asn.nama === item.nama ? 'selected' : '';
             options += `<option value="${asn.nama}" ${isSelected}>${asn.nama}</option>`;
         });
@@ -262,7 +227,7 @@ function renderPengikutTable() {
 }
 
 /**
- * Perhitungan Otomatis Lama Hari dan Total Estimasi Biaya
+ * Perhitungan Otomatis
  */
 function hitungLamaHariOtomatis() {
     const tglMulai = document.getElementById('tglMulai').value;
@@ -273,7 +238,6 @@ function hitungLamaHariOtomatis() {
         const d2 = new Date(tglKembali);
         const selisihMs = d2 - d1;
         const diffDays = Math.ceil(selisihMs / (1000 * 60 * 60 * 24)) + 1;
-        
         document.getElementById('lamaHari').value = diffDays > 0 ? diffDays : 1;
     }
     updateSKQuotaInfo();
@@ -283,7 +247,6 @@ function updateSKQuotaInfo() {
     const lamaHari = parseInt(document.getElementById('lamaHari').value) || 1;
     const biayaPerOrang = parseFloat(document.getElementById('biayaPerOrang').value) || 0;
     const jumlahPersonel = 1 + daftarPengikut.length;
-    
     const totalBiaya = lamaHari * biayaPerOrang * jumlahPersonel;
 
     document.getElementById('totalBiayaFormatted').value = "Rp " + totalBiaya.toLocaleString('id-ID');
@@ -305,7 +268,7 @@ function angkaKeTerbilang(nilai) {
 }
 
 /**
- * Navigasi Wizard
+ * Stepper Navigasi
  */
 function switchStep(step) {
     for (let i = 1; i <= 3; i++) {
@@ -334,27 +297,23 @@ function proceedToStep2() {
     switchStep(2);
 }
 
-/**
- * Simpan Data SPPD
- */
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
     e.preventDefault();
-    const dataSPPD = {
+    const record = {
+        id: Date.now(),
         noST: document.getElementById('noSuratTugas').value,
         noSPPD: document.getElementById('noSPPD').value,
         kodeSK: document.getElementById('step1_kodeSK').value,
-        pelaksanaUtama: document.getElementById('namaPelaksana').value,
-        tujuan: document.getElementById('tempatTujuan').value,
-        totalBiaya: document.getElementById('totalBiayaFormatted').value,
-        tglMulai: document.getElementById('tglMulai').value
+        namaPelaksana: document.getElementById('namaPelaksana').value,
+        tempatTujuan: document.getElementById('tempatTujuan').value,
+        totalBiayaFormatted: document.getElementById('totalBiayaFormatted').value,
+        tglMulai: document.getElementById('tglMulai').value,
+        lamaHari: parseInt(document.getElementById('lamaHari').value) || 1,
+        pengikut: daftarPengikut
     };
 
-    riwayatSPPD.push(dataSPPD);
-    if (typeof db !== 'undefined' && db.sppd) {
-        db.sppd.add(dataSPPD);
-    } else {
-        localStorage.setItem('riwayat_sppd', JSON.stringify(riwayatSPPD));
-    }
+    if (window.AppDB) await window.AppDB.saveRecord(record);
+    riwayatSPPD.unshift(record);
 
     alert("Dokumen SPPD Berhasil Disimpan!");
     renderHistoryTable();
@@ -371,12 +330,15 @@ function renderHistoryTable() {
             <tr class="hover:bg-slate-50 border-b">
                 <td class="p-3 font-semibold">${item.noST || '-'}<br><span class="text-[10px] text-slate-400">${item.noSPPD || '-'}</span></td>
                 <td class="p-3 font-mono">${item.kodeSK || '-'}</td>
-                <td class="p-3 font-bold">${item.pelaksanaUtama || '-'}</td>
-                <td class="p-3">${item.tujuan || '-'}</td>
-                <td class="p-3 font-bold text-emerald-700">${item.totalBiaya || '0'}</td>
-                <td class="p-3 text-center">
-                    <button type="button" onclick="window.print()" class="text-sky-600 hover:text-sky-800 font-bold">
-                        <i class="fa-solid fa-print"></i> Cetak
+                <td class="p-3 font-bold">${item.namaPelaksana || item.pelaksanaUtama || '-'}</td>
+                <td class="p-3">${item.tempatTujuan || item.tujuan || '-'}</td>
+                <td class="p-3 font-bold text-emerald-700">${item.totalBiayaFormatted || item.totalBiaya || '0'}</td>
+                <td class="p-3 text-center flex items-center justify-center gap-2">
+                    <button type="button" onclick="window.print()" class="text-sky-600 hover:text-sky-800 font-bold" title="Cetak SPPD">
+                        <i class="fa-solid fa-print"></i>
+                    </button>
+                    <button type="button" onclick="deleteHistoryRecord(${item.id})" class="text-rose-600 hover:text-rose-800 font-bold" title="Hapus SPPD">
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </td>
             </tr>
@@ -384,8 +346,15 @@ function renderHistoryTable() {
     });
 }
 
+async function deleteHistoryRecord(id) {
+    if (!confirm("Hapus data perjalanan dinas ini?")) return;
+    if (window.AppDB) await window.AppDB.deleteRecord(id);
+    riwayatSPPD = riwayatSPPD.filter(r => r.id != id);
+    renderHistoryTable();
+}
+
 /**
- * MODAL MASTER ASN / PELAKSANA (master_pelaksana)
+ * MODAL OPEN / CLOSE
  */
 function openModalAsn() { document.getElementById('modalAsn').classList.remove('hidden'); document.getElementById('modalAsn').classList.add('flex'); }
 function closeModalAsn() { document.getElementById('modalAsn').classList.add('hidden'); document.getElementById('modalAsn').classList.remove('flex'); }
@@ -397,7 +366,7 @@ function openModalManageSK() { document.getElementById('modalManageSK').classLis
 function closeModalManageSK() { document.getElementById('modalManageSK').classList.add('hidden'); document.getElementById('modalManageSK').classList.remove('flex'); }
 
 /**
- * Render Tabel Master Pelaksana (Diurutkan berdasarkan Hirarki Jabatan)
+ * MODAL KELOLA MASTER ASN (tabel master_pelaksana)
  */
 function renderAsnMasterTable(filteredList = null) {
     const tbody = document.getElementById('asnTableBody');
@@ -405,24 +374,24 @@ function renderAsnMasterTable(filteredList = null) {
     if (!tbody) return;
     
     tbody.innerHTML = '';
-    const dataToDisplay = filteredList || masterPelaksana;
+    const dataToDisplay = filteredList || masterASN;
     count.textContent = dataToDisplay.length;
 
     if (dataToDisplay.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400 italic">Data pelaksana kosong.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400 italic">Data ASN kosong.</td></tr>`;
         return;
     }
 
     dataToDisplay.forEach((asn) => {
         tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition">
+            <tr class="hover:bg-slate-50 transition border-b">
                 <td class="p-2.5">
                     <div class="font-bold uppercase text-slate-800">${asn.nama}</div>
                     <div class="text-[10px] font-mono text-slate-500">NIP: ${asn.nip || '-'} | Gol: ${asn.pangkat || '-'}</div>
                 </td>
                 <td class="p-2.5 capitalize-input font-medium text-slate-700">${asn.jabatan || '-'}</td>
                 <td class="p-2.5 text-center">
-                    <button type="button" onclick="deleteAsnMaster(${asn.id})" class="text-rose-600 hover:text-rose-800 font-bold p-1 cursor-pointer" title="Hapus Pelaksana">
+                    <button type="button" onclick="deleteAsnMaster('${asn.nip}')" class="text-rose-600 hover:text-rose-800 font-bold p-1.5 cursor-pointer" title="Hapus ASN">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </td>
@@ -431,12 +400,9 @@ function renderAsnMasterTable(filteredList = null) {
     });
 }
 
-/**
- * Pencarian / Filter Data Master Pelaksana
- */
 function filterAsnTable(keyword) {
     const q = keyword.toLowerCase();
-    const filtered = masterPelaksana.filter(item => 
+    const filtered = masterASN.filter(item => 
         (item.nama && item.nama.toLowerCase().includes(q)) || 
         (item.nip && item.nip.toLowerCase().includes(q)) ||
         (item.jabatan && item.jabatan.toLowerCase().includes(q))
@@ -445,7 +411,56 @@ function filterAsnTable(keyword) {
 }
 
 /**
- * PROSES IMPORT DATA CSV KE TABEL master_pelaksana
+ * SIMPAN INDIVIDUAL MASTER ASN
+ */
+async function saveAsnMaster(e) {
+    e.preventDefault();
+    const asnObj = {
+        nama: document.getElementById('addAsnNama').value.trim().toUpperCase(),
+        nip: document.getElementById('addAsnNip').value.trim(),
+        jabatan: document.getElementById('addAsnJabatan').value.trim(),
+        pangkat: document.getElementById('addAsnPangkat').value.trim()
+    };
+
+    if (window.AppDB) {
+        await window.AppDB.saveMasterAsn(asnObj);
+        masterASN = await window.AppDB.getMasterAsn();
+    }
+    
+    masterASN = sortASNByHirarki(masterASN);
+    document.getElementById('formAddAsn').reset();
+    populateSelects();
+    renderPengikutTable();
+    alert("Data ASN berhasil disimpan ke master_pelaksana.");
+}
+
+/**
+ * HAPUS MASTER ASN (BERDARTAKAN NIP)
+ */
+async function deleteAsnMaster(nip) {
+    if (!nip || nip === '-') {
+        alert("NIP tidak valid untuk dihapus.");
+        return;
+    }
+    if (!confirm(`Apakah Anda yakin ingin menghapus data ASN dengan NIP (${nip}) dari master_pelaksana?`)) return;
+
+    try {
+        if (window.AppDB) {
+            await window.AppDB.deleteMasterAsn(nip);
+            masterASN = await window.AppDB.getMasterAsn();
+        }
+        masterASN = sortASNByHirarki(masterASN);
+        populateSelects();
+        renderPengikutTable();
+        alert("Data ASN berhasil dihapus.");
+    } catch (err) {
+        console.error("Gagal menghapus ASN:", err);
+        alert("Gagal menghapus data ASN.");
+    }
+}
+
+/**
+ * IMPORT CSV MASTER ASN TO TABEL master_pelaksana
  */
 async function importAsnFromCsv() {
     const fileInput = document.getElementById('csvFileInput');
@@ -460,57 +475,49 @@ async function importAsnFromCsv() {
     reader.onload = async function(e) {
         const text = e.target.result;
         const lines = text.split(/\r\n|\n/);
-        let importedCount = 0;
+        const importedList = [];
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Memisahkan kolom dengan koma atau titik koma
             const cols = line.split(/;|,/).map(c => c.trim().replace(/^"|"$/g, ''));
             
-            // Lewati baris header jika ada
+            // Bypass baris header jika ada
             if (i === 0 && (cols[0].toLowerCase().includes('nama') || cols[1]?.toLowerCase().includes('nip'))) {
                 continue;
             }
 
             if (cols.length >= 2) {
-                const newPelaksana = {
-                    id: Date.now() + Math.floor(Math.random() * 1000),
-                    nama: cols[0],
+                importedList.push({
+                    nama: cols[0].toUpperCase(),
                     nip: cols[1] || '',
                     pangkat: cols[2] || '',
-                    jabatan: cols[3] || 'Staf / Pelaksana'
-                };
-
-                // Simpan ke IndexedDB / LocalStorage
-                if (typeof db !== 'undefined' && db.master_pelaksana) {
-                    await db.master_pelaksana.add(newPelaksana);
-                } else if (typeof db !== 'undefined' && db.asn) {
-                    await db.asn.add(newPelaksana);
-                }
-                
-                masterPelaksana.push(newPelaksana);
-                importedCount++;
+                    jabatan: cols[3] || 'Pelaksana / Staf'
+                });
             }
         }
 
-        // Urutkan kembali berdasarkan hirarki
-        masterPelaksana = sortPelaksanaByHirarki(masterPelaksana);
-        localStorage.setItem('master_pelaksana', JSON.stringify(masterPelaksana));
+        if (importedList.length === 0) {
+            alert("Tidak ada baris data valid yang ditemukan dalam file CSV.");
+            return;
+        }
 
+        if (window.AppDB) {
+            await window.AppDB.bulkSaveMasterAsn(importedList);
+            masterASN = await window.AppDB.getMasterAsn();
+        }
+
+        masterASN = sortASNByHirarki(masterASN);
         populateSelects();
         renderPengikutTable();
         fileInput.value = '';
-        alert(`Berhasil mengimpor ${importedCount} data pelaksana ke master_pelaksana!`);
+        alert(`Berhasil mengimpor ${importedList.length} data ASN ke tabel master_pelaksana!`);
     };
 
     reader.readAsText(file);
 }
 
-/**
- * Unduh Template CSV Pelaksana
- */
 function downloadCsvTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,NAMA,NIP,PANGKAT_GOLONGAN,JABATAN\n" +
         "RUDOLF UMBU RESI LOLY ST,197205212006041008,Pembina / IV.a,Camat Tabundung\n" +
@@ -520,68 +527,14 @@ function downloadCsvTemplate() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "template_master_pelaksana.csv");
+    link.setAttribute("download", "template_master_asn.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
 /**
- * SIMPAN MASTER PELAKSANA MANUALLY
- */
-async function saveAsnMaster(e) {
-    e.preventDefault();
-    const newPelaksana = {
-        id: Date.now(),
-        nama: document.getElementById('addAsnNama').value.trim(),
-        nip: document.getElementById('addAsnNip').value.trim(),
-        jabatan: document.getElementById('addAsnJabatan').value.trim(),
-        pangkat: document.getElementById('addAsnPangkat').value.trim()
-    };
-
-    if (typeof db !== 'undefined' && db.master_pelaksana) {
-        await db.master_pelaksana.add(newPelaksana);
-    } else if (typeof db !== 'undefined' && db.asn) {
-        await db.asn.add(newPelaksana);
-    }
-    
-    masterPelaksana.push(newPelaksana);
-    masterPelaksana = sortPelaksanaByHirarki(masterPelaksana);
-    localStorage.setItem('master_pelaksana', JSON.stringify(masterPelaksana));
-
-    document.getElementById('formAddAsn').reset();
-    populateSelects();
-    renderPengikutTable();
-    alert("Data Pelaksana berhasil disimpan di master_pelaksana.");
-}
-
-/**
- * HAPUS MASTER PELAKSANA
- */
-async function deleteAsnMaster(id) {
-    if (!confirm("Apakah Anda yakin ingin menghapus data pelaksana ini dari master_pelaksana?")) return;
-
-    try {
-        if (typeof db !== 'undefined' && db.master_pelaksana) {
-            await db.master_pelaksana.delete(id);
-        } else if (typeof db !== 'undefined' && db.asn) {
-            await db.asn.delete(id);
-        }
-
-        masterPelaksana = masterPelaksana.filter(item => item.id !== id);
-        localStorage.setItem('master_pelaksana', JSON.stringify(masterPelaksana));
-
-        populateSelects();
-        renderPengikutTable();
-        alert("Data pelaksana berhasil dihapus.");
-    } catch (err) {
-        console.error("Gagal menghapus pelaksana:", err);
-        alert("Gagal menghapus data pelaksana.");
-    }
-}
-
-/**
- * MODAL MASTER SUB KEGIATAN
+ * MODAL KELOLA MASTER SUB KEGIATAN (tabel master_sk)
  */
 function renderSKMasterTable() {
     const tbody = document.getElementById('tableSKBody');
@@ -589,13 +542,16 @@ function renderSKMasterTable() {
 
     tbody.innerHTML = '';
     masterSK.forEach((sk) => {
+        const quotaVal = sk.quota || sk.kuota || 50;
         tbody.innerHTML += `
-            <tr>
+            <tr class="hover:bg-slate-50 transition border-b">
                 <td class="p-2.5 font-mono font-bold">${sk.kode}</td>
                 <td class="p-2.5">${sk.nama}</td>
-                <td class="p-2.5 text-center font-bold">${sk.kuota} OH</td>
+                <td class="p-2.5 text-center font-bold">${quotaVal} OH</td>
                 <td class="p-2.5 text-center">
-                    <button type="button" onclick="deleteSKMaster(${sk.id})" class="text-rose-600 hover:text-rose-800 font-bold"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" onclick="deleteSKMaster('${sk.kode}')" class="text-rose-600 hover:text-rose-800 font-bold p-1.5 cursor-pointer" title="Hapus Sub Kegiatan">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 </td>
             </tr>
         `;
@@ -604,31 +560,35 @@ function renderSKMasterTable() {
 
 async function saveNewSK(e) {
     e.preventDefault();
-    const newSK = {
-        id: Date.now(),
-        kode: document.getElementById('newKodeSK').value,
-        nama: document.getElementById('newNamaSK').value,
-        kuota: parseInt(document.getElementById('newQuotaSK').value) || 0
+    const skObj = {
+        kode: document.getElementById('newKodeSK').value.trim(),
+        nama: document.getElementById('newNamaSK').value.trim(),
+        quota: parseInt(document.getElementById('newQuotaSK').value) || 50
     };
 
-    masterSK.push(newSK);
-    if (typeof db !== 'undefined' && db.sk) {
-        await db.sk.add(newSK);
-    } else {
-        localStorage.setItem('master_sk', JSON.stringify(masterSK));
+    if (window.AppDB) {
+        await window.AppDB.saveMasterSK(skObj);
+        masterSK = await window.AppDB.getMasterSK();
     }
 
     closeModalSK();
     populateSelects();
-    alert("Sub Kegiatan berhasil ditambahkan.");
+    alert("Sub Kegiatan berhasil disimpan ke master_sk.");
 }
 
-async function deleteSKMaster(id) {
-    if (!confirm("Hapus Sub Kegiatan ini?")) return;
-    if (typeof db !== 'undefined' && db.sk) {
-        await db.sk.delete(id);
+async function deleteSKMaster(kodeSK) {
+    if (!kodeSK) return;
+    if (!confirm(`Apakah Anda yakin ingin menghapus Sub Kegiatan (${kodeSK}) dari master_sk?`)) return;
+
+    try {
+        if (window.AppDB) {
+            await window.AppDB.deleteMasterSK(kodeSK);
+            masterSK = await window.AppDB.getMasterSK();
+        }
+        populateSelects();
+        alert("Sub Kegiatan berhasil dihapus.");
+    } catch (err) {
+        console.error("Gagal menghapus Sub Kegiatan:", err);
+        alert("Gagal menghapus Sub Kegiatan.");
     }
-    masterSK = masterSK.filter(item => item.id !== id);
-    localStorage.setItem('master_sk', JSON.stringify(masterSK));
-    populateSelects();
 }
