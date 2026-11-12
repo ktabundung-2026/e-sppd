@@ -1073,7 +1073,7 @@
                 document.getElementById('st-kodeSK').textContent = recordData.kodeSK || '7.01.01.2.01.0003';
                 document.getElementById('st-namaSK').textContent = namaSubKegiatan;
                 document.getElementById('st-maksudPerdin').textContent = maksudDinamis;
-                document.getElementById('st-tglDikeluarkan').textContent = recordData.tglMulai || '-';
+                document.getElementById('st-tglDikeluarkan').textContent = formatTanggalIndo(recordData.tglMulai); || '-';
                 document.getElementById('st-tempatDikeluarkan').textContent = recordData.tempatBerangkat || 'Tabundung';
                 
                 const timLengkap = [
@@ -1150,10 +1150,10 @@
                 document.getElementById('sppd-tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
                 document.getElementById('sppd-tempatTujuan').textContent = recordData.tempatTujuan || '-';
                 document.getElementById('sppd-lamaHari').textContent = recordData.lamaHari || 1;
-                document.getElementById('sppd-tglMulai').textContent = recordData.tglMulai || '-';
-                document.getElementById('sppd-tglKembali').textContent = recordData.tglKembali || recordData.tglMulai || '-';
+                document.getElementById('sppd-tglMulai').textContent = formatTanggalIndo(recordData.tglMulai) || '-';
+                document.getElementById('sppd-tglKembali').textContent = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai) || '-';
                 document.getElementById('sppd-kodeSK').textContent = recordData.kodeSK || '5.1.02.04.001.0001';
-                document.getElementById('sppd-ttd-tgl').textContent = recordData.tglMulai || '-';
+                document.getElementById('sppd-ttd-tgl').textContent = formatTanggalIndo(recordData.tglMulai) || '-';
 
                 const pengikutContainer = document.getElementById('sppd-container-pengikut');
                 pengikutContainer.innerHTML = '';
@@ -1186,10 +1186,16 @@
             // ---------------------------------------------
             populateSPPDBelakangIsi(recordData);
 
+		const tglMulai = formatTanggalIndo(recordData.tglMulai);
+		const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
+
             // ---------------------------------------------
             // 4. POPULASI BAGIAN 4: SPPD BELAKANG KOSONG
             // ---------------------------------------------
             populateSPPDBelakangKosong(recordData);
+
+		const tglMulai = formatTanggalIndo(recordData.tglMulai);
+		const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
 
             // ---------------------------------------------
             // 5. POPULASI BAGIAN 5: LAPORAN PERJALANAN DINAS
@@ -1236,6 +1242,8 @@
             if (!recordData) return;
 
             const defaultDots = "...........................................";
+	    const tglMulai = formatTanggalIndo(recordData.tglMulai);
+	    const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
 
             if (document.getElementById('bisi_noSPPD')) document.getElementById('bisi_noSPPD').textContent = recordData.noSPPD || '-';
             if (document.getElementById('bisi_tempatBerangkat')) document.getElementById('bisi_tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
@@ -1266,8 +1274,8 @@
                 const tujuan2 = recordData.tempatTujuan2;
                 const pejabatTujuan2 = recordData.pejabatTujuan2 ? recordData.pejabatTujuan2.toUpperCase() : defaultDots;
                 const keRute2 = recordData.tempatTujuan3 && recordData.tempatTujuan3.trim() !== '' ? recordData.tempatTujuan3 : tempatBerangkat;
-                const tglBerangkat2 = recordData.tglBerangkat2 || tglKembali;
-
+                const tglBerangkat2 = recordData.tglBerangkat2 ? formatTanggalIndo(recordData.tglBerangkat2) : tglKembali;
+		
                 if (document.getElementById('bisi_rute2_tibaDi')) document.getElementById('bisi_rute2_tibaDi').textContent = tujuan2;
                 if (document.getElementById('bisi_rute2_tglTiba')) document.getElementById('bisi_rute2_tglTiba').textContent = recordData.tglTiba2 || defaultDots;
                 if (document.getElementById('bisi_rute2_ttd_nama1')) document.getElementById('bisi_rute2_ttd_nama1').textContent = pejabatTujuan2;
@@ -1291,6 +1299,9 @@
             if (recordData.tempatTujuan3 && recordData.tempatTujuan3.trim() !== '') {
                 const tujuan3 = recordData.tempatTujuan3;
                 const pejabatTujuan3 = recordData.pejabatTujuan3 ? recordData.pejabatTujuan3.toUpperCase() : defaultDots;
+
+		const tglMulai3 = formatTanggalIndo(recordData.tglMulai3);
+		const tglKembali3 = formatTanggalIndo(recordData.tglKembali3 || recordData.tglMulai3);
 
                 if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = tujuan3;
                 if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = recordData.tglTiba3 || defaultDots;
