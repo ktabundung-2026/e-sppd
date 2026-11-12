@@ -340,7 +340,7 @@ async function handleFormSubmit(e) {
         namaPejabatTujuan: document.getElementById('namaPejabatTujuan').value || '',
         jabatanPejabatTujuan: document.getElementById('jabatanPejabatTujuan').value || '',
         nipPejabatTujuan: '-',
-        namaCamat: document.getElementById('namaPenggunaAnggaran').value || 'RUDOLF UMBU RESI LOLY, ST',
+        namaPenggunaAnggaran: document.getElementById('namaPenggunaAnggaran').value || 'RUDOLF UMBU RESI LOLY, ST',
         nipCamat: document.getElementById('nipPenggunaAnggaran').value || '197205212006041008',
         pangkatCamat: 'Pembina',
         namaBendahara: namaBendaharaVal,
