@@ -1217,7 +1217,13 @@
             // ---------------------------------------------
             // 6. POPULASI BAGIAN 6: KWITANSI
             // ---------------------------------------------
-            const timKwitansi = [
+			if(document.getElementById('kwitansi-bendahara-nama')) {
+			    document.getElementById('kwitansi-bendahara-nama').textContent = recordData.namaBendahara ? recordData.namaBendahara.toUpperCase() : 'DANIEL KAMBARU WINDI';
+			}
+			if(document.getElementById('kwitansi-bendahara-nip')) {
+			    document.getElementById('kwitansi-bendahara-nip').textContent = recordData.nipBendahara || '19771231 200801 1 028';
+			}
+			const timKwitansi = [
                 {
                     nama: `1. ${recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-'}`,
                     vol: parseInt(recordData.lamaHari) || 1,
@@ -1287,7 +1293,7 @@
                 const tglBerangkat2 = recordData.tglBerangkat2 ? formatTanggalIndo(recordData.tglBerangkat2) : tglKembali;
 		
                 if (document.getElementById('bisi_rute2_tibaDi')) document.getElementById('bisi_rute2_tibaDi').textContent = tujuan2;
-                if (document.getElementById('bisi_rute2_tglTiba')) document.getElementById('bisi_rute2_tglTiba').textContent = recordData.tglTiba2 || defaultDots;
+                if (document.getElementById('bisi_rute2_tglTiba')) document.getElementById('bisi_rute2_tglTiba').textContent = recordData.tglTiba2 ? formatTanggalIndo(recordData.tglTiba2) : defaultDots;
                 if (document.getElementById('bisi_rute2_ttd_nama1')) document.getElementById('bisi_rute2_ttd_nama1').textContent = pejabatTujuan2;
 
                 if (document.getElementById('bisi_rute2_berangkatDari')) document.getElementById('bisi_rute2_berangkatDari').textContent = tujuan2;
@@ -1314,7 +1320,7 @@
 				const tglKembali3 = recordData.tglBerangkat3 ? formatTanggalIndo(recordData.tglBerangkat3) : '-';
 
                 if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = tujuan3;
-                if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = recordData.tglTiba3 || defaultDots;
+                if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = recordData.tglTiba3 ? formatTanggalIndo(recordData.tglTiba3) : defaultDots;
                 if (document.getElementById('bisi_rute3_ttd_nama1')) document.getElementById('bisi_rute3_ttd_nama1').textContent = pejabatTujuan3;
 
                 if (document.getElementById('bisi_rute3_berangkatDari')) document.getElementById('bisi_rute3_berangkatDari').textContent = tujuan3;
