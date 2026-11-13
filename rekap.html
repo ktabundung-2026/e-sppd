@@ -98,59 +98,60 @@
         </section>
 
         <!-- REKAPITULASI DETAIL PER DOKUMEN / SUB KEGIATAN -->
+        <!-- Tambahkan penyesuaian margin dan hilangkan border saat cetak -->
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5 print:border-none print:shadow-none print:p-0 print:mt-6">
-            <!-- Tambahkan print:hidden agar judul default, filter, dan tombol cetak tidak ikut tercetak -->
-            <div class="print:hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
-                <div>
-                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-gov-700"></i> Detail Laporan Realisasi Perjalanan Dinas
-                    </h3>
-                    <p class="text-xs text-slate-600">Daftar rincian perjalanan dinas yang diterbitkan berdasarkan Sub Kegiatan.</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <!-- Filter Sub Kegiatan -->
-                    <select id="filter-sk" onchange="filterAndRenderRekap()" class="text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
-                        <option value="ALL">-- Semua Sub Kegiatan --</option>
-                    </select>
-
-                    <!-- Search Input -->
-                    <input type="text" id="search-rekap" onkeyup="filterAndRenderRekap()" placeholder="Cari Pelaksana / No SPPD..." class="text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none w-full sm:w-48">
-
-                    <!-- Tombol Cetak Rekap -->
-                    <button onclick="window.print()" class="px-3 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-print"></i> Cetak Rekap
-                    </button>
-                </div>
+        <!-- Tambahkan print:hidden agar judul default, filter, dan tombol cetak tidak ikut tercetak -->
+        <div class="print:hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-gov-700"></i> Detail Laporan Realisasi Perjalanan Dinas
+                </h3>
+                <p class="text-xs text-slate-600">Daftar rincian perjalanan dinas yang diterbitkan berdasarkan Sub Kegiatan.</p>
             </div>
 
-            <!-- JUDUL TABEL KHUSUS CETAK (Hanya akan muncul di halaman PDF/Print) -->
-            <div class="hidden print:block text-center mt-8 mb-4 border-b-2 border-slate-800 pb-2">
-                <h2 class="text-lg font-extrabold text-slate-900 uppercase tracking-wide">Daftar Rincian Perjalanan Dinas</h2>
-            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <!-- Filter Sub Kegiatan -->
+                <select id="filter-sk" onchange="filterAndRenderRekap()" class="text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none">
+                    <option value="ALL">-- Semua Sub Kegiatan --</option>
+                </select>
 
-            <!-- TABEL REKAPITULASI DETAIL -->
-            <div class="border border-slate-200 rounded-xl overflow-x-auto print:border-none print:overflow-visible">
-          
-            <!-- TABEL REKAPITULASI DETAIL -->
-            <div class="border border-slate-200 rounded-xl overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead class="bg-gov-900 text-white font-bold">
-                        <tr>
-                            <th class="p-3 w-10 text-center">No</th>
-                            <th class="p-3 min-w-[140px]">No. Surat Tugas & SPPD</th>
-                            <th class="p-3 min-w-[180px]">Pelaksana & Pengikut</th>
-                            <th class="p-3 min-w-[150px]">Maksud & Tujuan Perdin</th>
-                            <th class="p-3 min-w-[120px]">Tanggal & Lama</th>
-                            <th class="p-3 text-center w-24">Jumlah OH</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-rekap" class="divide-y divide-slate-200 bg-white">
-                        <!-- Rendered dynamically via js/rekap.js -->
-                    </tbody>
-                </table>
+                <!-- Search Input -->
+                <input type="text" id="search-rekap" onkeyup="filterAndRenderRekap()" placeholder="Cari Pelaksana / No SPPD..." class="text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-600 focus:outline-none w-full sm:w-48">
+
+                <!-- Tombol Cetak Rekap -->
+                <button onclick="window.print()" class="px-3 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-print"></i> Cetak Rekap
+                </button>
             </div>
-        </section>
+        </div>
+
+          <!-- JUDUL TABEL KHUSUS CETAK (Hanya akan muncul di halaman PDF/Print) -->
+          <div class="hidden print:block text-center mt-8 mb-4 border-b-2 border-slate-800 pb-2">
+              <h2 class="text-lg font-extrabold text-slate-900 uppercase tracking-wide">Daftar Rincian Perjalanan Dinas</h2>
+          </div>
+
+          <!-- TABEL REKAPITULASI DETAIL -->
+          <div class="border border-slate-200 rounded-xl overflow-x-auto print:border-none print:overflow-visible">
+        
+          <!-- TABEL REKAPITULASI DETAIL -->
+          <div class="border border-slate-200 rounded-xl overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                  <thead class="bg-gov-900 text-white font-bold">
+                      <tr>
+                          <th class="p-3 w-10 text-center">No</th>
+                          <th class="p-3 min-w-[140px]">No. Surat Tugas & SPPD</th>
+                          <th class="p-3 min-w-[180px]">Pelaksana & Pengikut</th>
+                          <th class="p-3 min-w-[150px]">Maksud & Tujuan Perdin</th>
+                          <th class="p-3 min-w-[120px]">Tanggal & Lama</th>
+                          <th class="p-3 text-center w-24">Jumlah OH</th>
+                      </tr>
+                  </thead>
+                  <tbody id="tbody-rekap" class="divide-y divide-slate-200 bg-white">
+                      <!-- Rendered dynamically via js/rekap.js -->
+                  </tbody>
+              </table>
+          </div>
+      </section>
 
     </main>
 
