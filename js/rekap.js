@@ -177,7 +177,7 @@ function filterAndRenderRekap() {
             }
 
             tbody.innerHTML += `
-                <tr class="hover:bg-slate-50 border-b">
+               <tr class="hover:bg-slate-50 border-b print:break-inside-avoid">
                     <td class="p-3 text-center font-bold text-slate-500">${globalNo++}</td>
                     <td class="p-3">
                         <div class="font-bold text-gov-900">${r.noSPPD}</div>
