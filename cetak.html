@@ -197,7 +197,7 @@
 
         .sppd-bisi-signature-title {
             font-weight: bold;
-            margin-bottom: 50px;
+            margin-bottom: 80px;
         }
 
         .sppd-bisi-signature-name {
@@ -1115,20 +1115,21 @@
         });
 
         // FUNGSI POPULASI SPPD BELAKANG ISI (OPSIONAL TANPA MENGHILANGKAN BARIS)
-        function populateSPPDBelakangIsi(recordData) {
+        	function populateSPPDBelakangIsi(recordData) {
             if (!recordData) return;
 
             const defaultDots = "";
 
 			if (document.getElementById('bisi_noSPPD')) document.getElementById('bisi_noSPPD').textContent = recordData.noSPPD || '-';
             if (document.getElementById('bisi_tempatBerangkat')) document.getElementById('bisi_tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
-            if (document.getElementById('bisi_tglMulai')) document.getElementById('bisi_tglMulai').textContent = recordData.tglMulai || '-';
-            if (document.getElementById('bisi_tempatTujuan')) document.getElementById('bisi_tempatTujuan').textContent = recordData.tempatTujuan || '-';
 
-            const tempatBerangkat = recordData.tempatBerangkat || 'Malahar';
-            const tujuan1 = recordData.tempatTujuan || '-';
-            const tglMulai = recordData.tglMulai || '-';
-            const tglKembali = recordData.tglKembali || recordData.tglMulai || '-';
+			if (document.getElementById('bisi_tglMulai')) document.getElementById('bisi_tglMulai').textContent = recordData.tglMulai ? formatTanggalIndo(recordData.tglMulai) : '-';
+			if (document.getElementById('bisi_tempatTujuan')) document.getElementById('bisi_tempatTujuan').textContent = recordData.tempatTujuan || '-';
+
+			const tempatBerangkat = recordData.tempatBerangkat || 'Malahar';
+			const tujuan1 = recordData.tempatTujuan || '-';
+			const tglMulai = recordData.tglMulai ? formatTanggalIndo(recordData.tglMulai) : '-';
+			const tglKembali = recordData.tglKembali ? formatTanggalIndo(recordData.tglKembali) : tglMulai;
             const pejabatTujuan1 = recordData.namaPejabatTujuan ? recordData.namaPejabatTujuan.toUpperCase() : defaultDots;
 
             // RUTE I (UTAMA)
@@ -1137,7 +1138,7 @@
             if (document.getElementById('bisi_rute1_ttd_nama1')) document.getElementById('bisi_rute1_ttd_nama1').textContent = pejabatTujuan1;
 
             const keRute1 = recordData.tempatTujuan2 && recordData.tempatTujuan2.trim() !== '' ? recordData.tempatTujuan2 : tempatBerangkat;
-            const tglBerangkat1 = recordData.tglBerangkat2 && recordData.tglBerangkat2.trim() !== '' ? recordData.tglBerangkat2 : tglKembali;
+            const tglBerangkat1 = recordData.tglBerangkat2 && recordData.tglBerangkat2.trim() !== '' ? formatTanggalIndo(recordData.tglBerangkat2) : tglKembali;
 
             if (document.getElementById('bisi_rute1_berangkatDari')) document.getElementById('bisi_rute1_berangkatDari').textContent = tujuan1;
             if (document.getElementById('bisi_rute1_ke')) document.getElementById('bisi_rute1_ke').textContent = keRute1;
@@ -1184,7 +1185,7 @@
 
                 if (document.getElementById('bisi_rute3_berangkatDari')) document.getElementById('bisi_rute3_berangkatDari').textContent = tujuan3;
                 if (document.getElementById('bisi_rute3_ke')) document.getElementById('bisi_rute3_ke').textContent = tempatBerangkat;
-                if (document.getElementById('bisi_rute3_tglBerangkat')) document.getElementById('bisi_rute3_tglBerangkat').textContent = recordData.tglBerangkat3 || tglKembali;
+                if (document.getElementById('bisi_rute3_tglBerangkat')) document.getElementById('bisi_rute3_tglBerangkat').textContent = recordData.tglBerangkat3 ? formatTanggalIndo(recordData.tglBerangkat3) : tglKembali;
                 if (document.getElementById('bisi_rute3_ttd_nama2')) document.getElementById('bisi_rute3_ttd_nama2').textContent = pejabatTujuan3;
             } else {
                 if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = defaultDots;
@@ -1212,8 +1213,10 @@
                 document.getElementById('lap-maksudPerdin').textContent = maksudPerdinText || '-';
             }
             if (document.getElementById('lap-waktuPelaksanaan')) {
-                document.getElementById('lap-waktuPelaksanaan').textContent = `${recordData.tglMulai || '-'} s/d ${recordData.tglKembali || recordData.tglMulai || '-'} (${recordData.lamaHari || 1} Hari)`;
-            }
+			    const fmtMulai = recordData.tglMulai ? formatTanggalIndo(recordData.tglMulai) : '-';
+			    const fmtKembali = recordData.tglKembali ? formatTanggalIndo(recordData.tglKembali) : fmtMulai;
+			    document.getElementById('lap-waktuPelaksanaan').textContent = `${fmtMulai} s/d ${fmtKembali} (${recordData.lamaHari || 1} Hari)`;
+			}
             if (document.getElementById('lap-daerahTujuan')) {
                 let lokasiTujuanSemua = recordData.tempatTujuan || '-';
                 if (recordData.tempatTujuan2) lokasiTujuanSemua += `, ${recordData.tempatTujuan2}`;
@@ -1243,7 +1246,10 @@
             }
 
             if (document.getElementById('lap-ttd-tempat')) document.getElementById('lap-ttd-tempat').textContent = recordData.tempatBerangkat || 'Tabundung';
-            if (document.getElementById('lap-ttd-tgl')) document.getElementById('lap-ttd-tgl').textContent = recordData.tglKembali || recordData.tglMulai || '-';
+            if (document.getElementById('lap-ttd-tgl')) {
+			    const fmtKembaliTTD = recordData.tglKembali ? formatTanggalIndo(recordData.tglKembali) : (recordData.tglMulai ? formatTanggalIndo(recordData.tglMulai) : '-');
+			    document.getElementById('lap-ttd-tgl').textContent = fmtKembaliTTD;
+			}
             if (document.getElementById('lap-ttd-nama')) document.getElementById('lap-ttd-nama').textContent = recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-';
             if (document.getElementById('lap-ttd-nip')) document.getElementById('lap-ttd-nip').textContent = recordData.nipPelaksana || recordData.nip || '-';
         }
