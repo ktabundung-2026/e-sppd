@@ -702,34 +702,34 @@
 
         <table class="content-table mb-4">
             <tr>
-                <td class="col-label">1. Dasar Pelaksanaan</td>
-                <td class="col-colon">:</td>
-                <td id="lap-dasarST">-</td>
+                <td class="col-label pb-3">1. Dasar Pelaksanaan</td>
+                <td class="col-colon" pb-3>:</td>
+                <td id="lap-dasarST" class="pb-3">-</td>
             </tr>
             <tr>
-                <td class="col-label">2. Maksud / Tujuan</td>
-                <td class="col-colon">:</td>
-                <td id="lap-maksudPerdin">-</td>
+                <td class="col-label pb-3">2. Maksud / Tujuan</td>
+                <td class="col-colon pb-3">:</td>
+                <td id="lap-maksudPerdin " class="pb-3">-</td>
             </tr>
             <tr>
-                <td class="col-label">3. Waktu Pelaksanaan</td>
-                <td class="col-colon">:</td>
-                <td id="lap-waktuPelaksanaan">-</td>
+                <td class="col-label pb-3">3. Waktu Pelaksanaan</td>
+                <td class="col-colon pb-3">:</td>
+                <td id="lap-waktuPelaksanaan" class="pb-3">-</td>
             </tr>
             <tr>
-                <td class="col-label">4. Daerah Tujuan</td>
-                <td class="col-colon">:</td>
-                <td id="lap-daerahTujuan">-</td>
+                <td class="col-label pb-3">4. Daerah Tujuan</td>
+                <td class="col-colon pb-3">:</td>
+                <td id="lap-daerahTujuan" class="pb-3">-</td>
             </tr>
             <tr>
-                <td class="col-label">5. Pelaksana Tugas</td>
-                <td class="col-colon">:</td>
-                <td id="lap-container-pelaksana"></td>
+                <td class="col-label pb-3">5. Pelaksana Tugas</td>
+                <td class="col-colon pb-3">:</td>
+                <td id="lap-container-pelaksana" class="pb-3"></td>
             </tr>
         </table>
 
         <div class="mb-4 text-xs leading-relaxed">
-            <p class="font-bold uppercase mb-1">6. Hasil Yang Dicapai / Laporan Ringkas :</p>
+            <p class="font-bold uppercase mb-2">6. Hasil Yang Dicapai / Laporan Ringkas :</p>
             <div id="lap-isiHasil" class="p-3 border border-slate-300 rounded text-justify min-h-[220px] whitespace-pre-line bg-slate-50/50">
                 -
             </div>
@@ -739,16 +739,24 @@
             <p>Demikian laporan hasil perjalanan dinas ini dibuat untuk dapat dipergunakan sebagaimana mestinya.</p>
         </div>
 
-        <div class="flex justify-end mt-8">
-            <div class="w-72 text-center text-xs leading-normal">
-                <p>Dikeluarkan di : <span id="lap-ttd-tempat">Tabundung</span></p>
-                <p>pada tanggal : <span id="lap-ttd-tgl">-</span></p>
-                <br>
-                <p class="font-bold">Pelaksana Perjalanan Dinas,</p>
-                <div class="h-16"></div>
-                <p class="font-bold underline uppercase" id="lap-ttd-nama">-</p>
-                <p>NIP. <span id="lap-ttd-nip">-</span></p>
-            </div>
+        <!-- BLOK TANDA TANGAN BARU (RATA KIRI) -->
+        <div class="mt-8 text-xs leading-normal">
+            <table class="mb-4">
+                <tr><td class="pr-2">Dikeluarkan di</td><td>:</td><td class="pl-1" id="lap-ttd-tempat">Tabundung</td></tr>
+                <tr><td class="pr-2">Pada Tanggal</td><td>:</td><td class="pl-1" id="lap-ttd-tgl">-</td></tr>
+            </table>
+            
+            <table class="w-full text-xs mt-4">
+                <thead>
+                    <tr>
+                        <th class="text-left font-bold w-[60%] pb-3">Yang Melakukan Perjalanan Dinas</th>
+                        <th class="text-left font-bold w-[40%] pb-3 pl-4">Tanda Tangan</th>
+                    </tr>
+                </thead>
+                <tbody id="lap-signature-list">
+                    <!-- Data anggota dan kolom tanda tangan digenerate otomatis dari JS -->
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -1250,11 +1258,54 @@
 			    const fmtKembaliTTD = recordData.tglKembali ? formatTanggalIndo(recordData.tglKembali) : (recordData.tglMulai ? formatTanggalIndo(recordData.tglMulai) : '-');
 			    document.getElementById('lap-ttd-tgl').textContent = fmtKembaliTTD;
 			}
-            if (document.getElementById('lap-ttd-nama')) document.getElementById('lap-ttd-nama').textContent = recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-';
-            if (document.getElementById('lap-ttd-nip')) document.getElementById('lap-ttd-nip').textContent = recordData.nipPelaksana || recordData.nip || '-';
-        }
-
-        function renderRincianTabel(data) {
+            // Perubahan Tanda tangan rata kiri
+			const sigContainer = document.getElementById('lap-signature-list');
+		    if (sigContainer) {
+		        sigContainer.innerHTML = '';
+        
+			        // 1. Baris untuk Pelaksana Utama
+			        let htmlSig = `
+			            <tr>
+			                <td class="py-2.5 align-top">
+			                    <span class="inline-block w-4">1.</span> 
+			                    <span class="uppercase font-bold">${recordData.namaPelaksana ? recordData.namaPelaksana.toUpperCase() : '-'}</span><br>
+			                    <span class="inline-block w-4"></span> 
+			                    <span>NIP. ${recordData.nipPelaksana || recordData.nip || '-'}</span>
+			                </td>
+			                <td class="py-2.5 align-top pl-4">
+			                    1. ........................................
+			                </td>
+			            </tr>
+			        `;
+			
+			        // 2. Baris untuk Anggota Pengikut (jika ada)
+			        if (Array.isArray(recordData.pengikut) && recordData.pengikut.length > 0) {
+			            recordData.pengikut.forEach((p, idx) => {
+			                const namaP = p ? (p.nama || p.namaPengikut || p.namaAsn) : null;
+			                if (namaP) {
+			                    const num = idx + 2;
+			                    htmlSig += `
+			                        <tr>
+			                            <td class="py-2.5 align-top">
+			                                <span class="inline-block w-4">${num}.</span> 
+			                                <span class="uppercase font-bold">${namaP.toUpperCase()}</span><br>
+			                                <span class="inline-block w-4"></span> 
+			                                <span>NIP. ${p.nip || p.nipPengikut || '-'}</span>
+			                            </td>
+			                            <td class="py-2.5 align-top pl-4">
+			                                ${num}. ........................................
+			                            </td>
+			                        </tr>
+			                    `;
+			                }
+			            });
+			        }
+			        sigContainer.innerHTML = htmlSig;
+			    }
+			}
+        // batas perubahan tanda tangan rata kiri
+		
+		function renderRincianTabel(data) {
             const cL6 = document.getElementById("container-l6");
             const cL7 = document.getElementById("container-l7");
             const cL8 = document.getElementById("container-l8");
