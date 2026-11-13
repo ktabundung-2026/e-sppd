@@ -155,7 +155,24 @@
     <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-600">
         &copy; 2026 Kecamatan Tabundung - ArL
     </footer>
+    <!-- JS networkBadge -->
+  <script>  
+  function updateNetworkBadge() {
+    const badge = document.getElementById('networkBadge');
+    if (!badge) return;
 
+    if (navigator.onLine) {
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600/90 text-white shadow-sm';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Mode Online`;
+    } else {
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600/90 text-white shadow-sm';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Mode Offline`;
+    }
+}
+    window.addEventListener('online', updateNetworkBadge);
+    window.addEventListener('offline', updateNetworkBadge);
+    document.addEventListener('DOMContentLoaded', updateNetworkBadge);
+  </script>
     <!-- JS EXTERNAL MODUL -->
     <script src="js/db.js"></script>
     <script src="js/rekap.js"></script>
