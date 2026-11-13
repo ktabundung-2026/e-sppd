@@ -1019,7 +1019,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/db.js"></script>
     <script>
-        function terbilangIndonesia(angka) {
+		function terbilangIndonesia(angka) {
             angka = Math.floor(Math.abs(angka));
             const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
             let hasil = "";
@@ -1045,6 +1045,14 @@
             return hasil.replace(/\s+/g, ' ').trim();
         }
 
+		function formatTanggalIndo(dateString) {
+		    if (!dateString || dateString === '-') return '-';
+		    const d = new Date(dateString);
+		    if (isNaN(d.getTime())) return dateString;
+		    const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+		    return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+		}
+		
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const recordId = urlParams.get('id');
@@ -1246,10 +1254,8 @@
             if (!recordData) return;
 
             const defaultDots = "...........................................";
-	    const tglMulai = formatTanggalIndo(recordData.tglMulai);
-	    const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
 
-            if (document.getElementById('bisi_noSPPD')) document.getElementById('bisi_noSPPD').textContent = recordData.noSPPD || '-';
+			if (document.getElementById('bisi_noSPPD')) document.getElementById('bisi_noSPPD').textContent = recordData.noSPPD || '-';
             if (document.getElementById('bisi_tempatBerangkat')) document.getElementById('bisi_tempatBerangkat').textContent = recordData.tempatBerangkat || 'Malahar';
             if (document.getElementById('bisi_tglMulai')) document.getElementById('bisi_tglMulai').textContent = recordData.tglMulai || '-';
             if (document.getElementById('bisi_tempatTujuan')) document.getElementById('bisi_tempatTujuan').textContent = recordData.tempatTujuan || '-';
