@@ -346,8 +346,21 @@ async function handleFormSubmit(e) {
         namaBendahara: namaBendaharaVal,
         nipBendahara: nipBendaharaVal,
         laporanHasil: document.getElementById('laporanHasil').value || '',
-        createdAt: new Date().toISOString()
-    };
+        createdAt: new Date().toISOString(),
+          
+        // --- TAMBAHAN RUTE 2 ---
+        tempatTujuan2: document.getElementById('tempatTujuan2').value || '',
+        tglTiba2: document.getElementById('tglTiba2').value || '',
+        tglBerangkat2: document.getElementById('tglBerangkat2').value || '',
+        pejabatTujuan2: document.getElementById('pejabatTujuan2').value || '',
+        
+        // --- TAMBAHAN RUTE 3 ---
+        tempatTujuan3: document.getElementById('tempatTujuan3').value || '',
+        tglTiba3: document.getElementById('tglTiba3').value || '',
+        tglBerangkat3: document.getElementById('tglBerangkat3').value || '',
+        pejabatTujuan3: document.getElementById('pejabatTujuan3').value || '',
+        
+   };
 
     if (window.AppDB) await window.AppDB.saveRecord(record);
     riwayatSPPD.unshift(record);
