@@ -1186,16 +1186,10 @@
             // ---------------------------------------------
             populateSPPDBelakangIsi(recordData);
 
-		const tglMulai = formatTanggalIndo(recordData.tglMulai);
-		const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
-
-            // ---------------------------------------------
+		    // ---------------------------------------------
             // 4. POPULASI BAGIAN 4: SPPD BELAKANG KOSONG
             // ---------------------------------------------
             populateSPPDBelakangKosong(recordData);
-
-		const tglMulai = formatTanggalIndo(recordData.tglMulai);
-		const tglKembali = formatTanggalIndo(recordData.tglKembali || recordData.tglMulai);
 
             // ---------------------------------------------
             // 5. POPULASI BAGIAN 5: LAPORAN PERJALANAN DINAS
