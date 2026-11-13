@@ -1310,8 +1310,8 @@
                 const tujuan3 = recordData.tempatTujuan3;
                 const pejabatTujuan3 = recordData.pejabatTujuan3 ? recordData.pejabatTujuan3.toUpperCase() : defaultDots;
 
-		const tglMulai3 = formatTanggalIndo(recordData.tglMulai3);
-		const tglKembali3 = formatTanggalIndo(recordData.tglKembali3 || recordData.tglMulai3);
+				const tglMulai3 = recordData.tglTiba3 ? formatTanggalIndo(recordData.tglTiba3) : '-';
+				const tglKembali3 = recordData.tglBerangkat3 ? formatTanggalIndo(recordData.tglBerangkat3) : '-';
 
                 if (document.getElementById('bisi_rute3_tibaDi')) document.getElementById('bisi_rute3_tibaDi').textContent = tujuan3;
                 if (document.getElementById('bisi_rute3_tglTiba')) document.getElementById('bisi_rute3_tglTiba').textContent = recordData.tglTiba3 || defaultDots;
