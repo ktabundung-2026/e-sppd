@@ -541,35 +541,22 @@
     <!-- JS networkBadge -->
     <script>  
     function updateNetworkBadge() {
-        const badge = document.getElementById('networkBadge');
-        if (!badge) return;
-  
-        if (navigator.onLine) {
-            badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600/90 text-white shadow-sm';
-            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Mode Online`;
-        } else {
-            badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600/90 text-white shadow-sm';
-            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-200"></span> Mode Offline`;
-        }
-    }
-
-    window.addEventListener('online', updateNetworkBadge);
-    window.addEventListener('offline', updateNetworkBadge);
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        updateNetworkBadge();
-
-        // Cek jika URL memiliki hash #riwayat, otomatis buka Step 3 (Riwayat)
-        if (window.location.hash === '#riwayat') {
-            // Beri jeda sedikit agar fungsi switchStep dari sppd.js siap dimuat
-            setTimeout(() => {
-                if (typeof switchStep === 'function') {
-                    switchStep(3);
-                }
-            }, 100);
-        }
-    });
-</script>
+			    const badge = document.getElementById('networkBadge');
+			    if (!badge) return;
+			    
+			    if (navigator.onLine) {
+			        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-emerald-600 text-white shadow-sm';
+			        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Online`;
+			    } else {
+			        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-amber-600 text-white shadow-sm';
+			        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span> Offline`;
+			    }
+			}
+			
+			window.addEventListener('online', updateNetworkBadge);
+			window.addEventListener('offline', updateNetworkBadge);
+			document.addEventListener('DOMContentLoaded', updateNetworkBadge);
+  </script>
   
     <!-- SCRIPT INCLUSION LAYER -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
